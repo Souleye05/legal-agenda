@@ -1,0 +1,274 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Legal Agenda - Professional Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Professional Navy & Gold Theme */
+    --background: 220 20% 97%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Deep Navy Blue - Trust & Professionalism */
+    --primary: 222 47% 20%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Soft Gray-Blue */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Subtle Blue Accent */
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Urgent/Warning - Amber Gold */
+    --urgent: 38 92% 50%;
+    --urgent-foreground: 0 0% 100%;
+
+    /* Success - Green */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Destructive - Red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 222 47% 20%;
+
+    --radius: 0.5rem;
+
+    /* Custom shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+    /* Sidebar */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 18%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 217 91% 60%;
+
+    /* Status Colors */
+    --status-active: 142 71% 45%;
+    --status-closed: 215 16% 47%;
+    --status-radiated: 0 84% 60%;
+    --status-pending: 38 92% 50%;
+    --status-upcoming: 217 91% 60%;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 222 47% 15%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 47% 18%;
+    --input: 222 47% 18%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 12%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 222 47% 12%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer components {
+  /* Card variants */
+  .card-elevated {
+    @apply bg-card rounded-lg border shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-md)];
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-active {
+    @apply bg-[hsl(var(--status-active)/0.1)] text-[hsl(var(--status-active))];
+  }
+
+  .status-closed {
+    @apply bg-[hsl(var(--status-closed)/0.1)] text-[hsl(var(--status-closed))];
+  }
+
+  .status-radiated {
+    @apply bg-[hsl(var(--status-radiated)/0.1)] text-[hsl(var(--status-radiated))];
+  }
+
+  .status-pending {
+    @apply bg-[hsl(var(--status-pending)/0.1)] text-[hsl(var(--status-pending))];
+  }
+
+  .status-upcoming {
+    @apply bg-[hsl(var(--status-upcoming)/0.1)] text-[hsl(var(--status-upcoming))];
+  }
+
+  /* Urgent alert styling */
+  .alert-urgent {
+    @apply bg-[hsl(var(--urgent)/0.1)] border-[hsl(var(--urgent))] text-[hsl(var(--urgent))];
+  }
+
+  /* Navigation link */
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors;
+  }
+
+  .nav-link-active {
+    @apply bg-sidebar-accent text-sidebar-foreground font-medium;
+  }
+
+  /* Quick action button */
+  .quick-action {
+    @apply flex flex-col items-center gap-2 p-4 rounded-xl bg-card border hover:border-primary/30 hover:shadow-[var(--shadow-md)] transition-all cursor-pointer;
+  }
+
+  /* Calendar cell */
+  .calendar-cell {
+    @apply min-h-[100px] p-2 border-r border-b bg-card hover:bg-muted/50 transition-colors cursor-pointer;
+  }
+
+  .calendar-cell-today {
+    @apply bg-primary/5;
+  }
+
+  /* Hearing card in calendar */
+  .hearing-item {
+    @apply text-xs p-1.5 rounded mb-1 truncate cursor-pointer transition-colors;
+  }
+
+  .hearing-upcoming {
+    @apply bg-[hsl(var(--status-upcoming)/0.15)] text-[hsl(var(--status-upcoming))] hover:bg-[hsl(var(--status-upcoming)/0.25)];
+  }
+
+  .hearing-pending {
+    @apply bg-[hsl(var(--status-pending)/0.15)] text-[hsl(var(--status-pending))] hover:bg-[hsl(var(--status-pending)/0.25)] font-medium;
+  }
+
+  .hearing-done {
+    @apply bg-[hsl(var(--status-active)/0.15)] text-[hsl(var(--status-active))] hover:bg-[hsl(var(--status-active)/0.25)];
+  }
+}
+
+@layer utilities {
+  /* Scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Pulse animation for urgent items */
+  .pulse-urgent {
+    animation: pulseUrgent 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulseUrgent {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+}

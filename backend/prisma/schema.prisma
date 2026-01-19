@@ -1,0 +1,247 @@
+// Prisma Schema for Legal Agenda Application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+enum UserRole {
+  ADMIN
+  COLLABORATOR
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String
+  role      UserRole @default(COLLABORATOR)
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  casesCreated      Case[]           @relation("CaseCreator")
+  hearingsCreated   Hearing[]        @relation("HearingCreator")
+  resultsCreated    HearingResult[]  @relation("ResultCreator")
+  auditLogs         AuditLog[]
+  
+  @@map("users")
+}
+
+// ============================================
+// CASE (AFFAIRE)
+// ============================================
+
+enum CaseStatus {
+  ACTIVE
+  CLOTUREE
+  RADIEE
+}
+
+model Case {
+  id          String     @id @default(uuid())
+  reference   String     @unique // AFF-2026-0001
+  title       String     // X c/ Y - expulsion
+  jurisdiction String
+  chamber     String
+  city        String?
+  status      CaseStatus @default(ACTIVE)
+  observations String?   @db.Text
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String
+  createdBy   User       @relation("CaseCreator", fields: [createdById], references: [id])
+  
+  // Relations
+  parties     Party[]
+  hearings    Hearing[]
+  
+  @@map("cases")
+  @@index([status])
+  @@index([reference])
+}
+
+// ============================================
+// PARTY (PARTIE)
+// ============================================
+
+enum PartyRole {
+  DEMANDEUR
+  DEFENDEUR
+  CONSEIL_ADVERSE
+}
+
+model Party {
+  id      String    @id @default(uuid())
+  name    String
+  role    PartyRole
+  
+  caseId  String
+  case    Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  @@map("parties")
+  @@index([caseId])
+}
+
+// ============================================
+// HEARING (AUDIENCE)
+// ============================================
+
+enum HearingStatus {
+  A_VENIR
+  TENUE
+  NON_RENSEIGNEE
+}
+
+enum HearingType {
+  MISE_EN_ETAT
+  PLAIDOIRIE
+  REFERE
+  EVOCATION
+  CONCILIATION
+  MEDIATION
+  AUTRE
+}
+
+model Hearing {
+  id               String        @id @default(uuid())
+  date             DateTime
+  time             String?
+  type             HearingType
+  status           HearingStatus @default(A_VENIR)
+  preparationNotes String?       @db.Text
+  isPrepared       Boolean       @default(false)
+  
+  caseId           String
+  case             Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  createdById      String
+  createdBy        User          @relation("HearingCreator", fields: [createdById], references: [id])
+  
+  // Relations
+  result           HearingResult?
+  alerts           Alert[]
+  
+  @@map("hearings")
+  @@index([caseId])
+  @@index([date])
+  @@index([status])
+}
+
+// ============================================
+// HEARING RESULT (RÉSULTAT D'AUDIENCE)
+// ============================================
+
+enum HearingResultType {
+  RENVOI
+  RADIATION
+  DELIBERE
+}
+
+model HearingResult {
+  id                 String            @id @default(uuid())
+  type               HearingResultType
+  
+  // For RENVOI
+  newDate            DateTime?
+  postponementReason String?           @db.Text
+  
+  // For RADIATION
+  radiationReason    String?           @db.Text
+  
+  // For DELIBERE
+  deliberationText   String?           @db.Text
+  
+  hearingId          String            @unique
+  hearing            Hearing           @relation(fields: [hearingId], references: [id], onDelete: Cascade)
+  
+  createdAt          DateTime          @default(now())
+  createdById        String
+  createdBy          User              @relation("ResultCreator", fields: [createdById], references: [id])
+  
+  @@map("hearing_results")
+  @@index([hearingId])
+}
+
+// ============================================
+// ALERT SYSTEM (SYSTÈME D'ALERTES)
+// ============================================
+
+enum AlertStatus {
+  PENDING
+  SENT
+  RESOLVED
+}
+
+model Alert {
+  id          String      @id @default(uuid())
+  hearingId   String
+  hearing     Hearing     @relation(fields: [hearingId], references: [id], onDelete: Cascade)
+  
+  status      AlertStatus @default(PENDING)
+  sentCount   Int         @default(0)
+  lastSentAt  DateTime?
+  
+  createdAt   DateTime    @default(now())
+  resolvedAt  DateTime?
+  
+  @@map("alerts")
+  @@index([hearingId])
+  @@index([status])
+}
+
+// ============================================
+// AUDIT LOG (TRAÇABILITÉ)
+// ============================================
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  entityType  String      // Case, Hearing, HearingResult
+  entityId    String
+  action      AuditAction
+  oldValue    String?     @db.Text
+  newValue    String?     @db.Text
+  
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime    @default(now())
+  
+  @@map("audit_logs")
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================
+// SYSTEM CONFIGURATION
+// ============================================
+
+model SystemConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String @db.Text
+  
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_config")
+}
