@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { CalendarView } from '@/components/calendar/CalendarView';
+import { WeekView } from '@/components/calendar/WeekView';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getCalendarEvents } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 import { CalendarEvent } from '@/types/legal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { HearingStatusBadge } from '@/components/hearings/HearingStatusBadge';
@@ -13,23 +15,59 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { MapPin, Clock, FileEdit } from 'lucide-react';
-import { hearingTypeLabels } from '@/lib/mock-data';
+import { HEARING_TYPE_LABELS } from '@/lib/constants';
 
 export default function Agenda() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>('month');
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  const events = getCalendarEvents();
+  // Fetch hearings from API
+  const { data: hearings = [], isLoading } = useQuery({
+    queryKey: ['hearings'],
+    queryFn: () => api.getHearings(),
+  });
+
+  // Transform hearings to calendar events
+  const events = useMemo(() => {
+    return hearings.map((hearing: any) => ({
+      id: hearing.id,
+      title: hearing.affaire?.titre || 'Sans titre',
+      date: new Date(hearing.date),
+      time: hearing.heure,
+      caseReference: hearing.affaire?.reference || '',
+      parties: hearing.affaire?.parties?.map((p: any) => p.nom).join(' / ') || '',
+      jurisdiction: hearing.affaire?.juridiction || '',
+      chamber: hearing.affaire?.chambre || '',
+      status: hearing.statut,
+      type: hearing.type,
+    })) as CalendarEvent[];
+  }, [hearings]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
   };
 
   const handleDateClick = (date: Date) => {
-    console.log('Date clicked:', date);
-    // TODO: Open new hearing dialog for this date
+    // Navigate to new hearing page with date preselected
+    navigate(`/agenda/nouvelle-audience?date=${format(date, 'yyyy-MM-dd')}`);
   };
+
+  const handleNewHearing = () => {
+    navigate('/agenda/nouvelle-audience');
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="p-6 md:p-8 max-w-7xl mx-auto">
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            Chargement du calendrier...
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -39,7 +77,7 @@ export default function Agenda() {
           description="Calendrier de vos audiences"
           action={{
             label: 'Nouvelle audience',
-            onClick: () => console.log('New hearing'),
+            onClick: handleNewHearing,
           }}
         >
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as typeof viewMode)}>
@@ -53,6 +91,14 @@ export default function Agenda() {
 
         {viewMode === 'month' && (
           <CalendarView 
+            events={events}
+            onEventClick={handleEventClick}
+            onDateClick={handleDateClick}
+          />
+        )}
+
+        {viewMode === 'week' && (
+          <WeekView 
             events={events}
             onEventClick={handleEventClick}
             onDateClick={handleDateClick}
@@ -76,7 +122,7 @@ export default function Agenda() {
                           {event.caseReference}
                         </span>
                         <Badge variant="outline" className="text-xs">
-                          {hearingTypeLabels[event.type]}
+                          {HEARING_TYPE_LABELS[event.type]}
                         </Badge>
                         <HearingStatusBadge status={event.status} />
                       </div>
@@ -121,7 +167,7 @@ export default function Agenda() {
                     {selectedEvent.caseReference}
                   </span>
                   <Badge variant="outline">
-                    {hearingTypeLabels[selectedEvent.type]}
+                    {HEARING_TYPE_LABELS[selectedEvent.type]}
                   </Badge>
                   <HearingStatusBadge status={selectedEvent.status} />
                 </div>

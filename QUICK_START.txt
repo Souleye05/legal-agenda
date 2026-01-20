@@ -22,16 +22,16 @@ Login: admin@legalagenda.com / admin123
   DOCUMENTATION (10 FICHIERS)
 ═══════════════════════════════════════════════════════════════
 
-📖 START_HERE.md          ← Commencer ici
-📖 SUMMARY.md             ← Résumé complet
-📖 GETTING_STARTED.md     ← Installation détaillée
-📖 ARCHITECTURE.md        ← Architecture technique
-📖 API_ENDPOINTS.md       ← 22 endpoints documentés
-📖 COMMANDS.md            ← Commandes utiles
-📖 DEPLOY.md              ← Guide déploiement
-📖 CHECK.md               ← Checklist vérification
-📖 NEXT_STEPS.md          ← Prochaines étapes
-📖 FILES_CREATED.md       ← Liste des fichiers
+📖 docs/START_HERE.md          ← Commencer ici
+📖 docs/SUMMARY.md             ← Résumé complet
+📖 docs/GETTING_STARTED.md     ← Installation détaillée
+📖 docs/ARCHITECTURE.md        ← Architecture technique
+📖 docs/API_ENDPOINTS.md       ← 22 endpoints documentés
+📖 docs/COMMANDS.md            ← Commandes utiles
+📖 docs/DEPLOY.md              ← Guide déploiement
+📖 docs/CHECK.md               ← Checklist vérification
+📖 docs/NEXT_STEPS.md          ← Prochaines étapes
+📖 docs/FILES_CREATED.md       ← Liste des fichiers
 
 ═══════════════════════════════════════════════════════════════
   FONCTIONNALITÉS PRINCIPALES
@@ -105,19 +105,19 @@ cd backend && npm run prisma:studio
 ═══════════════════════════════════════════════════════════════
 
 1. Tester localement (docker-compose up -d)
-2. Lire SUMMARY.md pour comprendre le projet
+2. Lire docs/SUMMARY.md pour comprendre le projet
 3. Personnaliser (juridictions, chambres, emails)
 4. Importer vos données réelles
-5. Déployer en production (voir DEPLOY.md)
+5. Déployer en production (voir docs/DEPLOY.md)
 
 ═══════════════════════════════════════════════════════════════
   SUPPORT
 ═══════════════════════════════════════════════════════════════
 
-📚 Documentation complète (10 fichiers)
-🔧 Commandes utiles (COMMANDS.md)
-🚀 Guide déploiement (DEPLOY.md)
-✅ Checklist (CHECK.md)
+📚 Documentation complète (10 fichiers dans docs/)
+🔧 Commandes utiles (docs/COMMANDS.md)
+🚀 Guide déploiement (docs/DEPLOY.md)
+✅ Checklist (docs/CHECK.md)
 
 ═══════════════════════════════════════════════════════════════
 

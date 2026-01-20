@@ -1,4 +1,4 @@
-// Prisma Schema for Legal Agenda Application
+// Schéma Prisma pour l'Application d'Agenda Juridique
 
 generator client {
   provider = "prisma-client-js"
@@ -10,101 +10,110 @@ datasource db {
 }
 
 // ============================================
-// USER & AUTHENTICATION
+// UTILISATEUR & AUTHENTIFICATION
 // ============================================
 
-enum UserRole {
+enum RoleUtilisateur {
   ADMIN
-  COLLABORATOR
+  COLLABORATEUR
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  fullName  String
-  role      UserRole @default(COLLABORATOR)
-  isActive  Boolean  @default(true)
+model Utilisateur {
+  id        String           @id @default(uuid())
+  email     String           @unique
+  motDePasse String
+  nomComplet String
+  role      RoleUtilisateur  @default(COLLABORATEUR)
+  estActif  Boolean          @default(true)
+  
+  // Sécurité
+  refreshToken          String?   @db.Text
+  refreshTokenExpiresAt DateTime?
+  passwordResetToken    String?   @unique
+  passwordResetExpires  DateTime?
+  lastLoginAt           DateTime?
+  lastLoginIp           String?
+  lastLoginUserAgent    String?   @db.Text
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   // Relations
-  casesCreated      Case[]           @relation("CaseCreator")
-  hearingsCreated   Hearing[]        @relation("HearingCreator")
-  resultsCreated    HearingResult[]  @relation("ResultCreator")
-  auditLogs         AuditLog[]
+  affairesCrees     Affaire[]        @relation("CreateurAffaire")
+  audiencesCrees    Audience[]       @relation("CreateurAudience")
+  resultatsCrees    ResultatAudience[] @relation("CreateurResultat")
+  journalAudit      JournalAudit[]
   
-  @@map("users")
+  @@map("utilisateurs")
 }
 
 // ============================================
-// CASE (AFFAIRE)
+// AFFAIRE
 // ============================================
 
-enum CaseStatus {
+enum StatutAffaire {
   ACTIVE
   CLOTUREE
   RADIEE
 }
 
-model Case {
-  id          String     @id @default(uuid())
-  reference   String     @unique // AFF-2026-0001
-  title       String     // X c/ Y - expulsion
-  jurisdiction String
-  chamber     String
-  city        String?
-  status      CaseStatus @default(ACTIVE)
-  observations String?   @db.Text
+model Affaire {
+  id          String        @id @default(uuid())
+  reference   String        @unique // AFF-2026-0001
+  titre       String        // X c/ Y - expulsion
+  juridiction String
+  chambre     String
+  ville       String?
+  statut      StatutAffaire @default(ACTIVE)
+  observations String?      @db.Text
   
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  createdById String
-  createdBy   User       @relation("CaseCreator", fields: [createdById], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createurId  String
+  createur    Utilisateur   @relation("CreateurAffaire", fields: [createurId], references: [id])
   
   // Relations
-  parties     Party[]
-  hearings    Hearing[]
+  parties     Partie[]
+  audiences   Audience[]
   
-  @@map("cases")
-  @@index([status])
+  @@map("affaires")
+  @@index([statut])
   @@index([reference])
 }
 
 // ============================================
-// PARTY (PARTIE)
+// PARTIE
 // ============================================
 
-enum PartyRole {
+enum RolePartie {
   DEMANDEUR
   DEFENDEUR
   CONSEIL_ADVERSE
 }
 
-model Party {
-  id      String    @id @default(uuid())
-  name    String
-  role    PartyRole
+model Partie {
+  id        String     @id @default(uuid())
+  nom       String
+  role      RolePartie
   
-  caseId  String
-  case    Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  affaireId String
+  affaire   Affaire    @relation(fields: [affaireId], references: [id], onDelete: Cascade)
   
   @@map("parties")
-  @@index([caseId])
+  @@index([affaireId])
 }
 
 // ============================================
-// HEARING (AUDIENCE)
+// AUDIENCE
 // ============================================
 
-enum HearingStatus {
+enum StatutAudience {
   A_VENIR
   TENUE
   NON_RENSEIGNEE
 }
 
-enum HearingType {
+enum TypeAudience {
   MISE_EN_ETAT
   PLAIDOIRIE
   REFERE
@@ -114,134 +123,134 @@ enum HearingType {
   AUTRE
 }
 
-model Hearing {
-  id               String        @id @default(uuid())
-  date             DateTime
-  time             String?
-  type             HearingType
-  status           HearingStatus @default(A_VENIR)
-  preparationNotes String?       @db.Text
-  isPrepared       Boolean       @default(false)
+model Audience {
+  id                String         @id @default(uuid())
+  date              DateTime
+  heure             String?
+  type              TypeAudience
+  statut            StatutAudience @default(A_VENIR)
+  notesPreparation  String?        @db.Text
+  estPreparee       Boolean        @default(false)
   
-  caseId           String
-  case             Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  affaireId         String
+  affaire           Affaire        @relation(fields: [affaireId], references: [id], onDelete: Cascade)
   
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  createdById      String
-  createdBy        User          @relation("HearingCreator", fields: [createdById], references: [id])
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  createurId        String
+  createur          Utilisateur    @relation("CreateurAudience", fields: [createurId], references: [id])
   
   // Relations
-  result           HearingResult?
-  alerts           Alert[]
+  resultat          ResultatAudience?
+  alertes           Alerte[]
   
-  @@map("hearings")
-  @@index([caseId])
+  @@map("audiences")
+  @@index([affaireId])
   @@index([date])
-  @@index([status])
+  @@index([statut])
 }
 
 // ============================================
-// HEARING RESULT (RÉSULTAT D'AUDIENCE)
+// RÉSULTAT D'AUDIENCE
 // ============================================
 
-enum HearingResultType {
+enum TypeResultat {
   RENVOI
   RADIATION
   DELIBERE
 }
 
-model HearingResult {
-  id                 String            @id @default(uuid())
-  type               HearingResultType
+model ResultatAudience {
+  id                String       @id @default(uuid())
+  type              TypeResultat
   
-  // For RENVOI
-  newDate            DateTime?
-  postponementReason String?           @db.Text
+  // Pour RENVOI
+  nouvelleDate      DateTime?
+  motifRenvoi       String?      @db.Text
   
-  // For RADIATION
-  radiationReason    String?           @db.Text
+  // Pour RADIATION
+  motifRadiation    String?      @db.Text
   
-  // For DELIBERE
-  deliberationText   String?           @db.Text
+  // Pour DELIBERE
+  texteDelibere     String?      @db.Text
   
-  hearingId          String            @unique
-  hearing            Hearing           @relation(fields: [hearingId], references: [id], onDelete: Cascade)
+  audienceId        String       @unique
+  audience          Audience     @relation(fields: [audienceId], references: [id], onDelete: Cascade)
   
-  createdAt          DateTime          @default(now())
-  createdById        String
-  createdBy          User              @relation("ResultCreator", fields: [createdById], references: [id])
+  createdAt         DateTime     @default(now())
+  createurId        String
+  createur          Utilisateur  @relation("CreateurResultat", fields: [createurId], references: [id])
   
-  @@map("hearing_results")
-  @@index([hearingId])
+  @@map("resultats_audience")
+  @@index([audienceId])
 }
 
 // ============================================
-// ALERT SYSTEM (SYSTÈME D'ALERTES)
+// SYSTÈME D'ALERTES
 // ============================================
 
-enum AlertStatus {
-  PENDING
-  SENT
-  RESOLVED
+enum StatutAlerte {
+  EN_ATTENTE
+  ENVOYEE
+  RESOLUE
 }
 
-model Alert {
-  id          String      @id @default(uuid())
-  hearingId   String
-  hearing     Hearing     @relation(fields: [hearingId], references: [id], onDelete: Cascade)
+model Alerte {
+  id              String        @id @default(uuid())
+  audienceId      String
+  audience        Audience      @relation(fields: [audienceId], references: [id], onDelete: Cascade)
   
-  status      AlertStatus @default(PENDING)
-  sentCount   Int         @default(0)
-  lastSentAt  DateTime?
+  statut          StatutAlerte  @default(EN_ATTENTE)
+  nombreEnvois    Int           @default(0)
+  dernierEnvoiLe  DateTime?
   
-  createdAt   DateTime    @default(now())
-  resolvedAt  DateTime?
+  createdAt       DateTime      @default(now())
+  resoleLe        DateTime?
   
-  @@map("alerts")
-  @@index([hearingId])
-  @@index([status])
+  @@map("alertes")
+  @@index([audienceId])
+  @@index([statut])
 }
 
 // ============================================
-// AUDIT LOG (TRAÇABILITÉ)
+// JOURNAL D'AUDIT (TRAÇABILITÉ)
 // ============================================
 
-enum AuditAction {
-  CREATE
-  UPDATE
-  DELETE
+enum ActionAudit {
+  CREATION
+  MODIFICATION
+  SUPPRESSION
 }
 
-model AuditLog {
-  id          String      @id @default(uuid())
-  entityType  String      // Case, Hearing, HearingResult
-  entityId    String
-  action      AuditAction
-  oldValue    String?     @db.Text
-  newValue    String?     @db.Text
+model JournalAudit {
+  id              String      @id @default(uuid())
+  typeEntite      String      // Affaire, Audience, ResultatAudience
+  idEntite        String
+  action          ActionAudit
+  ancienneValeur  String?     @db.Text
+  nouvelleValeur  String?     @db.Text
   
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
+  utilisateurId   String
+  utilisateur     Utilisateur @relation(fields: [utilisateurId], references: [id])
   
-  createdAt   DateTime    @default(now())
+  createdAt       DateTime    @default(now())
   
-  @@map("audit_logs")
-  @@index([entityType, entityId])
-  @@index([userId])
+  @@map("journal_audit")
+  @@index([typeEntite, idEntite])
+  @@index([utilisateurId])
   @@index([createdAt])
 }
 
 // ============================================
-// SYSTEM CONFIGURATION
+// CONFIGURATION SYSTÈME
 // ============================================
 
-model SystemConfig {
-  id    String @id @default(uuid())
-  key   String @unique
-  value String @db.Text
+model ConfigurationSysteme {
+  id     String @id @default(uuid())
+  cle    String @unique
+  valeur String @db.Text
   
   updatedAt DateTime @updatedAt
   
-  @@map("system_config")
+  @@map("configuration_systeme")
 }

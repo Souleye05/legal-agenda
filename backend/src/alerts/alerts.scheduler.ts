@@ -19,23 +19,23 @@ export class AlertsScheduler {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const unreported = await this.prisma.hearing.findMany({
+    const unreported = await this.prisma.audience.findMany({
       where: {
         date: { lt: today },
-        status: 'A_VENIR',
-        result: null,
+        statut: 'A_VENIR',
+        resultat: null,
       },
     });
 
     for (const hearing of unreported) {
-      await this.prisma.hearing.update({
+      await this.prisma.audience.update({
         where: { id: hearing.id },
-        data: { status: 'NON_RENSEIGNEE' },
+        data: { statut: 'NON_RENSEIGNEE' },
       });
 
       // Check if alert already exists
-      const existingAlert = await this.prisma.alert.findFirst({
-        where: { hearingId: hearing.id },
+      const existingAlert = await this.prisma.alerte.findFirst({
+        where: { audienceId: hearing.id },
       });
 
       if (!existingAlert) {
@@ -55,11 +55,11 @@ export class AlertsScheduler {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const count = await this.prisma.hearing.count({
+    const count = await this.prisma.audience.count({
       where: {
         date: { lt: today },
-        status: 'A_VENIR',
-        result: null,
+        statut: 'A_VENIR',
+        resultat: null,
       },
     });
 

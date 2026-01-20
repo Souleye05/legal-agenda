@@ -12,7 +12,7 @@ export class AlertsService {
     private configService: ConfigService,
   ) {
     // Initialize email transporter
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: this.configService.get('SMTP_HOST'),
       port: this.configService.get('SMTP_PORT'),
       secure: false,
@@ -24,26 +24,26 @@ export class AlertsService {
   }
 
   async createAlert(hearingId: string) {
-    return this.prisma.alert.create({
+    return this.prisma.alerte.create({
       data: {
-        hearingId,
-        status: 'PENDING',
+        audienceId: hearingId,
+        statut: 'EN_ATTENTE',
       },
     });
   }
 
   async getPendingAlerts() {
-    return this.prisma.alert.findMany({
+    return this.prisma.alerte.findMany({
       where: {
-        status: 'PENDING',
+        statut: 'EN_ATTENTE',
       },
       include: {
-        hearing: {
+        audience: {
           include: {
-            case: {
+            affaire: {
               include: {
                 parties: true,
-                createdBy: true,
+                createur: true,
               },
             },
           },
@@ -53,15 +53,15 @@ export class AlertsService {
   }
 
   async sendAlert(alertId: string) {
-    const alert = await this.prisma.alert.findUnique({
+    const alert = await this.prisma.alerte.findUnique({
       where: { id: alertId },
       include: {
-        hearing: {
+        audience: {
           include: {
-            case: {
+            affaire: {
               include: {
                 parties: true,
-                createdBy: true,
+                createur: true,
               },
             },
           },
@@ -71,20 +71,20 @@ export class AlertsService {
 
     if (!alert) return;
 
-    const { hearing } = alert;
-    const { case: caseData } = hearing;
+    const { audience } = alert;
+    const { affaire: caseData } = audience;
 
-    const parties = caseData.parties.map(p => p.name).join(' / ');
-    const dateStr = hearing.date.toLocaleDateString('fr-FR');
+    const parties = caseData.parties.map(p => p.nom).join(' / ');
+    const dateStr = audience.date.toLocaleDateString('fr-FR');
 
     const subject = `⚠️ Audience non renseignée - ${caseData.reference}`;
     const message = `
       <h2>Audience non renseignée</h2>
-      <p><strong>Affaire:</strong> ${caseData.reference} - ${caseData.title}</p>
+      <p><strong>Affaire:</strong> ${caseData.reference} - ${caseData.titre}</p>
       <p><strong>Parties:</strong> ${parties}</p>
-      <p><strong>Juridiction:</strong> ${caseData.jurisdiction} - ${caseData.chamber}</p>
+      <p><strong>Juridiction:</strong> ${caseData.juridiction} - ${caseData.chambre}</p>
       <p><strong>Date de l'audience:</strong> ${dateStr}</p>
-      <p><strong>Type:</strong> ${hearing.type}</p>
+      <p><strong>Type:</strong> ${audience.type}</p>
       <br>
       <p>Cette audience doit être renseignée dans le système.</p>
       <p><a href="${this.configService.get('FRONTEND_URL')}/a-renseigner">Renseigner maintenant</a></p>
@@ -93,35 +93,35 @@ export class AlertsService {
     try {
       await this.transporter.sendMail({
         from: this.configService.get('SMTP_FROM'),
-        to: caseData.createdBy.email,
+        to: caseData.createur.email,
         subject,
         html: message,
       });
 
-      await this.prisma.alert.update({
+      await this.prisma.alerte.update({
         where: { id: alertId },
         data: {
-          status: 'SENT',
-          sentCount: { increment: 1 },
-          lastSentAt: new Date(),
+          statut: 'ENVOYEE',
+          nombreEnvois: { increment: 1 },
+          dernierEnvoiLe: new Date(),
         },
       });
 
-      console.log(`✅ Alert sent for hearing ${hearing.id}`);
+      console.log(`✅ Alert sent for hearing ${audience.id}`);
     } catch (error) {
-      console.error(`❌ Failed to send alert for hearing ${hearing.id}:`, error);
+      console.error(`❌ Failed to send alert for hearing ${audience.id}:`, error);
     }
   }
 
   async resolveAlertsForHearing(hearingId: string) {
-    await this.prisma.alert.updateMany({
+    await this.prisma.alerte.updateMany({
       where: {
-        hearingId,
-        status: { in: ['PENDING', 'SENT'] },
+        audienceId: hearingId,
+        statut: { in: ['EN_ATTENTE', 'ENVOYEE'] },
       },
       data: {
-        status: 'RESOLVED',
-        resolvedAt: new Date(),
+        statut: 'RESOLUE',
+        resoleLe: new Date(),
       },
     });
   }

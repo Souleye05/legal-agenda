@@ -61,3 +61,6 @@ backend/prisma/migrations/*_migration.sql
 *.tmp
 *.temp
 .cache
+
+# Documentation
+docs/

@@ -1,31 +1,66 @@
-import { useState } from 'react';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { CaseCard } from '@/components/cases/CaseCard';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockCases } from '@/lib/mock-data';
+import { api } from '@/lib/api';
+import { useDebouncedValue } from '@/hooks/use-debounce';
+import { DEBOUNCE_DELAYS } from '@/lib/constants';
 import { CaseStatus } from '@/types/legal';
 
 export default function Cases() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery, DEBOUNCE_DELAYS.SEARCH);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
 
-  const filteredCases = mockCases.filter(c => {
-    const matchesSearch = 
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.parties.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+  // Fetch cases from API
+  const { data: cases = [], isLoading } = useQuery({
+    queryKey: ['cases'],
+    queryFn: () => api.getCases(),
   });
 
-  const activeCases = filteredCases.filter(c => c.status === 'ACTIVE');
-  const closedCases = filteredCases.filter(c => c.status !== 'ACTIVE');
+  // Transform API data to match frontend format
+  const transformedCases = useMemo(() => {
+    return cases.map((c: any) => ({
+      id: c.id,
+      reference: c.reference,
+      title: c.titre,
+      parties: c.parties || [],
+      jurisdiction: c.juridiction,
+      chamber: c.chambre,
+      city: c.ville,
+      status: c.statut,
+      observations: c.observations,
+      createdAt: new Date(c.createdAt),
+      updatedAt: new Date(c.updatedAt),
+      createdBy: c.createdBy,
+    }));
+  }, [cases]);
+
+  const filteredCases = useMemo(() => {
+    return transformedCases.filter((c: any) => {
+      const matchesSearch = 
+        c.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        c.reference.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (c.parties && c.parties.some((p: any) => p.nom?.toLowerCase().includes(debouncedSearch.toLowerCase())));
+      
+      const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [transformedCases, debouncedSearch, statusFilter]);
+
+  const activeCases = filteredCases.filter((c: any) => c.status === 'ACTIVE');
+  const closedCases = filteredCases.filter((c: any) => c.status !== 'ACTIVE');
+
+  const handleNewCase = () => {
+    navigate('/affaires/nouvelle');
+  };
 
   return (
     <MainLayout>
@@ -35,7 +70,7 @@ export default function Cases() {
           description="Gérez vos dossiers et affaires en cours"
           action={{
             label: 'Nouvelle affaire',
-            onClick: () => console.log('New case'),
+            onClick: handleNewCase,
           }}
         />
 
@@ -60,40 +95,47 @@ export default function Cases() {
           </Tabs>
         </div>
 
-        {/* Results */}
-        <div className="space-y-6">
-          {statusFilter === 'all' || statusFilter === 'ACTIVE' ? (
-            <div>
-              <h2 className="text-lg font-semibold text-foreground mb-4 font-serif">
-                Affaires actives ({activeCases.length})
-              </h2>
-              {activeCases.length === 0 ? (
-                <div className="card-elevated p-8 text-center text-muted-foreground">
-                  Aucune affaire active trouvée
-                </div>
-              ) : (
+        {/* Loading state */}
+        {isLoading ? (
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            Chargement des affaires...
+          </div>
+        ) : (
+          /* Results */
+          <div className="space-y-6">
+            {statusFilter === 'all' || statusFilter === 'ACTIVE' ? (
+              <div>
+                <h2 className="text-lg font-semibold text-foreground mb-4 font-serif">
+                  Affaires actives ({activeCases.length})
+                </h2>
+                {activeCases.length === 0 ? (
+                  <div className="card-elevated p-8 text-center text-muted-foreground">
+                    Aucune affaire active trouvée
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {activeCases.map((c: any) => (
+                      <CaseCard key={c.id} caseData={c} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            {(statusFilter === 'all' || statusFilter === 'CLOTUREE' || statusFilter === 'RADIEE') && closedCases.length > 0 ? (
+              <div>
+                <h2 className="text-lg font-semibold text-foreground mb-4 font-serif">
+                  Affaires clôturées ({closedCases.length})
+                </h2>
                 <div className="grid gap-4">
-                  {activeCases.map((c) => (
+                  {closedCases.map((c: any) => (
                     <CaseCard key={c.id} caseData={c} />
                   ))}
                 </div>
-              )}
-            </div>
-          ) : null}
-
-          {(statusFilter === 'all' || statusFilter === 'CLOTUREE' || statusFilter === 'RADIEE') && closedCases.length > 0 ? (
-            <div>
-              <h2 className="text-lg font-semibold text-foreground mb-4 font-serif">
-                Affaires clôturées ({closedCases.length})
-              </h2>
-              <div className="grid gap-4">
-                {closedCases.map((c) => (
-                  <CaseCard key={c.id} caseData={c} />
-                ))}
               </div>
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </MainLayout>
   );

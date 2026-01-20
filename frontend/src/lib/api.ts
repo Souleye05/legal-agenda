@@ -2,71 +2,147 @@
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+  user: any;
+}
+
 class ApiClient {
-  private token: string | null = null;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
 
   constructor() {
-    // Load token from localStorage
-    this.token = localStorage.getItem('auth_token');
+    // Load tokens from localStorage
+    this.accessToken = localStorage.getItem('access_token');
+    this.refreshToken = localStorage.getItem('refresh_token');
   }
 
-  setToken(token: string) {
-    this.token = token;
-    localStorage.setItem('auth_token', token);
+  setTokens(accessToken: string, refreshToken: string) {
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
   }
 
-  clearToken() {
-    this.token = null;
-    localStorage.removeItem('auth_token');
+  clearTokens() {
+    this.accessToken = null;
+    this.refreshToken = null;
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+  }
+
+  getAccessToken() {
+    return this.accessToken;
+  }
+
+  private async refreshAccessToken(): Promise<boolean> {
+    if (!this.refreshToken) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: this.refreshToken }),
+      });
+
+      if (!response.ok) {
+        this.clearTokens();
+        return false;
+      }
+
+      const data = await response.json();
+      this.accessToken = data.access_token;
+      localStorage.setItem('access_token', data.access_token);
+      return true;
+    } catch (error) {
+      this.clearTokens();
+      return false;
+    }
   }
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retry = true
   ): Promise<T> {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      if (this.accessToken) {
+        headers['Authorization'] = `Bearer ${this.accessToken}`;
+      }
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
+
+      // Si 401 et qu'on peut retry, essayer de refresh le token
+      if (response.status === 401 && retry) {
+        const refreshed = await this.refreshAccessToken();
+        if (refreshed) {
+          return this.request<T>(endpoint, options, false);
+        }
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error: any) {
+      // Si c'est une erreur réseau (Failed to fetch)
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        throw new Error('Impossible de se connecter au serveur. Vérifiez que le backend est démarré.');
+      }
+      throw error;
     }
-
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
-
-    return response.json();
   }
 
   // Auth
   async login(email: string, password: string) {
-    const data = await this.request<{ access_token: string; user: any }>('/auth/login', {
+    const data = await this.request<AuthTokens>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    this.setToken(data.access_token);
+    
+    this.setTokens(data.access_token, data.refresh_token);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   }
 
-  async register(email: string, password: string, fullName: string, role?: 'ADMIN' | 'COLLABORATOR') {
-    const data = await this.request<{ access_token: string; user: any }>('/auth/register', {
+  async register(email: string, password: string, fullName: string, role?: 'ADMIN' | 'COLLABORATEUR') {
+    const data = await this.request<AuthTokens>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, fullName, role }),
     });
-    this.setToken(data.access_token);
+    this.setTokens(data.access_token, data.refresh_token);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   }
 
-  logout() {
-    this.clearToken();
+  async logout() {
+    try {
+      await this.request('/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      this.clearTokens();
+    }
+  }
+
+  async getMe() {
+    return this.request<any>('/auth/me');
   }
 
   // Cases

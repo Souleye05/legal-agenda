@@ -70,11 +70,12 @@ docker-compose up -d
 # 4. Accéder à l'application
 # Frontend: http://localhost:5173
 # Backend API: http://localhost:3001/api
+# Swagger Docs: http://localhost:3001/api/docs
 ```
 
-**Identifiants de test** :
-- Admin : `admin@legalagenda.com` / `admin123`
-- Collaborateur : `collaborateur@legalagenda.com` / `collab123`
+**Créer un compte** :
+- Aller sur http://localhost:5173/register
+- Créer votre compte administrateur
 
 ### Installation manuelle
 
@@ -105,13 +106,28 @@ cp .env.example .env
 npm run dev
 ```
 
-Voir le guide détaillé dans [GETTING_STARTED.md](./GETTING_STARTED.md)
+Voir le guide détaillé dans [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md)
 
 ## 📚 Documentation
 
-- **[Guide de démarrage](./GETTING_STARTED.md)** - Installation et utilisation
-- **[Architecture](./ARCHITECTURE.md)** - Architecture technique détaillée
-- **[Backend README](./backend/README.md)** - Documentation API
+Toute la documentation est disponible dans le dossier **[docs/](./docs/)** :
+
+### Guides principaux
+- **[Guide de démarrage](./docs/GETTING_STARTED.md)** - Installation et utilisation
+- **[Guide de test](./docs/TESTING_GUIDE.md)** - Tests fonctionnels et debugging
+- **[Architecture](./docs/ARCHITECTURE.md)** - Architecture technique détaillée
+- **[API Endpoints](./docs/API_ENDPOINTS.md)** - Documentation complète de l'API
+
+### Intégration Frontend-Backend
+- **[État de l'intégration](./docs/INTEGRATION_STATUS.md)** - Progression et tâches restantes
+- **[Intégration API](./docs/FRONTEND_API_INTEGRATION.md)** - Détails techniques de l'intégration
+
+### Autres guides
+- **[Commandes](./docs/COMMANDS.md)** - Commandes utiles
+- **[Déploiement](./docs/DEPLOY.md)** - Guide de déploiement
+- **[GitHub Setup](./docs/METTRE_SUR_GITHUB.md)** - Mise sur GitHub
+
+Voir **[docs/README.md](./docs/README.md)** pour l'index complet de la documentation.
 
 ## 🏗️ Stack Technique
 
@@ -120,7 +136,7 @@ Voir le guide détaillé dans [GETTING_STARTED.md](./GETTING_STARTED.md)
 - Vite (build tool)
 - shadcn/ui (Radix UI + Tailwind CSS)
 - React Router v6
-- React Query (TanStack)
+- React Query (TanStack Query) - Gestion d'état et cache
 - React Hook Form + Zod
 - date-fns
 
@@ -128,13 +144,33 @@ Voir le guide détaillé dans [GETTING_STARTED.md](./GETTING_STARTED.md)
 - NestJS (Node.js + TypeScript)
 - Prisma ORM
 - PostgreSQL 16
-- JWT Authentication
+- JWT Authentication (Access + Refresh tokens)
+- @nestjs/throttler (Rate limiting)
 - @nestjs/schedule (cron jobs)
 - Nodemailer (emails)
+- Swagger/OpenAPI (documentation API)
 
 ### DevOps
 - Docker + Docker Compose
 - Ready for Render / Railway / Vercel
+
+## 🔄 État de l'intégration Frontend-Backend
+
+### ✅ Complété (60%)
+- Authentification complète (login, register, logout, refresh token)
+- Navbar avec recherche, alertes et menu utilisateur
+- Dashboard avec statistiques en temps réel
+- Page Affaires avec liste, recherche et filtres
+- Composants d'alertes connectés à l'API
+- React Query configuré pour le cache et les requêtes
+
+### 🔄 En cours
+- Pages de création (Nouvelle affaire, Nouvelle audience)
+- Page de détail d'affaire
+- Page Agenda (calendrier)
+- Gestion des résultats d'audience (RENVOI/RADIATION/DELIBERE)
+
+Voir [docs/INTEGRATION_STATUS.md](./docs/INTEGRATION_STATUS.md) pour les détails complets.
 
 ## 📁 Structure du projet
 
@@ -284,8 +320,9 @@ Développé pour les cabinets d'avocats souhaitant moderniser leur gestion d'aud
 
 ## 🆘 Support
 
-- Consulter [GETTING_STARTED.md](./GETTING_STARTED.md)
-- Consulter [ARCHITECTURE.md](./ARCHITECTURE.md)
+- Consulter [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md)
+- Consulter [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- Consulter [docs/README.md](./docs/README.md) pour toute la documentation
 - Ouvrir une issue sur GitHub
 
 ---

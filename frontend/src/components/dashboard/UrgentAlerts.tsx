@@ -2,12 +2,19 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AlertTriangle, ArrowRight, FileEdit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { getUnreportedHearings, hearingTypeLabels } from '@/lib/mock-data';
+import { api } from '@/lib/api';
+import { HEARING_TYPE_LABELS } from '@/lib/constants';
 
 export function UrgentAlerts() {
   const navigate = useNavigate();
-  const unreportedHearings = getUnreportedHearings();
+  
+  const { data: unreportedHearings = [] } = useQuery({
+    queryKey: ['unreported-hearings'],
+    queryFn: () => api.getUnreportedHearings(),
+    refetchInterval: 60000,
+  });
 
   if (unreportedHearings.length === 0) {
     return null;
@@ -34,7 +41,7 @@ export function UrgentAlerts() {
         </Button>
       </div>
       <div className="divide-y divide-urgent/10">
-        {unreportedHearings.slice(0, 3).map((hearing) => (
+        {unreportedHearings.slice(0, 3).map((hearing: any) => (
           <div 
             key={hearing.id}
             className="p-4 hover:bg-urgent/5 transition-colors"
@@ -43,17 +50,17 @@ export function UrgentAlerts() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-medium text-muted-foreground">
-                    {hearing.case.reference}
+                    {hearing.affaire?.reference}
                   </span>
                   <span className="text-xs text-urgent font-medium">
-                    {hearingTypeLabels[hearing.type]}
+                    {HEARING_TYPE_LABELS[hearing.type] || hearing.type}
                   </span>
                 </div>
                 <p className="font-medium text-foreground truncate">
-                  {hearing.case.title}
+                  {hearing.affaire?.titre}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {hearing.case.jurisdiction} • {hearing.case.chamber}
+                  {hearing.affaire?.juridiction} • {hearing.affaire?.chambre}
                 </p>
               </div>
               <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">

@@ -8,34 +8,34 @@ export class AuditService {
   async log(
     entityType: string,
     entityId: string,
-    action: 'CREATE' | 'UPDATE' | 'DELETE',
+    action: 'CREATION' | 'MODIFICATION' | 'SUPPRESSION',
     oldValue: string | null,
     newValue: string | null,
     userId: string,
   ) {
-    return this.prisma.auditLog.create({
+    return this.prisma.journalAudit.create({
       data: {
-        entityType,
-        entityId,
+        typeEntite: entityType,
+        idEntite: entityId,
         action,
-        oldValue,
-        newValue,
-        userId,
+        ancienneValeur: oldValue,
+        nouvelleValeur: newValue,
+        utilisateurId: userId,
       },
     });
   }
 
   async findByEntity(entityType: string, entityId: string) {
-    return this.prisma.auditLog.findMany({
+    return this.prisma.journalAudit.findMany({
       where: {
-        entityType,
-        entityId,
+        typeEntite: entityType,
+        idEntite: entityId,
       },
       include: {
-        user: {
+        utilisateur: {
           select: {
             id: true,
-            fullName: true,
+            nomComplet: true,
             email: true,
           },
         },
@@ -45,13 +45,13 @@ export class AuditService {
   }
 
   async findAll(limit = 100) {
-    return this.prisma.auditLog.findMany({
+    return this.prisma.journalAudit.findMany({
       take: limit,
       include: {
-        user: {
+        utilisateur: {
           select: {
             id: true,
-            fullName: true,
+            nomComplet: true,
             email: true,
           },
         },

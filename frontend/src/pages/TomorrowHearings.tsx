@@ -1,19 +1,25 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { HearingCard } from '@/components/hearings/HearingCard';
-import { getTomorrowHearings } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 import { CalendarCheck, FileDown, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function TomorrowHearings() {
-  const tomorrowHearings = getTomorrowHearings();
+  const { data: tomorrowHearings = [], isLoading } = useQuery({
+    queryKey: ['tomorrow-hearings'],
+    queryFn: () => api.getTomorrowHearings(),
+  });
+
   const tomorrow = addDays(new Date(), 1);
 
   const [preparedIds, setPreparedIds] = useState<Set<string>>(
-    new Set(tomorrowHearings.filter(h => h.isPrepared).map(h => h.id))
+    new Set(tomorrowHearings.filter((h: any) => h.estPrepare).map((h: any) => h.id))
   );
 
   const handleMarkPrepared = (hearingId: string) => {
@@ -22,9 +28,31 @@ export default function TomorrowHearings() {
       next.add(hearingId);
       return next;
     });
+    // TODO: Update in database
   };
 
-  const allPrepared = tomorrowHearings.every(h => preparedIds.has(h.id));
+  const allPrepared = tomorrowHearings.every((h: any) => preparedIds.has(h.id));
+
+  const handlePrint = () => {
+    toast.success('Utilisez Ctrl+P pour imprimer');
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    toast.success('Export PDF - Fonctionnalité à venir');
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            Chargement...
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -33,11 +61,11 @@ export default function TomorrowHearings() {
           title="Audiences de demain"
           description={format(tomorrow, "EEEE d MMMM yyyy", { locale: fr })}
         >
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             Imprimer
           </Button>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleExportPDF}>
             <FileDown className="h-4 w-4" />
             Export PDF
           </Button>
@@ -75,11 +103,11 @@ export default function TomorrowHearings() {
             )}
 
             <div className="space-y-4">
-              {tomorrowHearings.map((hearing) => (
+              {tomorrowHearings.map((hearing: any) => (
                 <HearingCard
                   key={hearing.id}
                   hearing={{ ...hearing, isPrepared: preparedIds.has(hearing.id) }}
-                  caseData={hearing.case}
+                  caseData={hearing.affaire}
                   onMarkPrepared={() => handleMarkPrepared(hearing.id)}
                 />
               ))}

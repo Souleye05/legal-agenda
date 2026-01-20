@@ -8,13 +8,13 @@ async function main() {
 
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
-  const admin = await prisma.user.upsert({
+  const admin = await prisma.utilisateur.upsert({
     where: { email: 'admin@legalagenda.com' },
     update: {},
     create: {
       email: 'admin@legalagenda.com',
-      password: adminPassword,
-      fullName: 'Maître Administrateur',
+      motDePasse: adminPassword,
+      nomComplet: 'Maître Administrateur',
       role: 'ADMIN',
     },
   });
@@ -23,54 +23,54 @@ async function main() {
 
   // Create collaborator user
   const collabPassword = await bcrypt.hash('collab123', 10);
-  const collaborator = await prisma.user.upsert({
+  const collaborator = await prisma.utilisateur.upsert({
     where: { email: 'collaborateur@legalagenda.com' },
     update: {},
     create: {
       email: 'collaborateur@legalagenda.com',
-      password: collabPassword,
-      fullName: 'Jean Collaborateur',
-      role: 'COLLABORATOR',
+      motDePasse: collabPassword,
+      nomComplet: 'Jean Collaborateur',
+      role: 'COLLABORATEUR',
     },
   });
 
   console.log('✅ Collaborator user created:', collaborator.email);
 
   // Create sample cases
-  const case1 = await prisma.case.create({
+  const affaire1 = await prisma.affaire.create({
     data: {
       reference: 'AFF-2026-0001',
-      title: 'Dupont c/ Martin - Expulsion',
-      jurisdiction: 'Tribunal Judiciaire',
-      chamber: 'Chambre civile',
-      city: 'Paris',
-      status: 'ACTIVE',
+      titre: 'Dupont c/ Martin - Expulsion',
+      juridiction: 'Tribunal Judiciaire',
+      chambre: 'Chambre civile',
+      ville: 'Paris',
+      statut: 'ACTIVE',
       observations: 'Affaire urgente - locataire en situation irrégulière depuis 6 mois',
-      createdById: admin.id,
+      createurId: admin.id,
       parties: {
         create: [
-          { name: 'Société Dupont SARL', role: 'DEMANDEUR' },
-          { name: 'M. Jean Martin', role: 'DEFENDEUR' },
-          { name: 'Me Lefebvre', role: 'CONSEIL_ADVERSE' },
+          { nom: 'Société Dupont SARL', role: 'DEMANDEUR' },
+          { nom: 'M. Jean Martin', role: 'DEFENDEUR' },
+          { nom: 'Me Lefebvre', role: 'CONSEIL_ADVERSE' },
         ],
       },
     },
   });
 
-  const case2 = await prisma.case.create({
+  const affaire2 = await prisma.affaire.create({
     data: {
       reference: 'AFF-2026-0002',
-      title: 'SCI Horizon c/ Constructions Plus - Malfaçons',
-      jurisdiction: 'Tribunal de Commerce',
-      chamber: 'Chambre commerciale',
-      city: 'Lyon',
-      status: 'ACTIVE',
+      titre: 'SCI Horizon c/ Constructions Plus - Malfaçons',
+      juridiction: 'Tribunal de Commerce',
+      chambre: 'Chambre commerciale',
+      ville: 'Lyon',
+      statut: 'ACTIVE',
       observations: 'Expertise en cours - rapport attendu pour mars 2026',
-      createdById: admin.id,
+      createurId: admin.id,
       parties: {
         create: [
-          { name: 'SCI Horizon', role: 'DEMANDEUR' },
-          { name: 'Constructions Plus SA', role: 'DEFENDEUR' },
+          { nom: 'SCI Horizon', role: 'DEMANDEUR' },
+          { nom: 'Constructions Plus SA', role: 'DEFENDEUR' },
         ],
       },
     },
@@ -82,28 +82,28 @@ async function main() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const hearing1 = await prisma.hearing.create({
+  const audience1 = await prisma.audience.create({
     data: {
       date: tomorrow,
-      time: '09:30',
+      heure: '09:30',
       type: 'MISE_EN_ETAT',
-      status: 'A_VENIR',
-      preparationNotes: 'Vérifier échange des conclusions. Préparer demande de renvoi si conclusions adverses non reçues.',
-      caseId: case1.id,
-      createdById: admin.id,
+      statut: 'A_VENIR',
+      notesPreparation: 'Vérifier échange des conclusions. Préparer demande de renvoi si conclusions adverses non reçues.',
+      affaireId: affaire1.id,
+      createurId: admin.id,
     },
   });
 
-  const hearing2 = await prisma.hearing.create({
+  const audience2 = await prisma.audience.create({
     data: {
       date: tomorrow,
-      time: '14:00',
+      heure: '14:00',
       type: 'PLAIDOIRIE',
-      status: 'A_VENIR',
-      preparationNotes: 'Plaidoirie finale. Dossier complet. Prévoir 45 min de plaidoirie.',
-      isPrepared: true,
-      caseId: case2.id,
-      createdById: admin.id,
+      statut: 'A_VENIR',
+      notesPreparation: 'Plaidoirie finale. Dossier complet. Prévoir 45 min de plaidoirie.',
+      estPreparee: true,
+      affaireId: affaire2.id,
+      createurId: admin.id,
     },
   });
 
@@ -111,24 +111,24 @@ async function main() {
   const pastDate = new Date();
   pastDate.setDate(pastDate.getDate() - 2);
 
-  const hearing3 = await prisma.hearing.create({
+  const audience3 = await prisma.audience.create({
     data: {
       date: pastDate,
-      time: '09:00',
+      heure: '09:00',
       type: 'REFERE',
-      status: 'NON_RENSEIGNEE',
-      preparationNotes: 'Demande de provision urgente',
-      isPrepared: true,
-      caseId: case1.id,
-      createdById: admin.id,
+      statut: 'NON_RENSEIGNEE',
+      notesPreparation: 'Demande de provision urgente',
+      estPreparee: true,
+      affaireId: affaire1.id,
+      createurId: admin.id,
     },
   });
 
   // Create alert for unreported hearing
-  await prisma.alert.create({
+  await prisma.alerte.create({
     data: {
-      hearingId: hearing3.id,
-      status: 'PENDING',
+      audienceId: audience3.id,
+      statut: 'EN_ATTENTE',
     },
   });
 

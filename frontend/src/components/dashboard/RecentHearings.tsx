@@ -2,25 +2,24 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Clock, MapPin, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockHearings, getCaseById, hearingTypeLabels } from '@/lib/mock-data';
-import { cn } from '@/lib/utils';
-import { HearingStatus } from '@/types/legal';
-
-const statusConfig: Record<HearingStatus, { label: string; className: string }> = {
-  A_VENIR: { label: 'À venir', className: 'status-upcoming' },
-  TENUE: { label: 'Tenue', className: 'status-active' },
-  NON_RENSEIGNEE: { label: 'Non renseignée', className: 'status-pending' },
-};
+import { api } from '@/lib/api';
+import { HEARING_TYPE_LABELS } from '@/lib/constants';
 
 export function RecentHearings() {
   const navigate = useNavigate();
 
+  const { data: hearings = [] } = useQuery({
+    queryKey: ['hearings'],
+    queryFn: () => api.getHearings(),
+  });
+
   // Get next 5 upcoming hearings
-  const upcomingHearings = mockHearings
-    .filter(h => h.status === 'A_VENIR')
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const upcomingHearings = hearings
+    .filter((h: any) => h.statut === 'A_VENIR')
+    .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 5);
 
   return (
@@ -43,8 +42,8 @@ export function RecentHearings() {
             Aucune audience à venir
           </div>
         ) : (
-          upcomingHearings.map((hearing) => {
-            const caseData = getCaseById(hearing.caseId);
+          upcomingHearings.map((hearing: any) => {
+            const caseData = hearing.affaire;
             if (!caseData) return null;
 
             return (
@@ -60,21 +59,21 @@ export function RecentHearings() {
                         {caseData.reference}
                       </span>
                       <Badge variant="outline" className="text-xs">
-                        {hearingTypeLabels[hearing.type]}
+                        {HEARING_TYPE_LABELS[hearing.type] || hearing.type}
                       </Badge>
                     </div>
                     <p className="font-medium text-foreground truncate">
-                      {caseData.title}
+                      {caseData.titre}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5" />
-                        {caseData.jurisdiction}
+                        {caseData.juridiction}
                       </span>
-                      {hearing.time && (
+                      {hearing.heure && (
                         <span className="flex items-center gap-1">
                           <Clock className="h-3.5 w-3.5" />
-                          {hearing.time}
+                          {hearing.heure}
                         </span>
                       )}
                     </div>

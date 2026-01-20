@@ -1,0 +1,15 @@
+✅ PROBLÈME RÉSOLU
+
+Le fichier schema.prisma contenait du texte corrompu à la ligne 239 :
+  @@index([typeEntitPlease correct the following validation errors and try again.
+  For 'user-agent': Required field is not provided.e, idEntite])
+
+Corrigé en :
+  @@index([typeEntite, idEntite])
+
+Le schema Prisma est maintenant valide.
+
+RELANCER DOCKER :
+  docker-compose up -d --build
+
+Cette fois, la construction devrait réussir !

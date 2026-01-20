@@ -13,22 +13,22 @@ export class HearingsService {
   ) {}
 
   async findAll(status?: string, caseId?: string) {
-    return this.prisma.hearing.findMany({
+    return this.prisma.audience.findMany({
       where: {
-        ...(status && { status: status as any }),
-        ...(caseId && { caseId }),
+        ...(status && { statut: status as any }),
+        ...(caseId && { affaireId: caseId }),
       },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
         },
-        result: true,
-        createdBy: {
+        resultat: true,
+        createur: {
           select: {
             id: true,
-            fullName: true,
+            nomComplet: true,
           },
         },
       },
@@ -37,19 +37,19 @@ export class HearingsService {
   }
 
   async findOne(id: string) {
-    const hearing = await this.prisma.hearing.findUnique({
+    const hearing = await this.prisma.audience.findUnique({
       where: { id },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
         },
-        result: true,
-        createdBy: {
+        resultat: true,
+        createur: {
           select: {
             id: true,
-            fullName: true,
+            nomComplet: true,
           },
         },
       },
@@ -63,17 +63,17 @@ export class HearingsService {
   }
 
   async create(dto: CreateHearingDto, userId: string) {
-    const hearing = await this.prisma.hearing.create({
+    const hearing = await this.prisma.audience.create({
       data: {
         date: new Date(dto.date),
-        time: dto.time,
+        heure: dto.time,
         type: dto.type,
-        preparationNotes: dto.preparationNotes,
-        caseId: dto.caseId,
-        createdById: userId,
+        notesPreparation: dto.preparationNotes,
+        affaireId: dto.caseId,
+        createurId: userId,
       },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
@@ -81,7 +81,7 @@ export class HearingsService {
       },
     });
 
-    await this.auditService.log('Hearing', hearing.id, 'CREATE', null, JSON.stringify(hearing), userId);
+    await this.auditService.log('Audience', hearing.id, 'CREATION', null, JSON.stringify(hearing), userId);
 
     return hearing;
   }
@@ -89,26 +89,26 @@ export class HearingsService {
   async update(id: string, dto: UpdateHearingDto) {
     const oldHearing = await this.findOne(id);
 
-    const updated = await this.prisma.hearing.update({
+    const updated = await this.prisma.audience.update({
       where: { id },
       data: {
         ...(dto.date && { date: new Date(dto.date) }),
-        ...(dto.time !== undefined && { time: dto.time }),
+        ...(dto.time !== undefined && { heure: dto.time }),
         ...(dto.type && { type: dto.type }),
-        ...(dto.preparationNotes !== undefined && { preparationNotes: dto.preparationNotes }),
-        ...(dto.isPrepared !== undefined && { isPrepared: dto.isPrepared }),
+        ...(dto.preparationNotes !== undefined && { notesPreparation: dto.preparationNotes }),
+        ...(dto.isPrepared !== undefined && { estPreparee: dto.isPrepared }),
       },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
         },
-        result: true,
+        resultat: true,
       },
     });
 
-    await this.auditService.log('Hearing', id, 'UPDATE', JSON.stringify(oldHearing), JSON.stringify(updated), oldHearing.createdById);
+    await this.auditService.log('Audience', id, 'MODIFICATION', JSON.stringify(oldHearing), JSON.stringify(updated), oldHearing.createurId);
 
     return updated;
   }
@@ -116,65 +116,65 @@ export class HearingsService {
   async recordResult(id: string, dto: RecordResultDto, userId: string) {
     const hearing = await this.findOne(id);
 
-    if (hearing.result) {
+    if (hearing.resultat) {
       throw new BadRequestException('Result already recorded for this hearing');
     }
 
     // Create result
-    const result = await this.prisma.hearingResult.create({
+    const result = await this.prisma.resultatAudience.create({
       data: {
         type: dto.type,
-        newDate: dto.newDate ? new Date(dto.newDate) : null,
-        postponementReason: dto.postponementReason,
-        radiationReason: dto.radiationReason,
-        deliberationText: dto.deliberationText,
-        hearingId: id,
-        createdById: userId,
+        nouvelleDate: dto.newDate ? new Date(dto.newDate) : null,
+        motifRenvoi: dto.postponementReason,
+        motifRadiation: dto.radiationReason,
+        texteDelibere: dto.deliberationText,
+        audienceId: id,
+        createurId: userId,
       },
     });
 
     // Update hearing status
-    await this.prisma.hearing.update({
+    await this.prisma.audience.update({
       where: { id },
-      data: { status: 'TENUE' },
+      data: { statut: 'TENUE' },
     });
 
     // Handle automatic actions based on result type
     if (dto.type === 'RENVOI' && dto.newDate) {
       // Create new hearing for postponed date
       await this.create({
-        caseId: hearing.caseId,
+        caseId: hearing.affaireId,
         date: dto.newDate,
-        time: hearing.time,
+        time: hearing.heure,
         type: hearing.type,
         preparationNotes: `Renvoi de l'audience du ${hearing.date.toLocaleDateString()}. ${dto.postponementReason || ''}`,
       }, userId);
     } else if (dto.type === 'RADIATION') {
       // Close case as RADIEE
-      await this.prisma.case.update({
-        where: { id: hearing.caseId },
-        data: { status: 'RADIEE' },
+      await this.prisma.affaire.update({
+        where: { id: hearing.affaireId },
+        data: { statut: 'RADIEE' },
       });
     } else if (dto.type === 'DELIBERE') {
       // Close case as CLOTUREE
-      await this.prisma.case.update({
-        where: { id: hearing.caseId },
-        data: { status: 'CLOTUREE' },
+      await this.prisma.affaire.update({
+        where: { id: hearing.affaireId },
+        data: { statut: 'CLOTUREE' },
       });
     }
 
     // Resolve any pending alerts for this hearing
     await this.alertsService.resolveAlertsForHearing(id);
 
-    await this.auditService.log('HearingResult', result.id, 'CREATE', null, JSON.stringify(result), userId);
+    await this.auditService.log('ResultatAudience', result.id, 'CREATION', null, JSON.stringify(result), userId);
 
     return result;
   }
 
   async remove(id: string) {
     const hearing = await this.findOne(id);
-    await this.prisma.hearing.delete({ where: { id } });
-    await this.auditService.log('Hearing', id, 'DELETE', JSON.stringify(hearing), null, hearing.createdById);
+    await this.prisma.audience.delete({ where: { id } });
+    await this.auditService.log('Audience', id, 'SUPPRESSION', JSON.stringify(hearing), null, hearing.createurId);
     return { message: 'Hearing deleted successfully' };
   }
 
@@ -182,14 +182,14 @@ export class HearingsService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return this.prisma.hearing.findMany({
+    return this.prisma.audience.findMany({
       where: {
         date: { lt: today },
-        status: { in: ['A_VENIR', 'NON_RENSEIGNEE'] },
-        result: null,
+        statut: { in: ['A_VENIR', 'NON_RENSEIGNEE'] },
+        resultat: null,
       },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
@@ -207,22 +207,22 @@ export class HearingsService {
     const dayAfter = new Date(tomorrow);
     dayAfter.setDate(dayAfter.getDate() + 1);
 
-    return this.prisma.hearing.findMany({
+    return this.prisma.audience.findMany({
       where: {
         date: {
           gte: tomorrow,
           lt: dayAfter,
         },
-        status: 'A_VENIR',
+        statut: 'A_VENIR',
       },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
         },
       },
-      orderBy: [{ date: 'asc' }, { time: 'asc' }],
+      orderBy: [{ date: 'asc' }, { heure: 'asc' }],
     });
   }
 
@@ -234,7 +234,7 @@ export class HearingsService {
     const startDate = new Date(targetYear, targetMonth, 1);
     const endDate = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59);
 
-    return this.prisma.hearing.findMany({
+    return this.prisma.audience.findMany({
       where: {
         date: {
           gte: startDate,
@@ -242,14 +242,14 @@ export class HearingsService {
         },
       },
       include: {
-        case: {
+        affaire: {
           include: {
             parties: true,
           },
         },
-        result: true,
+        resultat: true,
       },
-      orderBy: [{ date: 'asc' }, { time: 'asc' }],
+      orderBy: [{ date: 'asc' }, { heure: 'asc' }],
     });
   }
 
@@ -257,18 +257,18 @@ export class HearingsService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const unreported = await this.prisma.hearing.findMany({
+    const unreported = await this.prisma.audience.findMany({
       where: {
         date: { lt: today },
-        status: 'A_VENIR',
-        result: null,
+        statut: 'A_VENIR',
+        resultat: null,
       },
     });
 
     for (const hearing of unreported) {
-      await this.prisma.hearing.update({
+      await this.prisma.audience.update({
         where: { id: hearing.id },
-        data: { status: 'NON_RENSEIGNEE' },
+        data: { statut: 'NON_RENSEIGNEE' },
       });
 
       // Create alert

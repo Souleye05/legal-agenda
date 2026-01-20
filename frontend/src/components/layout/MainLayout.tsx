@@ -1,21 +1,39 @@
 import { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
-import { mockDashboardStats } from '@/lib/mock-data';
+import { Navbar } from './Navbar';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  // Fetch unreported and tomorrow hearings for sidebar badges
+  const { data: unreportedHearings = [] } = useQuery({
+    queryKey: ['unreported-hearings'],
+    queryFn: () => api.getUnreportedHearings(),
+    refetchInterval: 60000, // Refresh every minute
+  });
+
+  const { data: tomorrowHearings = [] } = useQuery({
+    queryKey: ['tomorrow-hearings'],
+    queryFn: () => api.getTomorrowHearings(),
+    refetchInterval: 60000,
+  });
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar 
-        unreportedCount={mockDashboardStats.unreportedHearings} 
-        tomorrowCount={mockDashboardStats.tomorrowHearings}
+        unreportedCount={unreportedHearings.length} 
+        tomorrowCount={tomorrowHearings.length}
       />
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Navbar />
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

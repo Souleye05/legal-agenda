@@ -73,9 +73,9 @@ Si demande de mot de passe :
 📚 DOCUMENTATION COMPLÈTE
 ───────────────────────────────────────────────────────────────
 
-📖 METTRE_SUR_GITHUB.md    → Guide en français
-📖 GITHUB_SETUP.md         → Guide détaillé complet
-📖 setup-github.ps1        → Script automatique
+📖 docs/METTRE_SUR_GITHUB.md    → Guide en français
+📖 docs/GITHUB_SETUP.md         → Guide détaillé complet
+📖 setup-github.ps1             → Script automatique
 
 ═══════════════════════════════════════════════════════════════
 

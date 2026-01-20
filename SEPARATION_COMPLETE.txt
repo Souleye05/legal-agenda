@@ -23,8 +23,14 @@ legal-agenda/
 │   ├── Dockerfile
 │   └── README.md
 │
+├── docs/                 ← Documentation complète (19 fichiers .md)
+│   ├── README.md
+│   ├── START_HERE.md
+│   ├── GETTING_STARTED.md
+│   └── ... (tous les .md)
+│
 ├── docker-compose.yml    ← Orchestration Docker
-└── Documentation/        ← Tous les fichiers .md
+└── README.md             ← Documentation principale
 
 ═══════════════════════════════════════════════════════════════
   AVANTAGES
@@ -75,9 +81,9 @@ Frontend:
 
 ✅ docker-compose.yml       → Chemins mis à jour
 ✅ render.yaml              → Chemins mis à jour
-✅ README.md                → Structure mise à jour
-✅ START_HERE.md            → Commandes mises à jour
-✅ QUICK_START.txt          → Structure mise à jour
+✅ README.md                → Structure mise à jour + liens docs/
+✅ docs/START_HERE.md       → Commandes mises à jour
+✅ QUICK_START.txt          → Structure mise à jour + liens docs/
 ✅ VERIFY.sh / VERIFY.bat   → Vérifications mises à jour
 
 ═══════════════════════════════════════════════════════════════
@@ -87,8 +93,8 @@ Frontend:
 ✅ frontend/README.md       → Documentation frontend
 ✅ frontend/Dockerfile      → Image Docker frontend
 ✅ frontend/.dockerignore   → Exclusions Docker
-✅ STRUCTURE.md             → Documentation structure
-✅ MIGRATION_COMPLETE.md    → Guide migration
+✅ docs/STRUCTURE.md        → Documentation structure
+✅ docs/MIGRATION_COMPLETE.md → Guide migration
 ✅ SEPARATION_COMPLETE.txt  → Ce fichier
 
 ═══════════════════════════════════════════════════════════════
@@ -105,10 +111,10 @@ Linux/Mac:
   DOCUMENTATION
 ═══════════════════════════════════════════════════════════════
 
-📖 STRUCTURE.md            → Structure détaillée
-📖 MIGRATION_COMPLETE.md   → Guide de migration
-📖 backend/README.md       → Documentation backend
-📖 frontend/README.md      → Documentation frontend
+📖 docs/STRUCTURE.md            → Structure détaillée
+📖 docs/MIGRATION_COMPLETE.md   → Guide de migration
+📖 backend/README.md            → Documentation backend
+📖 frontend/README.md           → Documentation frontend
 
 ═══════════════════════════════════════════════════════════════
   COMPATIBILITÉ

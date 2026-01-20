@@ -11,18 +11,18 @@ export class CasesService {
   ) {}
 
   async findAll(status?: string) {
-    return this.prisma.case.findMany({
-      where: status ? { status: status as any } : undefined,
+    return this.prisma.affaire.findMany({
+      where: status ? { statut: status as any } : undefined,
       include: {
         parties: true,
-        hearings: {
+        audiences: {
           orderBy: { date: 'desc' },
           take: 1,
         },
-        createdBy: {
+        createur: {
           select: {
             id: true,
-            fullName: true,
+            nomComplet: true,
             email: true,
           },
         },
@@ -32,20 +32,20 @@ export class CasesService {
   }
 
   async findOne(id: string) {
-    const caseData = await this.prisma.case.findUnique({
+    const caseData = await this.prisma.affaire.findUnique({
       where: { id },
       include: {
         parties: true,
-        hearings: {
+        audiences: {
           include: {
-            result: true,
+            resultat: true,
           },
           orderBy: { date: 'desc' },
         },
-        createdBy: {
+        createur: {
           select: {
             id: true,
-            fullName: true,
+            nomComplet: true,
             email: true,
           },
         },
@@ -62,7 +62,7 @@ export class CasesService {
   async create(dto: CreateCaseDto, userId: string) {
     // Generate reference
     const year = new Date().getFullYear();
-    const lastCase = await this.prisma.case.findFirst({
+    const lastCase = await this.prisma.affaire.findFirst({
       where: {
         reference: {
           startsWith: `AFF-${year}-`,
@@ -79,17 +79,17 @@ export class CasesService {
 
     const reference = `AFF-${year}-${nextNumber.toString().padStart(4, '0')}`;
 
-    const caseData = await this.prisma.case.create({
+    const caseData = await this.prisma.affaire.create({
       data: {
         reference,
-        title: dto.title,
-        jurisdiction: dto.jurisdiction,
-        chamber: dto.chamber,
-        city: dto.city,
+        titre: dto.title,
+        juridiction: dto.jurisdiction,
+        chambre: dto.chamber,
+        ville: dto.city,
         observations: dto.observations,
-        createdById: userId,
+        createurId: userId,
         parties: {
-          create: dto.parties,
+          create: dto.parties.map(p => ({ nom: p.name, role: p.role })),
         },
       },
       include: {
@@ -97,7 +97,7 @@ export class CasesService {
       },
     });
 
-    await this.auditService.log('Case', caseData.id, 'CREATE', null, JSON.stringify(caseData), userId);
+    await this.auditService.log('Affaire', caseData.id, 'CREATION', null, JSON.stringify(caseData), userId);
 
     return caseData;
   }
@@ -105,14 +105,14 @@ export class CasesService {
   async update(id: string, dto: UpdateCaseDto) {
     const oldCase = await this.findOne(id);
 
-    const updated = await this.prisma.case.update({
+    const updated = await this.prisma.affaire.update({
       where: { id },
       data: {
-        title: dto.title,
-        jurisdiction: dto.jurisdiction,
-        chamber: dto.chamber,
-        city: dto.city,
-        status: dto.status,
+        titre: dto.title,
+        juridiction: dto.jurisdiction,
+        chambre: dto.chamber,
+        ville: dto.city,
+        statut: dto.status,
         observations: dto.observations,
       },
       include: {
@@ -120,23 +120,23 @@ export class CasesService {
       },
     });
 
-    await this.auditService.log('Case', id, 'UPDATE', JSON.stringify(oldCase), JSON.stringify(updated), oldCase.createdById);
+    await this.auditService.log('Affaire', id, 'MODIFICATION', JSON.stringify(oldCase), JSON.stringify(updated), oldCase.createurId);
 
     return updated;
   }
 
   async remove(id: string) {
     const caseData = await this.findOne(id);
-    await this.prisma.case.delete({ where: { id } });
-    await this.auditService.log('Case', id, 'DELETE', JSON.stringify(caseData), null, caseData.createdById);
+    await this.prisma.affaire.delete({ where: { id } });
+    await this.auditService.log('Affaire', id, 'SUPPRESSION', JSON.stringify(caseData), null, caseData.createurId);
     return { message: 'Case deleted successfully' };
   }
 
   async getStats() {
     const [activeCases, closedCases, radiatedCases] = await Promise.all([
-      this.prisma.case.count({ where: { status: 'ACTIVE' } }),
-      this.prisma.case.count({ where: { status: 'CLOTUREE' } }),
-      this.prisma.case.count({ where: { status: 'RADIEE' } }),
+      this.prisma.affaire.count({ where: { statut: 'ACTIVE' } }),
+      this.prisma.affaire.count({ where: { statut: 'CLOTUREE' } }),
+      this.prisma.affaire.count({ where: { statut: 'RADIEE' } }),
     ]);
 
     return {

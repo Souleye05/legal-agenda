@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { HearingCard } from '@/components/hearings/HearingCard';
-import { getUnreportedHearings } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 import { AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -15,32 +16,76 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CalendarIcon, RotateCcw, XCircle, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { HearingResultType, Hearing, Case } from '@/types/legal';
+import { HearingResultType } from '@/types/legal';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UnreportedHearings() {
-  const unreportedHearings = getUnreportedHearings();
-  const [selectedHearing, setSelectedHearing] = useState<(Hearing & { case: Case }) | null>(null);
+  const { toast } = useToast();
+  const { data: unreportedHearings = [], isLoading, refetch } = useQuery({
+    queryKey: ['unreported-hearings'],
+    queryFn: () => api.getUnreportedHearings(),
+  });
+
+  const [selectedHearing, setSelectedHearing] = useState<any | null>(null);
   const [resultType, setResultType] = useState<HearingResultType>('RENVOI');
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [reason, setReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRecordResult = (hearing: Hearing & { case: Case }) => {
+  const handleRecordResult = (hearing: any) => {
     setSelectedHearing(hearing);
     setResultType('RENVOI');
     setNewDate(undefined);
     setReason('');
   };
 
-  const handleSubmit = () => {
-    console.log('Recording result:', {
-      hearingId: selectedHearing?.id,
-      type: resultType,
-      newDate,
-      reason,
-    });
-    setSelectedHearing(null);
-    // TODO: Save to database
+  const handleSubmit = async () => {
+    if (!selectedHearing) return;
+
+    setIsSubmitting(true);
+    try {
+      const data: any = { type: resultType };
+      
+      if (resultType === 'RENVOI') {
+        data.newDate = newDate;
+        data.postponementReason = reason;
+      } else if (resultType === 'RADIATION') {
+        data.radiationReason = reason;
+      } else if (resultType === 'DELIBERE') {
+        data.deliberationText = reason;
+      }
+
+      await api.recordHearingResult(selectedHearing.id, data);
+      
+      toast({
+        title: "Résultat enregistré",
+        description: "L'audience a été mise à jour avec succès",
+      });
+      
+      setSelectedHearing(null);
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible d'enregistrer le résultat",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            Chargement...
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -71,11 +116,11 @@ export default function UnreportedHearings() {
             </div>
 
             <div className="space-y-4">
-              {unreportedHearings.map((hearing) => (
+              {unreportedHearings.map((hearing: any) => (
                 <HearingCard
                   key={hearing.id}
                   hearing={hearing}
-                  caseData={hearing.case}
+                  caseData={hearing.affaire}
                   onRecordResult={() => handleRecordResult(hearing)}
                 />
               ))}
@@ -93,9 +138,9 @@ export default function UnreportedHearings() {
             {selectedHearing && (
               <div className="space-y-6">
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm font-medium">{selectedHearing.case.title}</p>
+                  <p className="text-sm font-medium">{selectedHearing.affaire?.titre}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {selectedHearing.case.reference} • {format(new Date(selectedHearing.date), 'dd/MM/yyyy', { locale: fr })}
+                    {selectedHearing.affaire?.reference} • {format(new Date(selectedHearing.date), 'dd/MM/yyyy', { locale: fr })}
                   </p>
                 </div>
 
@@ -216,11 +261,12 @@ export default function UnreportedHearings() {
                     className="flex-1"
                     onClick={handleSubmit}
                     disabled={
+                      isSubmitting ||
                       (resultType === 'RENVOI' && (!newDate || !reason)) ||
                       ((resultType === 'RADIATION' || resultType === 'DELIBERE') && !reason)
                     }
                   >
-                    Enregistrer
+                    {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
                   </Button>
                 </div>
               </div>

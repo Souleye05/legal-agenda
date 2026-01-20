@@ -1,15 +1,41 @@
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, Calendar, AlertTriangle, CalendarCheck } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentHearings } from '@/components/dashboard/RecentHearings';
 import { UrgentAlerts } from '@/components/dashboard/UrgentAlerts';
-import { mockDashboardStats } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+
+  // Fetch dashboard stats from API
+  const { data: cases = [] } = useQuery({
+    queryKey: ['cases'],
+    queryFn: () => api.getCases(),
+  });
+
+  const { data: hearings = [] } = useQuery({
+    queryKey: ['hearings'],
+    queryFn: () => api.getHearings(),
+  });
+
+  const { data: unreportedHearings = [] } = useQuery({
+    queryKey: ['unreported-hearings'],
+    queryFn: () => api.getUnreportedHearings(),
+  });
+
+  const { data: tomorrowHearings = [] } = useQuery({
+    queryKey: ['tomorrow-hearings'],
+    queryFn: () => api.getTomorrowHearings(),
+  });
+
+  // Calculate stats
+  const activeCases = cases.filter((c: any) => c.statut === 'ACTIVE').length;
+  const upcomingHearings = hearings.filter((h: any) => h.statut === 'A_VENIR').length;
 
   return (
     <MainLayout>
@@ -23,20 +49,20 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Affaires actives"
-            value={mockDashboardStats.activeCases}
+            value={activeCases}
             icon={Briefcase}
             onClick={() => navigate('/affaires')}
           />
           <StatCard
             title="Audiences à venir"
-            value={mockDashboardStats.upcomingHearings}
+            value={upcomingHearings}
             icon={Calendar}
             variant="info"
             onClick={() => navigate('/agenda')}
           />
           <StatCard
             title="À renseigner"
-            value={mockDashboardStats.unreportedHearings}
+            value={unreportedHearings.length}
             icon={AlertTriangle}
             variant="urgent"
             description="Audiences non renseignées"
@@ -44,7 +70,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Demain"
-            value={mockDashboardStats.tomorrowHearings}
+            value={tomorrowHearings.length}
             icon={CalendarCheck}
             variant="success"
             description="Audience(s) à préparer"

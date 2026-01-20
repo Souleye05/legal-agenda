@@ -115,8 +115,8 @@ git ls-files | findstr node_modules
   DOCUMENTATION
 ═══════════════════════════════════════════════════════════════
 
-📖 FICHIERS_A_NE_PAS_COMMITER.md  → Liste complète
-📖 COMMANDES_GITHUB.txt            → Commandes à exécuter
-📖 GITHUB_SETUP.md                 → Guide complet
+📖 docs/FICHIERS_A_NE_PAS_COMMITER.md  → Liste complète
+📖 COMMANDES_GITHUB.txt                → Commandes à exécuter
+📖 docs/GITHUB_SETUP.md                → Guide complet
 
 ═══════════════════════════════════════════════════════════════
