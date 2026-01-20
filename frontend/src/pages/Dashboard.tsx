@@ -8,34 +8,35 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentHearings } from '@/components/dashboard/RecentHearings';
 import { UrgentAlerts } from '@/components/dashboard/UrgentAlerts';
 import { api } from '@/lib/api';
+import type { Case, Hearing } from '@/types/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
   // Fetch dashboard stats from API
-  const { data: cases = [] } = useQuery({
+  const { data: cases = [] } = useQuery<Case[]>({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
   });
 
-  const { data: hearings = [] } = useQuery({
+  const { data: hearings = [] } = useQuery<Hearing[]>({
     queryKey: ['hearings'],
     queryFn: () => api.getHearings(),
   });
 
-  const { data: unreportedHearings = [] } = useQuery({
+  const { data: unreportedHearings = [] } = useQuery<Hearing[]>({
     queryKey: ['unreported-hearings'],
     queryFn: () => api.getUnreportedHearings(),
   });
 
-  const { data: tomorrowHearings = [] } = useQuery({
+  const { data: tomorrowHearings = [] } = useQuery<Hearing[]>({
     queryKey: ['tomorrow-hearings'],
     queryFn: () => api.getTomorrowHearings(),
   });
 
   // Calculate stats
-  const activeCases = cases.filter((c: any) => c.statut === 'ACTIVE').length;
-  const upcomingHearings = hearings.filter((h: any) => h.statut === 'A_VENIR').length;
+  const activeCases = cases.filter((c) => c.statut === 'ACTIVE').length;
+  const upcomingHearings = hearings.filter((h) => h.statut === 'A_VENIR').length;
 
   return (
     <MainLayout>

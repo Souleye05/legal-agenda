@@ -1,11 +1,28 @@
 // API Client for Legal Agenda Backend
 
+import type {
+  User,
+  AuthResponse,
+  RefreshTokenResponse,
+  Case,
+  Hearing,
+  AuditLog,
+  DashboardStats,
+  CreateCaseDto,
+  UpdateCaseDto,
+  CreateHearingDto,
+  UpdateHearingDto,
+  RecordHearingResultDto,
+  LoginDto,
+  RegisterDto,
+} from '@/types/api';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 interface AuthTokens {
   access_token: string;
   refresh_token: string;
-  user: any;
+  user: User;
 }
 
 class ApiClient {
@@ -110,7 +127,7 @@ class ApiClient {
   }
 
   // Auth
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<AuthTokens> {
     const data = await this.request<AuthTokens>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -121,7 +138,7 @@ class ApiClient {
     return data;
   }
 
-  async register(email: string, password: string, fullName: string, role?: 'ADMIN' | 'COLLABORATEUR') {
+  async register(email: string, password: string, fullName: string, role?: 'ADMIN' | 'COLLABORATEUR'): Promise<AuthTokens> {
     const data = await this.request<AuthTokens>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, fullName, role }),
@@ -131,7 +148,7 @@ class ApiClient {
     return data;
   }
 
-  async logout() {
+  async logout(): Promise<void> {
     try {
       await this.request('/auth/logout', { method: 'POST' });
     } catch (error) {
@@ -141,116 +158,116 @@ class ApiClient {
     }
   }
 
-  async getMe() {
-    return this.request<any>('/auth/me');
+  async getMe(): Promise<User> {
+    return this.request<User>('/auth/me');
   }
 
   // Cases
-  async getCases(status?: string) {
-    return this.request<any[]>(`/cases${status ? `?status=${status}` : ''}`);
+  async getCases(status?: string): Promise<Case[]> {
+    return this.request<Case[]>(`/cases${status ? `?status=${status}` : ''}`);
   }
 
-  async getCase(id: string) {
-    return this.request<any>(`/cases/${id}`);
+  async getCase(id: string): Promise<Case> {
+    return this.request<Case>(`/cases/${id}`);
   }
 
-  async createCase(data: any) {
-    return this.request<any>('/cases', {
+  async createCase(data: CreateCaseDto): Promise<Case> {
+    return this.request<Case>('/cases', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updateCase(id: string, data: any) {
-    return this.request<any>(`/cases/${id}`, {
+  async updateCase(id: string, data: UpdateCaseDto): Promise<Case> {
+    return this.request<Case>(`/cases/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  async deleteCase(id: string) {
-    return this.request<any>(`/cases/${id}`, {
+  async deleteCase(id: string): Promise<void> {
+    return this.request<void>(`/cases/${id}`, {
       method: 'DELETE',
     });
   }
 
-  async getCaseStats() {
-    return this.request<any>('/cases/stats');
+  async getCaseStats(): Promise<DashboardStats> {
+    return this.request<DashboardStats>('/cases/stats');
   }
 
   // Hearings
-  async getHearings(params?: { status?: string; caseId?: string }) {
+  async getHearings(params?: { status?: string; caseId?: string }): Promise<Hearing[]> {
     const query = new URLSearchParams(params as any).toString();
-    return this.request<any[]>(`/hearings${query ? `?${query}` : ''}`);
+    return this.request<Hearing[]>(`/hearings${query ? `?${query}` : ''}`);
   }
 
-  async getHearing(id: string) {
-    return this.request<any>(`/hearings/${id}`);
+  async getHearing(id: string): Promise<Hearing> {
+    return this.request<Hearing>(`/hearings/${id}`);
   }
 
-  async createHearing(data: any) {
-    return this.request<any>('/hearings', {
+  async createHearing(data: CreateHearingDto): Promise<Hearing> {
+    return this.request<Hearing>('/hearings', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updateHearing(id: string, data: any) {
-    return this.request<any>(`/hearings/${id}`, {
+  async updateHearing(id: string, data: UpdateHearingDto): Promise<Hearing> {
+    return this.request<Hearing>(`/hearings/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  async deleteHearing(id: string) {
-    return this.request<any>(`/hearings/${id}`, {
+  async deleteHearing(id: string): Promise<void> {
+    return this.request<void>(`/hearings/${id}`, {
       method: 'DELETE',
     });
   }
 
-  async recordHearingResult(id: string, data: any) {
-    return this.request<any>(`/hearings/${id}/result`, {
+  async recordHearingResult(id: string, data: RecordHearingResultDto): Promise<Hearing> {
+    return this.request<Hearing>(`/hearings/${id}/result`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async getUnreportedHearings() {
-    return this.request<any[]>('/hearings/unreported');
+  async getUnreportedHearings(): Promise<Hearing[]> {
+    return this.request<Hearing[]>('/hearings/unreported');
   }
 
-  async getTomorrowHearings() {
-    return this.request<any[]>('/hearings/tomorrow');
+  async getTomorrowHearings(): Promise<Hearing[]> {
+    return this.request<Hearing[]>('/hearings/tomorrow');
   }
 
-  async getCalendar(month?: string, year?: string) {
+  async getCalendar(month?: string, year?: string): Promise<Hearing[]> {
     const query = new URLSearchParams({ ...(month && { month }), ...(year && { year }) }).toString();
-    return this.request<any[]>(`/hearings/calendar${query ? `?${query}` : ''}`);
+    return this.request<Hearing[]>(`/hearings/calendar${query ? `?${query}` : ''}`);
   }
 
   // Users
-  async getUsers() {
-    return this.request<any[]>('/users');
+  async getUsers(): Promise<User[]> {
+    return this.request<User[]>('/users');
   }
 
-  async getUser(id: string) {
-    return this.request<any>(`/users/${id}`);
+  async getUser(id: string): Promise<User> {
+    return this.request<User>(`/users/${id}`);
   }
 
-  async updateUser(id: string, data: any) {
-    return this.request<any>(`/users/${id}`, {
+  async updateUser(id: string, data: Partial<User>): Promise<User> {
+    return this.request<User>(`/users/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   // Audit
-  async getAuditLogs(limit?: number) {
-    return this.request<any[]>(`/audit${limit ? `?limit=${limit}` : ''}`);
+  async getAuditLogs(limit?: number): Promise<AuditLog[]> {
+    return this.request<AuditLog[]>(`/audit${limit ? `?limit=${limit}` : ''}`);
   }
 
-  async getEntityAuditLogs(type: string, id: string) {
-    return this.request<any[]>(`/audit/entity?type=${type}&id=${id}`);
+  async getEntityAuditLogs(type: string, id: string): Promise<AuditLog[]> {
+    return this.request<AuditLog[]>(`/audit/entity?type=${type}&id=${id}`);
   }
 }
 

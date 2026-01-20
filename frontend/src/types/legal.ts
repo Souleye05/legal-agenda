@@ -1,4 +1,5 @@
 // Types for the Legal Agenda Application
+// Note: These are frontend display types. API types are in types/api.ts
 
 export type CaseStatus = 'ACTIVE' | 'CLOTUREE' | 'RADIEE';
 
@@ -15,21 +16,22 @@ export type HearingType =
 
 export type HearingResultType = 'RENVOI' | 'RADIATION' | 'DELIBERE';
 
+// Frontend display types (transformed from API)
 export interface Party {
   id: string;
-  name: string;
+  nom: string; // French field name from API
   role: 'demandeur' | 'defendeur' | 'conseil_adverse';
 }
 
 export interface Case {
   id: string;
-  reference: string; // Auto-generated: AFF-2026-0001
-  title: string; // Short title: "X c/ Y - expulsion"
+  reference: string;
+  title: string; // Transformed from 'titre'
   parties: Party[];
-  jurisdiction: string; // TGI, TC, CA, etc.
-  chamber: string; // Civile, Commerciale, Référés
-  city?: string;
-  status: CaseStatus;
+  jurisdiction: string; // Transformed from 'juridiction'
+  chamber: string; // Transformed from 'chambre'
+  city?: string; // Transformed from 'ville'
+  status: CaseStatus; // Transformed from 'statut'
   observations?: string;
   createdAt: Date;
   updatedAt: Date;

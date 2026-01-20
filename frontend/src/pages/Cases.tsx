@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api } from '@/lib/api';
 import { useDebouncedValue } from '@/hooks/use-debounce';
 import { DEBOUNCE_DELAYS } from '@/lib/constants';
-import { CaseStatus } from '@/types/legal';
+import type { CaseStatus, Case } from '@/types/api';
 
 export default function Cases() {
   const navigate = useNavigate();
@@ -19,14 +19,14 @@ export default function Cases() {
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
 
   // Fetch cases from API
-  const { data: cases = [], isLoading } = useQuery({
+  const { data: cases = [], isLoading } = useQuery<Case[]>({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
   });
 
   // Transform API data to match frontend format
   const transformedCases = useMemo(() => {
-    return cases.map((c: any) => ({
+    return cases.map((c) => ({
       id: c.id,
       reference: c.reference,
       title: c.titre,
@@ -43,11 +43,11 @@ export default function Cases() {
   }, [cases]);
 
   const filteredCases = useMemo(() => {
-    return transformedCases.filter((c: any) => {
+    return transformedCases.filter((c) => {
       const matchesSearch = 
         c.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         c.reference.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        (c.parties && c.parties.some((p: any) => p.nom?.toLowerCase().includes(debouncedSearch.toLowerCase())));
+        (c.parties && c.parties.some((p) => p.nom?.toLowerCase().includes(debouncedSearch.toLowerCase())));
       
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
 
@@ -55,8 +55,8 @@ export default function Cases() {
     });
   }, [transformedCases, debouncedSearch, statusFilter]);
 
-  const activeCases = filteredCases.filter((c: any) => c.status === 'ACTIVE');
-  const closedCases = filteredCases.filter((c: any) => c.status !== 'ACTIVE');
+  const activeCases = filteredCases.filter((c) => c.status === 'ACTIVE');
+  const closedCases = filteredCases.filter((c) => c.status !== 'ACTIVE');
 
   const handleNewCase = () => {
     navigate('/affaires/nouvelle');
@@ -114,7 +114,7 @@ export default function Cases() {
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {activeCases.map((c: any) => (
+                    {activeCases.map((c) => (
                       <CaseCard key={c.id} caseData={c} />
                     ))}
                   </div>
@@ -128,7 +128,7 @@ export default function Cases() {
                   Affaires clôturées ({closedCases.length})
                 </h2>
                 <div className="grid gap-4">
-                  {closedCases.map((c: any) => (
+                  {closedCases.map((c) => (
                     <CaseCard key={c.id} caseData={c} />
                   ))}
                 </div>
