@@ -82,14 +82,17 @@ export class CasesService {
     const caseData = await this.prisma.affaire.create({
       data: {
         reference,
-        titre: dto.title,
-        juridiction: dto.jurisdiction,
-        chambre: dto.chamber,
-        ville: dto.city,
+        titre: dto.titre,
+        juridiction: dto.juridiction,
+        chambre: dto.chambre,
+        ville: dto.ville,
         observations: dto.observations,
         createurId: userId,
         parties: {
-          create: dto.parties.map(p => ({ nom: p.name, role: p.role })),
+          create: dto.parties.map(p => ({ 
+            nom: p.nom, 
+            role: p.role
+          })),
         },
       },
       include: {
@@ -108,11 +111,11 @@ export class CasesService {
     const updated = await this.prisma.affaire.update({
       where: { id },
       data: {
-        titre: dto.title,
-        juridiction: dto.jurisdiction,
-        chambre: dto.chamber,
-        ville: dto.city,
-        statut: dto.status,
+        titre: dto.titre,
+        juridiction: dto.juridiction,
+        chambre: dto.chambre,
+        ville: dto.ville,
+        statut: dto.statut,
         observations: dto.observations,
       },
       include: {
