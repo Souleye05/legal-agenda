@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -11,51 +12,55 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { api } from '@/lib/api';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-const jurisdictionOptions = [
-  'Tribunal Judiciaire',
-  'Tribunal de Commerce',
-  'Conseil de Prud\'hommes',
-  'Cour d\'Appel',
-  'Cour de Cassation',
-  'Tribunal Administratif',
-  'Cour Administrative d\'Appel',
-];
-
-const chamberOptions = [
-  'Chambre civile',
-  'Chambre commerciale',
-  'Chambre sociale',
-  'Chambre des référés',
-  'Chambre correctionnelle',
-  'Chambre de l\'instruction',
-  'Chambre civile 1',
-  'Chambre civile 2',
-  'Chambre civile 3',
-];
-
-interface Party {
-  nom: string;
-  role: 'demandeur' | 'defendeur' | 'conseil_adverse';
-}
+import { createCaseSchema, type CreateCaseFormData } from '@/lib/validations';
+import { JURISDICTION_OPTIONS, CHAMBER_OPTIONS } from '@/lib/constants';
 
 export default function NewCase() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [title, setTitle] = useState('');
-  const [jurisdiction, setJurisdiction] = useState('');
-  const [chamber, setChamber] = useState('');
-  const [city, setCity] = useState('');
-  const [observations, setObservations] = useState('');
-  const [parties, setParties] = useState<(Party & { id: string })[]>([
-    { id: '1', nom: '', role: 'demandeur' },
-    { id: '2', nom: '', role: 'defendeur' },
-  ]);
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateCaseFormData>({
+    resolver: zodResolver(createCaseSchema),
+    defaultValues: {
+      titre: '',
+      juridiction: '',
+      chambre: '',
+      ville: '',
+      observations: '',
+      parties: [
+        { nom: '', role: 'demandeur' },
+        { nom: '', role: 'defendeur' },
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'parties',
+  });
 
   const createCaseMutation = useMutation({
-    mutationFn: (data: any) => api.createCase(data),
+    mutationFn: (data: CreateCaseFormData) => {
+      // Transform form data to API format - filter out empty parties
+      const validParties = data.parties.filter(p => p.nom.trim());
+      const apiData = {
+        titre: data.titre,
+        juridiction: data.juridiction,
+        chambre: data.chambre || undefined,
+        ville: data.ville || undefined,
+        observations: data.observations || undefined,
+        parties: validParties as Array<{ nom: string; role: 'demandeur' | 'defendeur' | 'conseil_adverse' }>,
+      };
+      return api.createCase(apiData);
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['cases'] });
       toast({
@@ -73,45 +78,13 @@ export default function NewCase() {
     },
   });
 
-  const addParty = (role: Party['role']) => {
-    setParties([...parties, { id: Date.now().toString(), nom: '', role }]);
+  const onSubmit = (data: CreateCaseFormData) => {
+    createCaseMutation.mutate(data);
   };
 
-  const removeParty = (id: string) => {
-    setParties(parties.filter(p => p.id !== id));
-  };
-
-  const updateParty = (id: string, nom: string) => {
-    setParties(parties.map(p => p.id === id ? { ...p, nom } : p));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const validParties = parties.filter(p => p.nom.trim());
-    
-    if (!title || !jurisdiction || validParties.length < 2) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createCaseMutation.mutate({
-      titre: title,
-      juridiction: jurisdiction,
-      chambre: chamber || undefined,
-      ville: city || undefined,
-      observations: observations || undefined,
-      parties: validParties.map(({ id, ...p }) => p),
-    });
-  };
-
-  const demandeurs = parties.filter(p => p.role === 'demandeur');
-  const defendeurs = parties.filter(p => p.role === 'defendeur');
-  const conseils = parties.filter(p => p.role === 'conseil_adverse');
+  const demandeurs = fields.filter((_, index) => watch(`parties.${index}.role`) === 'demandeur');
+  const defendeurs = fields.filter((_, index) => watch(`parties.${index}.role`) === 'defendeur');
+  const conseils = fields.filter((_, index) => watch(`parties.${index}.role`) === 'conseil_adverse');
 
   return (
     <MainLayout>
@@ -126,58 +99,74 @@ export default function NewCase() {
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="card-elevated p-6 space-y-4">
             <h3 className="font-semibold text-foreground">Informations générales</h3>
             
             <div className="space-y-2">
-              <Label htmlFor="title">Intitulé de l'affaire *</Label>
+              <Label htmlFor="titre">Intitulé de l'affaire *</Label>
               <Input
-                id="title"
+                id="titre"
                 placeholder="Ex: Dupont c/ Martin - Expulsion"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                {...register('titre')}
               />
+              {errors.titre && (
+                <p className="text-sm text-destructive">{errors.titre.message}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Juridiction *</Label>
-                <Select value={jurisdiction} onValueChange={setJurisdiction}>
+                <Select 
+                  value={watch('juridiction')} 
+                  onValueChange={(value) => setValue('juridiction', value, { shouldValidate: true })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jurisdictionOptions.map(j => (
+                    {JURISDICTION_OPTIONS.map(j => (
                       <SelectItem key={j} value={j}>{j}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.juridiction && (
+                  <p className="text-sm text-destructive">{errors.juridiction.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>Chambre</Label>
-                <Select value={chamber} onValueChange={setChamber}>
+                <Select 
+                  value={watch('chambre') || ''} 
+                  onValueChange={(value) => setValue('chambre', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent>
-                    {chamberOptions.map(c => (
+                    {CHAMBER_OPTIONS.map(c => (
                       <SelectItem key={c} value={c}>{c}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.chambre && (
+                  <p className="text-sm text-destructive">{errors.chambre.message}</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="city">Ville</Label>
+              <Label htmlFor="ville">Ville</Label>
               <Input
-                id="city"
+                id="ville"
                 placeholder="Ex: Paris"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
+                {...register('ville')}
               />
+              {errors.ville && (
+                <p className="text-sm text-destructive">{errors.ville.message}</p>
+              )}
             </div>
           </div>
 
@@ -189,74 +178,135 @@ export default function NewCase() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Demandeur(s) *</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={() => addParty('demandeur')}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => append({ nom: '', role: 'demandeur' })}
+                >
                   <Plus className="h-4 w-4 mr-1" />
                   Ajouter
                 </Button>
               </div>
-              {demandeurs.map((party) => (
-                <div key={party.id} className="flex gap-2">
-                  <Input
-                    placeholder="Nom du demandeur"
-                    value={party.nom}
-                    onChange={(e) => updateParty(party.id, e.target.value)}
-                  />
-                  {demandeurs.length > 1 && (
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeParty(party.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+              {fields.map((field, index) => {
+                if (watch(`parties.${index}.role`) !== 'demandeur') return null;
+                return (
+                  <div key={field.id} className="flex gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        placeholder="Nom du demandeur"
+                        {...register(`parties.${index}.nom`)}
+                      />
+                      {errors.parties?.[index]?.nom && (
+                        <p className="text-xs text-destructive">
+                          {errors.parties[index]?.nom?.message}
+                        </p>
+                      )}
+                    </div>
+                    {demandeurs.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Défendeurs */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Défendeur(s) *</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={() => addParty('defendeur')}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => append({ nom: '', role: 'defendeur' })}
+                >
                   <Plus className="h-4 w-4 mr-1" />
                   Ajouter
                 </Button>
               </div>
-              {defendeurs.map((party) => (
-                <div key={party.id} className="flex gap-2">
-                  <Input
-                    placeholder="Nom du défendeur"
-                    value={party.nom}
-                    onChange={(e) => updateParty(party.id, e.target.value)}
-                  />
-                  {defendeurs.length > 1 && (
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeParty(party.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+              {fields.map((field, index) => {
+                if (watch(`parties.${index}.role`) !== 'defendeur') return null;
+                return (
+                  <div key={field.id} className="flex gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        placeholder="Nom du défendeur"
+                        {...register(`parties.${index}.nom`)}
+                      />
+                      {errors.parties?.[index]?.nom && (
+                        <p className="text-xs text-destructive">
+                          {errors.parties[index]?.nom?.message}
+                        </p>
+                      )}
+                    </div>
+                    {defendeurs.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Conseils adverses */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Conseil adverse (optionnel)</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={() => addParty('conseil_adverse')}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => append({ nom: '', role: 'conseil_adverse' })}
+                >
                   <Plus className="h-4 w-4 mr-1" />
                   Ajouter
                 </Button>
               </div>
-              {conseils.map((party) => (
-                <div key={party.id} className="flex gap-2">
-                  <Input
-                    placeholder="Nom du conseil adverse"
-                    value={party.nom}
-                    onChange={(e) => updateParty(party.id, e.target.value)}
-                  />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeParty(party.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              ))}
+              {fields.map((field, index) => {
+                if (watch(`parties.${index}.role`) !== 'conseil_adverse') return null;
+                return (
+                  <div key={field.id} className="flex gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        placeholder="Nom du conseil adverse"
+                        {...register(`parties.${index}.nom`)}
+                      />
+                      {errors.parties?.[index]?.nom && (
+                        <p className="text-xs text-destructive">
+                          {errors.parties[index]?.nom?.message}
+                        </p>
+                      )}
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
+
+            {errors.parties && typeof errors.parties.message === 'string' && (
+              <p className="text-sm text-destructive">{errors.parties.message}</p>
+            )}
           </div>
 
           {/* Notes */}
@@ -267,20 +317,31 @@ export default function NewCase() {
               <Textarea
                 id="observations"
                 placeholder="Notes sur l'affaire..."
-                value={observations}
-                onChange={(e) => setObservations(e.target.value)}
+                {...register('observations')}
                 rows={4}
               />
+              {errors.observations && (
+                <p className="text-sm text-destructive">{errors.observations.message}</p>
+              )}
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex gap-3">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => navigate('/affaires')}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1" 
+              onClick={() => navigate('/affaires')}
+            >
               Annuler
             </Button>
-            <Button type="submit" className="flex-1" disabled={createCaseMutation.isPending}>
-              {createCaseMutation.isPending ? 'Création...' : 'Créer l\'affaire'}
+            <Button 
+              type="submit" 
+              className="flex-1" 
+              disabled={isSubmitting || createCaseMutation.isPending}
+            >
+              {isSubmitting || createCaseMutation.isPending ? 'Création...' : 'Créer l\'affaire'}
             </Button>
           </div>
         </form>
