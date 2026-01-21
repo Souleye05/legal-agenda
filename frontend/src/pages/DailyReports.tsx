@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format, addDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -8,29 +9,24 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { FileText, Download, Printer, CalendarIcon, FileCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { mockHearings, getCaseById } from '@/lib/mock-data';
+import { api } from '@/lib/api';
+import type { Hearing } from '@/types/api';
 // import { generateDailyReportPDF, generateTrackingSheetPDF } from '@/lib/pdf-generator';
-import { Hearing, Case, HearingResult } from '@/types/legal';
 import { toast } from 'sonner';
-
-interface HearingWithCase extends Hearing {
-  case: Case;
-  result?: HearingResult;
-}
 
 export default function DailyReports() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tomorrowDate, setTomorrowDate] = useState<Date>(addDays(new Date(), 1));
 
-  const getHearingsForDate = (date: Date): HearingWithCase[] => {
+  // Fetch all hearings
+  const { data: allHearings = [] } = useQuery<Hearing[]>({
+    queryKey: ['hearings'],
+    queryFn: () => api.getHearings(),
+  });
+
+  const getHearingsForDate = (date: Date): Hearing[] => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return mockHearings
-      .filter(h => format(new Date(h.date), 'yyyy-MM-dd') === dateStr)
-      .map(h => ({
-        ...h,
-        case: getCaseById(h.caseId)!,
-      }))
-      .filter(h => h.case);
+    return allHearings.filter(h => format(new Date(h.date), 'yyyy-MM-dd') === dateStr);
   };
 
   const selectedDateHearings = getHearingsForDate(selectedDate);

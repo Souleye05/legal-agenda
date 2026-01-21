@@ -67,13 +67,13 @@ export type CreateCaseFormData = z.infer<typeof createCaseSchema>;
  * Hearing type validation
  */
 const hearingTypeSchema = z.enum([
-  'mise_en_etat',
-  'plaidoirie',
-  'refere',
-  'evocation',
-  'conciliation',
-  'mediation',
-  'autre',
+  'MISE_EN_ETAT',
+  'PLAIDOIRIE',
+  'REFERE',
+  'EVOCATION',
+  'CONCILIATION',
+  'MEDIATION',
+  'AUTRE',
 ], {
   errorMap: () => ({ message: 'Type d\'audience invalide' }),
 });

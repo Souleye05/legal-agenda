@@ -6,13 +6,13 @@ export type CaseStatus = 'ACTIVE' | 'CLOTUREE' | 'RADIEE';
 export type HearingStatus = 'A_VENIR' | 'TENUE' | 'NON_RENSEIGNEE';
 
 export type HearingType = 
-  | 'mise_en_etat' 
-  | 'plaidoirie' 
-  | 'refere' 
-  | 'evocation' 
-  | 'conciliation'
-  | 'mediation'
-  | 'autre';
+  | 'MISE_EN_ETAT' 
+  | 'PLAIDOIRIE' 
+  | 'REFERE' 
+  | 'EVOCATION' 
+  | 'CONCILIATION'
+  | 'MEDIATION'
+  | 'AUTRE';
 
 export type HearingResultType = 'RENVOI' | 'RADIATION' | 'DELIBERE';
 
@@ -20,6 +20,7 @@ export type HearingResultType = 'RENVOI' | 'RADIATION' | 'DELIBERE';
 export interface Party {
   id: string;
   nom: string; // French field name from API
+  name?: string; // Alias for compatibility
   role: 'demandeur' | 'defendeur' | 'conseil_adverse';
 }
 

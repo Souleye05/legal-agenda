@@ -66,10 +66,10 @@ export class HearingsService {
     const hearing = await this.prisma.audience.create({
       data: {
         date: new Date(dto.date),
-        heure: dto.time,
+        heure: dto.heure,
         type: dto.type,
-        notesPreparation: dto.preparationNotes,
-        affaireId: dto.caseId,
+        notesPreparation: dto.notesPreparation,
+        affaireId: dto.affaireId,
         createurId: userId,
       },
       include: {
@@ -93,10 +93,10 @@ export class HearingsService {
       where: { id },
       data: {
         ...(dto.date && { date: new Date(dto.date) }),
-        ...(dto.time !== undefined && { heure: dto.time }),
+        ...(dto.heure !== undefined && { heure: dto.heure }),
         ...(dto.type && { type: dto.type }),
-        ...(dto.preparationNotes !== undefined && { notesPreparation: dto.preparationNotes }),
-        ...(dto.isPrepared !== undefined && { estPreparee: dto.isPrepared }),
+        ...(dto.notesPreparation !== undefined && { notesPreparation: dto.notesPreparation }),
+        ...(dto.estPreparee !== undefined && { estPreparee: dto.estPreparee }),
       },
       include: {
         affaire: {
@@ -124,10 +124,10 @@ export class HearingsService {
     const result = await this.prisma.resultatAudience.create({
       data: {
         type: dto.type,
-        nouvelleDate: dto.newDate ? new Date(dto.newDate) : null,
-        motifRenvoi: dto.postponementReason,
-        motifRadiation: dto.radiationReason,
-        texteDelibere: dto.deliberationText,
+        nouvelleDate: dto.nouvelleDate ? new Date(dto.nouvelleDate) : null,
+        motifRenvoi: dto.motifRenvoi,
+        motifRadiation: dto.motifRadiation,
+        texteDelibere: dto.texteDelibere,
         audienceId: id,
         createurId: userId,
       },
@@ -140,14 +140,14 @@ export class HearingsService {
     });
 
     // Handle automatic actions based on result type
-    if (dto.type === 'RENVOI' && dto.newDate) {
+    if (dto.type === 'RENVOI' && dto.nouvelleDate) {
       // Create new hearing for postponed date
       await this.create({
-        caseId: hearing.affaireId,
-        date: dto.newDate,
-        time: hearing.heure,
+        affaireId: hearing.affaireId,
+        date: dto.nouvelleDate,
+        heure: hearing.heure,
         type: hearing.type,
-        preparationNotes: `Renvoi de l'audience du ${hearing.date.toLocaleDateString()}. ${dto.postponementReason || ''}`,
+        notesPreparation: `Renvoi de l'audience du ${hearing.date.toLocaleDateString()}. ${dto.motifRenvoi || ''}`,
       }, userId);
     } else if (dto.type === 'RADIATION') {
       // Close case as RADIEE

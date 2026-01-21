@@ -2,21 +2,21 @@ import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString } from 'class-val
 
 export class CreateHearingDto {
   @IsString()
-  caseId: string;
+  affaireId: string;
 
   @IsDateString()
   date: string;
 
   @IsOptional()
   @IsString()
-  time?: string;
+  heure?: string;
 
   @IsEnum(['MISE_EN_ETAT', 'PLAIDOIRIE', 'REFERE', 'EVOCATION', 'CONCILIATION', 'MEDIATION', 'AUTRE'])
   type: 'MISE_EN_ETAT' | 'PLAIDOIRIE' | 'REFERE' | 'EVOCATION' | 'CONCILIATION' | 'MEDIATION' | 'AUTRE';
 
   @IsOptional()
   @IsString()
-  preparationNotes?: string;
+  notesPreparation?: string;
 }
 
 export class UpdateHearingDto {
@@ -26,7 +26,7 @@ export class UpdateHearingDto {
 
   @IsOptional()
   @IsString()
-  time?: string;
+  heure?: string;
 
   @IsOptional()
   @IsEnum(['MISE_EN_ETAT', 'PLAIDOIRIE', 'REFERE', 'EVOCATION', 'CONCILIATION', 'MEDIATION', 'AUTRE'])
@@ -34,11 +34,11 @@ export class UpdateHearingDto {
 
   @IsOptional()
   @IsString()
-  preparationNotes?: string;
+  notesPreparation?: string;
 
   @IsOptional()
   @IsBoolean()
-  isPrepared?: boolean;
+  estPreparee?: boolean;
 }
 
 export class RecordResultDto {
@@ -48,19 +48,19 @@ export class RecordResultDto {
   // For RENVOI
   @IsOptional()
   @IsDateString()
-  newDate?: string;
+  nouvelleDate?: string;
 
   @IsOptional()
   @IsString()
-  postponementReason?: string;
+  motifRenvoi?: string;
 
   // For RADIATION
   @IsOptional()
   @IsString()
-  radiationReason?: string;
+  motifRadiation?: string;
 
   // For DELIBERE
   @IsOptional()
   @IsString()
-  deliberationText?: string;
+  texteDelibere?: string;
 }

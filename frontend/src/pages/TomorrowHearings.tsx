@@ -9,17 +9,22 @@ import { api } from '@/lib/api';
 import { CalendarCheck, FileDown, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import type { Hearing as ApiHearing } from '@/types/api';
+import { transformHearingWithCase } from '@/lib/transformers';
 
 export default function TomorrowHearings() {
-  const { data: tomorrowHearings = [], isLoading } = useQuery({
+  const { data: apiHearings = [], isLoading } = useQuery<ApiHearing[]>({
     queryKey: ['tomorrow-hearings'],
     queryFn: () => api.getTomorrowHearings(),
   });
 
+  // Transform API data
+  const tomorrowHearings = apiHearings.map(transformHearingWithCase);
+
   const tomorrow = addDays(new Date(), 1);
 
   const [preparedIds, setPreparedIds] = useState<Set<string>>(
-    new Set(tomorrowHearings.filter((h: any) => h.estPrepare).map((h: any) => h.id))
+    new Set(tomorrowHearings.filter(h => h.isPrepared).map(h => h.id))
   );
 
   const handleMarkPrepared = (hearingId: string) => {
@@ -103,7 +108,7 @@ export default function TomorrowHearings() {
             )}
 
             <div className="space-y-4">
-              {tomorrowHearings.map((hearing: any) => (
+              {tomorrowHearings.map((hearing) => (
                 <HearingCard
                   key={hearing.id}
                   hearing={{ ...hearing, isPrepared: preparedIds.has(hearing.id) }}

@@ -2,9 +2,11 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { MapPin, Users, Calendar, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Case } from '@/types/legal';
 import { CaseStatusBadge } from './CaseStatusBadge';
-import { getHearingsForCase } from '@/lib/mock-data';
+import { api } from '@/lib/api';
+import type { Hearing } from '@/types/api';
 
 interface CaseCardProps {
   caseData: Case;
@@ -12,8 +14,14 @@ interface CaseCardProps {
 
 export function CaseCard({ caseData }: CaseCardProps) {
   const navigate = useNavigate();
-  const hearings = getHearingsForCase(caseData.id);
-  const upcomingHearings = hearings.filter(h => h.status === 'A_VENIR').length;
+  
+  // Fetch hearings for this case
+  const { data: hearings = [] } = useQuery<Hearing[]>({
+    queryKey: ['hearings', caseData.id],
+    queryFn: () => api.getHearings({ affaireId: caseData.id }),
+  });
+  
+  const upcomingHearings = hearings.filter(h => h.statut === 'A_VENIR').length;
 
   const demandeurs = caseData.parties.filter(p => p.role === 'demandeur');
   const defendeurs = caseData.parties.filter(p => p.role === 'defendeur');
@@ -42,7 +50,7 @@ export function CaseCard({ caseData }: CaseCardProps) {
           <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
             <Users className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="truncate">
-              {demandeurs.map(p => p.name).join(', ')} c/ {defendeurs.map(p => p.name).join(', ')}
+              {demandeurs.map(p => p.nom || p.name).join(', ')} c/ {defendeurs.map(p => p.nom || p.name).join(', ')}
             </span>
           </div>
 

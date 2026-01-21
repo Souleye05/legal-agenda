@@ -6,13 +6,13 @@ import { HearingType, HearingStatus, CaseStatus } from '@/types/legal';
  * Labels français pour les types d'audience
  */
 export const HEARING_TYPE_LABELS: Record<HearingType, string> = {
-  mise_en_etat: 'Mise en état',
-  plaidoirie: 'Plaidoirie',
-  refere: 'Référé',
-  evocation: 'Évocation',
-  conciliation: 'Conciliation',
-  mediation: 'Médiation',
-  autre: 'Autre',
+  MISE_EN_ETAT: 'Mise en état',
+  PLAIDOIRIE: 'Plaidoirie',
+  REFERE: 'Référé',
+  EVOCATION: 'Évocation',
+  CONCILIATION: 'Conciliation',
+  MEDIATION: 'Médiation',
+  AUTRE: 'Autre',
 };
 
 /**

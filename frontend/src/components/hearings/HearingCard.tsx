@@ -5,7 +5,7 @@ import { Hearing, Case } from '@/types/legal';
 import { HearingStatusBadge } from './HearingStatusBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { hearingTypeLabels } from '@/lib/mock-data';
+import { HEARING_TYPE_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 interface HearingCardProps {
@@ -67,7 +67,7 @@ export function HearingCard({
                 {caseData.reference}
               </span>
               <Badge variant="outline" className="text-xs">
-                {hearingTypeLabels[hearing.type]}
+                {HEARING_TYPE_LABELS[hearing.type]}
               </Badge>
               <HearingStatusBadge status={hearing.status} />
             </div>
@@ -76,7 +76,7 @@ export function HearingCard({
           {!showCaseInfo && (
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline" className="text-xs">
-                {hearingTypeLabels[hearing.type]}
+                {HEARING_TYPE_LABELS[hearing.type]}
               </Badge>
               <HearingStatusBadge status={hearing.status} />
             </div>
@@ -89,8 +89,8 @@ export function HearingCard({
 
           {/* Parties */}
           <p className="text-sm text-muted-foreground mt-1">
-            {caseData.parties.filter(p => p.role === 'demandeur').map(p => p.name).join(', ')} c/{' '}
-            {caseData.parties.filter(p => p.role === 'defendeur').map(p => p.name).join(', ')}
+            {caseData.parties.filter(p => p.role === 'demandeur').map(p => p.nom || p.name).join(', ')} c/{' '}
+            {caseData.parties.filter(p => p.role === 'defendeur').map(p => p.nom || p.name).join(', ')}
           </p>
 
           {/* Jurisdiction */}

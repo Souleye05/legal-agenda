@@ -16,23 +16,28 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CalendarIcon, RotateCcw, XCircle, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { HearingResultType } from '@/types/legal';
+import { HearingResultType, Hearing, Case } from '@/types/legal';
 import { useToast } from '@/hooks/use-toast';
+import type { Hearing as ApiHearing } from '@/types/api';
+import { transformHearingWithCase } from '@/lib/transformers';
 
 export default function UnreportedHearings() {
   const { toast } = useToast();
-  const { data: unreportedHearings = [], isLoading, refetch } = useQuery({
+  const { data: apiHearings = [], isLoading, refetch } = useQuery<ApiHearing[]>({
     queryKey: ['unreported-hearings'],
     queryFn: () => api.getUnreportedHearings(),
   });
 
-  const [selectedHearing, setSelectedHearing] = useState<any | null>(null);
+  // Transform API data
+  const unreportedHearings = apiHearings.map(transformHearingWithCase);
+
+  const [selectedHearing, setSelectedHearing] = useState<(Hearing & { affaire: Case }) | null>(null);
   const [resultType, setResultType] = useState<HearingResultType>('RENVOI');
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRecordResult = (hearing: any) => {
+  const handleRecordResult = (hearing: Hearing & { affaire: Case }) => {
     setSelectedHearing(hearing);
     setResultType('RENVOI');
     setNewDate(undefined);
@@ -47,12 +52,12 @@ export default function UnreportedHearings() {
       const data: any = { type: resultType };
       
       if (resultType === 'RENVOI') {
-        data.newDate = newDate;
-        data.postponementReason = reason;
+        data.nouvelleDate = newDate?.toISOString();
+        data.motifRenvoi = reason;
       } else if (resultType === 'RADIATION') {
-        data.radiationReason = reason;
+        data.motifRadiation = reason;
       } else if (resultType === 'DELIBERE') {
-        data.deliberationText = reason;
+        data.texteDelibere = reason;
       }
 
       await api.recordHearingResult(selectedHearing.id, data);
@@ -116,7 +121,7 @@ export default function UnreportedHearings() {
             </div>
 
             <div className="space-y-4">
-              {unreportedHearings.map((hearing: any) => (
+              {unreportedHearings.map((hearing) => (
                 <HearingCard
                   key={hearing.id}
                   hearing={hearing}
@@ -138,9 +143,9 @@ export default function UnreportedHearings() {
             {selectedHearing && (
               <div className="space-y-6">
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm font-medium">{selectedHearing.affaire?.titre}</p>
+                  <p className="text-sm font-medium">{selectedHearing.affaire?.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {selectedHearing.affaire?.reference} • {format(new Date(selectedHearing.date), 'dd/MM/yyyy', { locale: fr })}
+                    {selectedHearing.affaire?.reference} • {format(selectedHearing.date, 'dd/MM/yyyy', { locale: fr })}
                   </p>
                 </div>
 
