@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Clock, MapPin, FileText, FileEdit, CheckCircle } from 'lucide-react';
+import { Clock, MapPin, FileText, FileEdit, CheckCircle, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Hearing, Case } from '@/types/legal';
 import { HearingStatusBadge } from './HearingStatusBadge';
 import { Button } from '@/components/ui/button';
@@ -23,8 +24,17 @@ export function HearingCard({
   onMarkPrepared,
   showCaseInfo = true 
 }: HearingCardProps) {
-  const isUrgent = hearing.status === 'NON_RENSEIGNEE';
-  const isUpcoming = hearing.status === 'A_VENIR';
+  const navigate = useNavigate();
+  
+  // Une audience est urgente si elle est NON_RENSEIGNEE OU si sa date est passée
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const hearingDate = new Date(hearing.date);
+  hearingDate.setHours(0, 0, 0, 0);
+  const isPastDate = hearingDate < today;
+  
+  const isUrgent = hearing.status === 'NON_RENSEIGNEE' || (isPastDate && hearing.status === 'A_VENIR');
+  const isUpcoming = hearing.status === 'A_VENIR' && !isPastDate;
 
   return (
     <div 
@@ -89,8 +99,8 @@ export function HearingCard({
 
           {/* Parties */}
           <p className="text-sm text-muted-foreground mt-1">
-            {caseData.parties.filter(p => p.role === 'demandeur').map(p => p.nom || p.name).join(', ')} c/{' '}
-            {caseData.parties.filter(p => p.role === 'defendeur').map(p => p.nom || p.name).join(', ')}
+            {caseData.parties.filter(p => p.role === 'DEMANDEUR' || p.role === 'demandeur').map(p => p.nom || p.name).join(', ')} c/{' '}
+            {caseData.parties.filter(p => p.role === 'DEFENDEUR' || p.role === 'defendeur').map(p => p.nom || p.name).join(', ')}
           </p>
 
           {/* Jurisdiction */}
@@ -113,6 +123,14 @@ export function HearingCard({
 
         {/* Actions */}
         <div className="flex flex-row md:flex-col gap-2 flex-shrink-0">
+          <Button 
+            size="sm"
+            variant="outline"
+            onClick={() => navigate(`/audiences/${hearing.id}`)}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Détails
+          </Button>
           {isUrgent && onRecordResult && (
             <Button 
               size="sm"

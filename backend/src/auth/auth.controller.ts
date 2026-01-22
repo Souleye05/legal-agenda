@@ -128,6 +128,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   async getProfile(@Request() req) {
-    return req.user;
+    const user = await this.authService.getUserProfile(req.user.userId);
+    return user;
   }
 }

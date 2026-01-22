@@ -28,6 +28,12 @@ const partySchema = z.object({
  * Create case validation schema
  */
 export const createCaseSchema = z.object({
+  reference: z.string()
+    .min(1, 'Le numéro de référence est obligatoire')
+    .max(50, 'Maximum 50 caractères')
+    .trim()
+    .regex(/^[A-Z0-9\-\/]+$/, 'Format invalide (utilisez uniquement des lettres majuscules, chiffres, tirets et slashs)'),
+  
   titre: z.string()
     .min(3, 'Le titre doit contenir au moins 3 caractères')
     .max(200, 'Le titre ne peut pas dépasser 200 caractères')

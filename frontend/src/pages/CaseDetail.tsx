@@ -54,9 +54,9 @@ export default function CaseDetail() {
     );
   }
 
-  const demandeurs = caseData.parties?.filter((p: any) => p.role === 'demandeur') || [];
-  const defendeurs = caseData.parties?.filter((p: any) => p.role === 'defendeur') || [];
-  const avocats = caseData.parties?.filter((p: any) => p.role === 'conseil_adverse') || [];
+  const demandeurs = caseData.parties?.filter((p: any) => p.role === 'DEMANDEUR') || [];
+  const defendeurs = caseData.parties?.filter((p: any) => p.role === 'DEFENDEUR') || [];
+  const avocats = caseData.parties?.filter((p: any) => p.role === 'CONSEIL_ADVERSE') || [];
 
   return (
     <MainLayout>
@@ -76,6 +76,12 @@ export default function CaseDetail() {
               {caseData.titre}
             </h1>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/affaires/${id}/modifier`)}
+          >
+            Modifier
+          </Button>
         </div>
 
         {/* Informations générales */}

@@ -30,6 +30,7 @@ export default function NewCase() {
   } = useForm<CreateCaseFormData>({
     resolver: zodResolver(createCaseSchema),
     defaultValues: {
+      reference: '',
       titre: '',
       juridiction: '',
       chambre: '',
@@ -52,12 +53,16 @@ export default function NewCase() {
       // Transform form data to API format - filter out empty parties
       const validParties = data.parties.filter(p => p.nom.trim());
       const apiData = {
+        reference: data.reference,
         titre: data.titre,
         juridiction: data.juridiction,
         chambre: data.chambre || undefined,
         ville: data.ville || undefined,
         observations: data.observations || undefined,
-        parties: validParties as Array<{ nom: string; role: 'demandeur' | 'defendeur' | 'conseil_adverse' }>,
+        parties: validParties.map(p => ({
+          nom: p.nom,
+          role: p.role.toUpperCase() as 'DEMANDEUR' | 'DEFENDEUR' | 'CONSEIL_ADVERSE'
+        })),
       };
       return api.createCase(apiData);
     },
@@ -103,6 +108,18 @@ export default function NewCase() {
           <div className="card-elevated p-6 space-y-4">
             <h3 className="font-semibold text-foreground">Informations générales</h3>
             
+            <div className="space-y-2">
+              <Label htmlFor="reference">Numéro de référence *</Label>
+              <Input
+                id="reference"
+                placeholder="Ex: 2024/001 ou RG-2024-0001"
+                {...register('reference')}
+              />
+              {errors.reference && (
+                <p className="text-sm text-destructive">{errors.reference.message}</p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="titre">Intitulé de l'affaire *</Label>
               <Input

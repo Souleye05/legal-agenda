@@ -13,6 +13,11 @@ class PartyDto {
 }
 
 export class CreateCaseDto {
+  @IsString({ message: 'Le numéro de référence est obligatoire' })
+  @MinLength(1, { message: 'Le numéro de référence est obligatoire' })
+  @MaxLength(50, { message: 'Le numéro de référence ne peut pas dépasser 50 caractères' })
+  reference: string;
+
   @IsString({ message: 'Le titre est obligatoire' })
   @MinLength(3, { message: 'Le titre doit contenir au moins 3 caractères' })
   @MaxLength(200, { message: 'Le titre ne peut pas dépasser 200 caractères' })

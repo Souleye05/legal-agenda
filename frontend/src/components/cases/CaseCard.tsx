@@ -23,8 +23,8 @@ export function CaseCard({ caseData }: CaseCardProps) {
   
   const upcomingHearings = hearings.filter(h => h.statut === 'A_VENIR').length;
 
-  const demandeurs = caseData.parties.filter(p => p.role === 'demandeur');
-  const defendeurs = caseData.parties.filter(p => p.role === 'defendeur');
+  const demandeurs = caseData.parties.filter(p => p.role === 'DEMANDEUR' || p.role === 'demandeur');
+  const defendeurs = caseData.parties.filter(p => p.role === 'DEFENDEUR' || p.role === 'defendeur');
 
   return (
     <div 

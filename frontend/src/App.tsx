@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
@@ -13,9 +13,14 @@ import CaseDetail from "./pages/CaseDetail";
 import NewCase from "./pages/NewCase";
 import Agenda from "./pages/Agenda";
 import NewHearing from "./pages/NewHearing";
+import HearingDetail from "./pages/HearingDetail";
+import EditHearing from "./pages/EditHearing";
+import RecordHearingResult from "./pages/RecordHearingResult";
+import EditCase from "./pages/EditCase";
 import UnreportedHearings from "./pages/UnreportedHearings";
 import TomorrowHearings from "./pages/TomorrowHearings";
 import DailyReports from "./pages/DailyReports";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -73,6 +78,14 @@ const App = () => (
               }
             />
             <Route
+              path="/affaires/:id/modifier"
+              element={
+                <ProtectedRoute>
+                  <EditCase />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/agenda"
               element={
                 <ProtectedRoute>
@@ -85,6 +98,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <NewHearing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audiences/:id"
+              element={
+                <ProtectedRoute>
+                  <HearingDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audiences/:id/modifier"
+              element={
+                <ProtectedRoute>
+                  <EditHearing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audiences/:id/renseigner"
+              element={
+                <ProtectedRoute>
+                  <RecordHearingResult />
                 </ProtectedRoute>
               }
             />
@@ -109,6 +146,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DailyReports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profil"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

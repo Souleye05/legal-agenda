@@ -63,11 +63,20 @@ export class HearingsService {
   }
 
   async create(dto: CreateHearingDto, userId: string) {
+    const hearingDate = new Date(dto.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    hearingDate.setHours(0, 0, 0, 0);
+
+    // Déterminer le statut selon la date
+    const statut = hearingDate < today ? 'NON_RENSEIGNEE' : 'A_VENIR';
+
     const hearing = await this.prisma.audience.create({
       data: {
         date: new Date(dto.date),
         heure: dto.heure,
         type: dto.type,
+        statut: statut,
         notesPreparation: dto.notesPreparation,
         affaireId: dto.affaireId,
         createurId: userId,
@@ -80,6 +89,11 @@ export class HearingsService {
         },
       },
     });
+
+    // Si l'audience est déjà passée, créer une alerte immédiatement
+    if (statut === 'NON_RENSEIGNEE') {
+      await this.alertsService.createAlert(hearing.id);
+    }
 
     await this.auditService.log('Audience', hearing.id, 'CREATION', null, JSON.stringify(hearing), userId);
 

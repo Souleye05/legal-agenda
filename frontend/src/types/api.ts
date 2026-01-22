@@ -12,8 +12,9 @@ export type UserRole = 'ADMIN' | 'COLLABORATEUR';
 export interface User {
   id: string;
   email: string;
-  nomComplet: string;
+  fullName: string;
   role: UserRole;
+  isActive?: boolean;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -41,7 +42,7 @@ export interface RefreshTokenResponse {
 /**
  * Party role in a case
  */
-export type PartyRole = 'demandeur' | 'defendeur' | 'conseil_adverse';
+export type PartyRole = 'DEMANDEUR' | 'DEFENDEUR' | 'CONSEIL_ADVERSE';
 
 /**
  * Party interface (Partie model)
@@ -91,7 +92,7 @@ export interface Hearing {
   motifRenvoi?: string;
   motifRadiation?: string;
   texteDelibere?: string;
-  estPrepare: boolean;
+  estPreparee: boolean;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -141,6 +142,7 @@ export interface DashboardStats {
  * Create case DTO
  */
 export interface CreateCaseDto {
+  reference: string;
   titre: string;
   juridiction: string;
   chambre?: string;
@@ -183,7 +185,7 @@ export interface UpdateHearingDto {
   heure?: string;
   type?: HearingType;
   notesPreparation?: string;
-  estPrepare?: boolean;
+  estPreparee?: boolean;
 }
 
 /**
@@ -191,10 +193,10 @@ export interface UpdateHearingDto {
  */
 export interface RecordHearingResultDto {
   type: HearingResultType;
-  newDate?: Date;
-  postponementReason?: string;
-  radiationReason?: string;
-  deliberationText?: string;
+  nouvelleDate?: string;
+  motifRenvoi?: string;
+  motifRadiation?: string;
+  texteDelibere?: string;
 }
 
 /**

@@ -253,4 +253,31 @@ export class AuthService {
       },
     });
   }
+
+  /**
+   * Récupère le profil complet de l'utilisateur
+   */
+  async getUserProfile(userId: string) {
+    const user = await this.usersService.findById(userId);
+    
+    if (!user) {
+      throw new UnauthorizedException('Utilisateur non trouvé');
+    }
+
+    // Return user without sensitive fields
+    const { motDePasse: _, refreshToken: __, passwordResetToken: ___, passwordResetExpires: ____, ...userProfile } = user;
+    
+    return {
+      id: userProfile.id,
+      email: userProfile.email,
+      fullName: userProfile.nomComplet,
+      role: userProfile.role,
+      isActive: userProfile.estActif,
+      createdAt: userProfile.createdAt,
+      updatedAt: userProfile.updatedAt,
+      lastLoginAt: userProfile.lastLoginAt,
+      lastLoginIp: userProfile.lastLoginIp,
+      lastLoginUserAgent: userProfile.lastLoginUserAgent,
+    };
+  }
 }

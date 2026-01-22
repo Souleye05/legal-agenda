@@ -21,7 +21,7 @@ export interface Party {
   id: string;
   nom: string; // French field name from API
   name?: string; // Alias for compatibility
-  role: 'demandeur' | 'defendeur' | 'conseil_adverse';
+  role: 'DEMANDEUR' | 'DEFENDEUR' | 'CONSEIL_ADVERSE' | 'demandeur' | 'defendeur' | 'conseil_adverse';
 }
 
 export interface Case {

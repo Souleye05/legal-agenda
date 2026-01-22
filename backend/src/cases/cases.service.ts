@@ -60,28 +60,10 @@ export class CasesService {
   }
 
   async create(dto: CreateCaseDto, userId: string) {
-    // Generate reference
-    const year = new Date().getFullYear();
-    const lastCase = await this.prisma.affaire.findFirst({
-      where: {
-        reference: {
-          startsWith: `AFF-${year}-`,
-        },
-      },
-      orderBy: { reference: 'desc' },
-    });
-
-    let nextNumber = 1;
-    if (lastCase) {
-      const lastNumber = parseInt(lastCase.reference.split('-')[2]);
-      nextNumber = lastNumber + 1;
-    }
-
-    const reference = `AFF-${year}-${nextNumber.toString().padStart(4, '0')}`;
-
+    // Use the provided reference instead of generating one
     const caseData = await this.prisma.affaire.create({
       data: {
-        reference,
+        reference: dto.reference,
         titre: dto.titre,
         juridiction: dto.juridiction,
         chambre: dto.chambre,

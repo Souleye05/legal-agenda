@@ -51,7 +51,7 @@ export const transformHearing = (apiHearing: ApiHearing): Hearing => {
     type: apiHearing.type,
     status: apiHearing.statut,
     preparationNotes: apiHearing.notesPreparation,
-    isPrepared: apiHearing.estPrepare,
+    isPrepared: apiHearing.estPreparee,
     createdAt: new Date(apiHearing.createdAt),
     updatedAt: new Date(apiHearing.updatedAt),
     createdBy: apiHearing.createdBy,
