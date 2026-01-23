@@ -215,7 +215,7 @@ export default function CaseDetail() {
                             </Badge>
                             <HearingStatusBadge status={hearing.statut} />
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3.5 w-3.5" />
                               {format(new Date(hearing.date), 'dd MMM yyyy', { locale: fr })}
@@ -227,6 +227,15 @@ export default function CaseDetail() {
                               </span>
                             )}
                           </div>
+                          {hearing.notesPreparation && (
+                            <div className="mt-2 p-2 bg-muted/50 rounded text-sm">
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                <FileText className="h-3 w-3" />
+                                Notes de préparation
+                              </div>
+                              <p className="text-foreground">{hearing.notesPreparation}</p>
+                            </div>
+                          )}
                         </div>
                         {hearing.statut === 'NON_RENSEIGNEE' && (
                           <Button 
