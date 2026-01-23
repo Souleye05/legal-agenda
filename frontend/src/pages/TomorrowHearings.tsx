@@ -27,13 +27,36 @@ export default function TomorrowHearings() {
     new Set(tomorrowHearings.filter(h => h.isPrepared).map(h => h.id))
   );
 
-  const handleMarkPrepared = (hearingId: string) => {
-    setPreparedIds(prev => {
-      const next = new Set(prev);
-      next.add(hearingId);
-      return next;
-    });
-    // TODO: Update in database
+  const handleMarkPrepared = async (hearingId: string) => {
+    try {
+      await api.patch(`/hearings/${hearingId}`, { estPreparee: true });
+      setPreparedIds(prev => {
+        const next = new Set(prev);
+        next.add(hearingId);
+        return next;
+      });
+      toast.success('Audience marquée comme préparée');
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleTogglePrepared = async (hearingId: string, currentState: boolean) => {
+    try {
+      await api.patch(`/hearings/${hearingId}`, { estPreparee: !currentState });
+      setPreparedIds(prev => {
+        const next = new Set(prev);
+        if (currentState) {
+          next.delete(hearingId);
+        } else {
+          next.add(hearingId);
+        }
+        return next;
+      });
+      toast.success(currentState ? 'Audience marquée comme non préparée' : 'Audience marquée comme préparée');
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la mise à jour');
+    }
   };
 
   const allPrepared = tomorrowHearings.every((h: any) => preparedIds.has(h.id));
@@ -113,7 +136,7 @@ export default function TomorrowHearings() {
                   key={hearing.id}
                   hearing={{ ...hearing, isPrepared: preparedIds.has(hearing.id) }}
                   caseData={hearing.affaire}
-                  onMarkPrepared={() => handleMarkPrepared(hearing.id)}
+                  onTogglePrepared={() => handleTogglePrepared(hearing.id, preparedIds.has(hearing.id))}
                 />
               ))}
             </div>

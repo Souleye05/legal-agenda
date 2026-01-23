@@ -6,6 +6,8 @@ import { Hearing, Case } from '@/types/legal';
 import { HearingStatusBadge } from './HearingStatusBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +16,7 @@ interface HearingCardProps {
   caseData: Case;
   onRecordResult?: () => void;
   onMarkPrepared?: () => void;
+  onTogglePrepared?: () => void;
   showCaseInfo?: boolean;
 }
 
@@ -22,6 +25,7 @@ export function HearingCard({
   caseData, 
   onRecordResult, 
   onMarkPrepared,
+  onTogglePrepared,
   showCaseInfo = true 
 }: HearingCardProps) {
   const navigate = useNavigate();
@@ -141,21 +145,24 @@ export function HearingCard({
               Renseigner
             </Button>
           )}
-          {isUpcoming && onMarkPrepared && !hearing.isPrepared && (
-            <Button 
-              size="sm"
-              variant="outline"
-              onClick={onMarkPrepared}
-            >
-              <CheckCircle className="h-4 w-4 mr-1" />
-              Préparé
-            </Button>
-          )}
-          {isUpcoming && hearing.isPrepared && (
-            <Badge className="bg-success/10 text-success border-success/20">
-              <CheckCircle className="h-3.5 w-3.5 mr-1" />
-              Préparé
-            </Badge>
+          {isUpcoming && (onTogglePrepared || onMarkPrepared) && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card">
+              <Switch
+                id={`prepared-${hearing.id}`}
+                checked={hearing.isPrepared}
+                onCheckedChange={onTogglePrepared || onMarkPrepared}
+              />
+              <Label 
+                htmlFor={`prepared-${hearing.id}`}
+                className="text-sm font-medium cursor-pointer flex items-center gap-1"
+              >
+                <CheckCircle className={cn(
+                  "h-4 w-4",
+                  hearing.isPrepared ? "text-success" : "text-muted-foreground"
+                )} />
+                Préparé
+              </Label>
+            </div>
           )}
         </div>
       </div>
