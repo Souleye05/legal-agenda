@@ -24,6 +24,7 @@ import { HearingStatusBadge } from '@/components/hearings/HearingStatusBadge';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import type { HearingStatus, HearingType } from '@/types/legal';
 
 interface Party {
   id: string;
@@ -57,8 +58,8 @@ interface Hearing {
   id: string;
   date: string;
   heure?: string;
-  type: string;
-  statut: string;
+  type: HearingType;
+  statut: HearingStatus;
   notesPreparation?: string;
   estPreparee: boolean;
   affaire: Case;
