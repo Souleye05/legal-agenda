@@ -12,6 +12,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CalendarIcon, RotateCcw, XCircle, Scale } from 'lucide-react';
@@ -20,6 +28,8 @@ import { HearingResultType, Hearing, Case } from '@/types/legal';
 import { useToast } from '@/hooks/use-toast';
 import type { Hearing as ApiHearing } from '@/types/api';
 import { transformHearingWithCase } from '@/lib/transformers';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function UnreportedHearings() {
   const { toast } = useToast();
@@ -36,6 +46,7 @@ export default function UnreportedHearings() {
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleRecordResult = (hearing: Hearing & { affaire: Case }) => {
     setSelectedHearing(hearing);
@@ -92,6 +103,12 @@ export default function UnreportedHearings() {
     );
   }
 
+  const totalPages = Math.ceil(unreportedHearings.length / ITEMS_PER_PAGE);
+  const paginatedHearings = unreportedHearings.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <MainLayout>
       <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -121,7 +138,7 @@ export default function UnreportedHearings() {
             </div>
 
             <div className="space-y-4">
-              {unreportedHearings.map((hearing) => (
+              {paginatedHearings.map((hearing) => (
                 <HearingCard
                   key={hearing.id}
                   hearing={hearing}
@@ -130,6 +147,38 @@ export default function UnreportedHearings() {
                 />
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </>
         )}
 

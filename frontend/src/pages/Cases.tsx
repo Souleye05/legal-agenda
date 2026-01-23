@@ -7,16 +7,27 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { CaseCard } from '@/components/cases/CaseCard';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { api } from '@/lib/api';
 import { useDebouncedValue } from '@/hooks/use-debounce';
 import { DEBOUNCE_DELAYS } from '@/lib/constants';
 import type { CaseStatus, Case } from '@/types/api';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function Cases() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, DEBOUNCE_DELAYS.SEARCH);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch cases from API
   const { data: cases = [], isLoading } = useQuery<Case[]>({
@@ -55,8 +66,27 @@ export default function Cases() {
     });
   }, [transformedCases, debouncedSearch, statusFilter]);
 
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, statusFilter]);
+
   const activeCases = filteredCases.filter((c) => c.status === 'ACTIVE');
   const closedCases = filteredCases.filter((c) => c.status !== 'ACTIVE');
+
+  // Pagination for active cases
+  const totalActivePages = Math.ceil(activeCases.length / ITEMS_PER_PAGE);
+  const paginatedActiveCases = activeCases.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Pagination for closed cases
+  const totalClosedPages = Math.ceil(closedCases.length / ITEMS_PER_PAGE);
+  const paginatedClosedCases = closedCases.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handleNewCase = () => {
     navigate('/affaires/nouvelle');
@@ -113,11 +143,44 @@ export default function Cases() {
                     Aucune affaire active trouvée
                   </div>
                 ) : (
-                  <div className="grid gap-4">
-                    {activeCases.map((c) => (
-                      <CaseCard key={c.id} caseData={c} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid gap-4">
+                      {paginatedActiveCases.map((c) => (
+                        <CaseCard key={c.id} caseData={c} />
+                      ))}
+                    </div>
+                    {totalActivePages > 1 && (
+                      <div className="mt-6">
+                        <Pagination>
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              />
+                            </PaginationItem>
+                            {Array.from({ length: totalActivePages }, (_, i) => i + 1).map((page) => (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  onClick={() => setCurrentPage(page)}
+                                  isActive={currentPage === page}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                              <PaginationNext 
+                                onClick={() => setCurrentPage(p => Math.min(totalActivePages, p + 1))}
+                                className={currentPage === totalActivePages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ) : null}
@@ -128,10 +191,41 @@ export default function Cases() {
                   Affaires clôturées ({closedCases.length})
                 </h2>
                 <div className="grid gap-4">
-                  {closedCases.map((c) => (
+                  {paginatedClosedCases.map((c) => (
                     <CaseCard key={c.id} caseData={c} />
                   ))}
                 </div>
+                {totalClosedPages > 1 && (
+                  <div className="mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        {Array.from({ length: totalClosedPages }, (_, i) => i + 1).map((page) => (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setCurrentPage(p => Math.min(totalClosedPages, p + 1))}
+                            className={currentPage === totalClosedPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
