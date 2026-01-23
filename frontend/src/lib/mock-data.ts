@@ -233,7 +233,7 @@ export const hearingTypeLabels: Record<string, string> = {
 export const jurisdictionOptions = [
   'Tribunal Judiciaire',
   'Tribunal de Commerce',
-  'Conseil de Prud\'hommes',
+  'Tribunal de Travail',
   'Cour d\'Appel',
   'Cour de Cassation',
   'Tribunal Administratif',

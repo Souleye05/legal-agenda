@@ -34,6 +34,8 @@ export default function EditCase() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [caseData, setCaseData] = useState<any>(null);
+  const [showCustomJurisdiction, setShowCustomJurisdiction] = useState(false);
+  const [showCustomChamber, setShowCustomChamber] = useState(false);
 
   const {
     register,
@@ -60,6 +62,14 @@ export default function EditCase() {
       setValue('chambre', caseInfo.chambre || '');
       setValue('ville', caseInfo.ville || '');
       setValue('observations', caseInfo.observations || '');
+
+      // Check if loaded values are in predefined options, if not show custom input
+      if (caseInfo.juridiction && !JURISDICTION_OPTIONS.includes(caseInfo.juridiction)) {
+        setShowCustomJurisdiction(true);
+      }
+      if (caseInfo.chambre && !CHAMBER_OPTIONS.includes(caseInfo.chambre)) {
+        setShowCustomChamber(true);
+      }
     } catch (error: any) {
       toast({
         title: 'Erreur',
@@ -152,19 +162,52 @@ export default function EditCase() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Juridiction *</Label>
-                  <Select 
-                    value={watch('juridiction')} 
-                    onValueChange={(value) => setValue('juridiction', value, { shouldValidate: true })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {JURISDICTION_OPTIONS.map(j => (
-                        <SelectItem key={j} value={j}>{j}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {!showCustomJurisdiction ? (
+                    <>
+                      <Select 
+                        value={watch('juridiction')} 
+                        onValueChange={(value) => {
+                          if (value === '__custom__') {
+                            setShowCustomJurisdiction(true);
+                            setValue('juridiction', '', { shouldValidate: true });
+                          } else {
+                            setValue('juridiction', value, { shouldValidate: true });
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {JURISDICTION_OPTIONS.map(j => (
+                            <SelectItem key={j} value={j}>{j}</SelectItem>
+                          ))}
+                          <SelectItem value="__custom__" className="text-primary font-medium">
+                            + Autre (saisir manuellement)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Saisir la juridiction"
+                        {...register('juridiction')}
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowCustomJurisdiction(false);
+                          setValue('juridiction', '', { shouldValidate: true });
+                        }}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  )}
                   {errors.juridiction && (
                     <p className="text-sm text-destructive">{errors.juridiction.message}</p>
                   )}
@@ -172,19 +215,52 @@ export default function EditCase() {
 
                 <div className="space-y-2">
                   <Label>Chambre</Label>
-                  <Select 
-                    value={watch('chambre')} 
-                    onValueChange={(value) => setValue('chambre', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CHAMBER_OPTIONS.map(c => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {!showCustomChamber ? (
+                    <>
+                      <Select 
+                        value={watch('chambre') || ''} 
+                        onValueChange={(value) => {
+                          if (value === '__custom__') {
+                            setShowCustomChamber(true);
+                            setValue('chambre', '');
+                          } else {
+                            setValue('chambre', value);
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CHAMBER_OPTIONS.map(c => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                          <SelectItem value="__custom__" className="text-primary font-medium">
+                            + Autre (saisir manuellement)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Saisir la chambre"
+                        {...register('chambre')}
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowCustomChamber(false);
+                          setValue('chambre', '');
+                        }}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  )}
                   {errors.chambre && (
                     <p className="text-sm text-destructive">{errors.chambre.message}</p>
                   )}

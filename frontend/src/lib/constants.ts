@@ -39,7 +39,7 @@ export const CASE_STATUS_LABELS: Record<CaseStatus, string> = {
 export const JURISDICTION_OPTIONS = [
   'Tribunal Judiciaire',
   'Tribunal de Commerce',
-  'Conseil de Prud\'hommes',
+  'Tribunal de Travail',
   'Cour d\'Appel',
   'Cour de Cassation',
   'Tribunal Administratif',

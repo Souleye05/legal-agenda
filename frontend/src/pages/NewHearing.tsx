@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
@@ -13,10 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CreateCaseDialog } from '@/components/cases/CreateCaseDialog';
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CalendarIcon, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, ArrowLeft, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
@@ -30,6 +31,7 @@ export default function NewHearing() {
   const [searchParams] = useSearchParams();
   const preselectedCaseId = searchParams.get('affaireId');
   const preselectedDate = searchParams.get('date');
+  const [showCreateCaseDialog, setShowCreateCaseDialog] = useState(false);
 
   const {
     register,
@@ -88,6 +90,17 @@ export default function NewHearing() {
     createHearingMutation.mutate(data);
   };
 
+  const handleCaseCreated = (caseId: string) => {
+    // Refresh cases list
+    queryClient.invalidateQueries({ queryKey: ['cases'] });
+    // Auto-select the newly created case
+    setValue('affaireId', caseId, { shouldValidate: true });
+    toast({
+      title: "Affaire sélectionnée",
+      description: "L'affaire créée a été automatiquement sélectionnée",
+    });
+  };
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -122,27 +135,38 @@ export default function NewHearing() {
               {/* Affaire */}
               <div className="space-y-2">
                 <Label htmlFor="affaireId">Affaire liée *</Label>
-                <Controller
-                  name="affaireId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une affaire" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {activeCases.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{c.titre}</span>
-                              <span className="text-xs text-muted-foreground">{c.reference}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                <div className="flex gap-2">
+                  <Controller
+                    name="affaireId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Sélectionner une affaire" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {activeCases.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{c.titre}</span>
+                                <span className="text-xs text-muted-foreground">{c.reference}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowCreateCaseDialog(true)}
+                    title="Créer une nouvelle affaire"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
                 {errors.affaireId && (
                   <p className="text-sm text-destructive">{errors.affaireId.message}</p>
                 )}
@@ -259,6 +283,13 @@ export default function NewHearing() {
             </CardContent>
           </Card>
         </form>
+
+        {/* Dialog pour créer une affaire */}
+        <CreateCaseDialog
+          open={showCreateCaseDialog}
+          onOpenChange={setShowCreateCaseDialog}
+          onCaseCreated={handleCaseCreated}
+        />
       </div>
     </MainLayout>
   );
