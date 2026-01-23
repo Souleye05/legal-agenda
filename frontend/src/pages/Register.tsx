@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Scale } from "lucide-react";
@@ -14,7 +13,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<"ADMIN" | "COLLABORATEUR">("COLLABORATEUR");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -45,15 +43,24 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register(email, password, fullName, role);
+      const response = await register(email, password, fullName);
       
-      toast({
-        title: "Inscription réussie",
-        description: "Bienvenue !",
-      });
-
-      // Redirect to dashboard
-      navigate("/");
+      // Check if account needs activation
+      if (response.message) {
+        toast({
+          title: "Compte créé",
+          description: response.message,
+        });
+        // Redirect to login page
+        navigate("/login");
+      } else {
+        // First user - auto-logged in
+        toast({
+          title: "Inscription réussie",
+          description: "Bienvenue ! Vous êtes le premier administrateur.",
+        });
+        navigate("/");
+      }
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
@@ -130,18 +137,6 @@ export default function Register() {
                 required
                 disabled={isLoading}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Rôle</Label>
-              <Select value={role} onValueChange={(value: any) => setRole(value)} disabled={isLoading}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="COLLABORATEUR">Collaborateur</SelectItem>
-                  <SelectItem value="ADMIN">Administrateur</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

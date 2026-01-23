@@ -36,14 +36,4 @@ export class RegisterDto {
   @MinLength(2, { message: 'Le nom complet doit contenir au moins 2 caractères' })
   @MaxLength(100, { message: 'Le nom complet ne peut pas dépasser 100 caractères' })
   fullName: string;
-
-  @ApiProperty({ 
-    enum: ['ADMIN', 'COLLABORATEUR'],
-    required: false,
-    default: 'COLLABORATEUR',
-    description: 'Rôle de l\'utilisateur (ADMIN ou COLLABORATEUR)'
-  })
-  @IsOptional()
-  @IsEnum(['ADMIN', 'COLLABORATEUR'], { message: 'Rôle invalide. Doit être ADMIN ou COLLABORATEUR' })
-  role?: 'ADMIN' | 'COLLABORATEUR';
 }

@@ -43,7 +43,7 @@ async function main() {
       titre: 'Dupont c/ Martin - Expulsion',
       juridiction: 'Tribunal Judiciaire',
       chambre: 'Chambre civile',
-      ville: 'Paris',
+      ville: 'Dakar',
       statut: 'ACTIVE',
       observations: 'Affaire urgente - locataire en situation irrégulière depuis 6 mois',
       createurId: admin.id,

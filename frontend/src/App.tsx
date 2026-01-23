@@ -21,6 +21,7 @@ import UnreportedHearings from "./pages/UnreportedHearings";
 import TomorrowHearings from "./pages/TomorrowHearings";
 import DailyReports from "./pages/DailyReports";
 import Profile from "./pages/Profile";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -154,6 +155,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/utilisateurs"
+              element={
+                <ProtectedRoute>
+                  <Users />
                 </ProtectedRoute>
               }
             />

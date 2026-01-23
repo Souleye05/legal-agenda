@@ -210,9 +210,9 @@ export default function HearingDetail() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 m-6">
           {/* Main info */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 lg:pr-4">
             {/* Audience info */}
             <Card>
               <CardHeader>

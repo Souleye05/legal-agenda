@@ -161,13 +161,18 @@ class ApiClient {
     return data;
   }
 
-  async register(email: string, password: string, fullName: string, role?: 'ADMIN' | 'COLLABORATEUR'): Promise<AuthTokens> {
-    const data = await this.request<AuthTokens>('/auth/register', {
+  async register(email: string, password: string, fullName: string): Promise<any> {
+    const data = await this.request<any>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password, fullName, role }),
+      body: JSON.stringify({ email, password, fullName }),
     });
-    this.setTokens(data.access_token, data.refresh_token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    
+    // Only set tokens if user is auto-logged in (first user)
+    if (data.access_token) {
+      this.setTokens(data.access_token, data.refresh_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    
     return data;
   }
 
@@ -281,6 +286,20 @@ class ApiClient {
     return this.request<User>(`/users/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
+    });
+  }
+
+  async updateUserStatus(id: string, estActif: boolean): Promise<User> {
+    return this.request<User>(`/users/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ estActif }),
+    });
+  }
+
+  async updateUserRole(id: string, role: 'ADMIN' | 'COLLABORATEUR'): Promise<User> {
+    return this.request<User>(`/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
     });
   }
 

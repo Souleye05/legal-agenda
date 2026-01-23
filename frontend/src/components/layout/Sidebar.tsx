@@ -76,11 +76,11 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0 }: SidebarProps
   ];
 
   const settingsItems: NavItem[] = [
-    {
+    ...(user?.role === 'ADMIN' ? [{
       label: 'Utilisateurs',
       href: '/utilisateurs',
       icon: <Users className="h-5 w-5" />,
-    },
+    }] : []),
     {
       label: 'Paramètres',
       href: '/parametres',
@@ -244,7 +244,7 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0 }: SidebarProps
                 {user?.fullName || 'Utilisateur'}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate font-medium">
-                Administrateur
+                {user?.role === 'ADMIN' ? 'Administrateur' : 'Collaborateur'}
               </p>
             </div>
             <Sparkles className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />

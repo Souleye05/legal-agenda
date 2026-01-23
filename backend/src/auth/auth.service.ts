@@ -95,6 +95,8 @@ export class AuthService {
 
   /**
    * Inscription d'un nouvel utilisateur avec validation
+   * Le premier utilisateur devient automatiquement admin
+   * Les suivants sont créés inactifs en attente d'activation
    */
   async register(dto: RegisterDto, context?: LoginContext) {
     // Check if email already exists
@@ -109,19 +111,38 @@ export class AuthService {
     // Hash password with secure rounds
     const hashedPassword = await bcrypt.hash(dto.password, this.BCRYPT_ROUNDS);
 
+    // Check if this is the first user
+    const userCount = await this.prisma.utilisateur.count();
+    const isFirstUser = userCount === 0;
+
     // Create user
     const user = await this.usersService.create({
       email: dto.email,
       motDePasse: hashedPassword,
       nomComplet: dto.fullName,
-      role: dto.role || 'COLLABORATEUR',
+      role: isFirstUser ? 'ADMIN' : 'COLLABORATEUR',
+      estActif: isFirstUser, // First user is auto-activated
     });
 
-    this.logger.log(`Nouvel utilisateur inscrit: ${user.email}`);
+    this.logger.log(`Nouvel utilisateur inscrit: ${user.email} (${isFirstUser ? 'ADMIN - Premier utilisateur' : 'COLLABORATEUR - En attente d\'activation'})`);
 
-    // Auto-login after registration
-    const { motDePasse: _, passwordResetToken: __, passwordResetExpires: ___, ...result } = user;
-    return this.login(result, context);
+    // Auto-login only if account is active (first user)
+    if (user.estActif) {
+      const { motDePasse: _, passwordResetToken: __, passwordResetExpires: ___, ...result } = user;
+      return this.login(result, context);
+    }
+
+    // Return pending activation message for subsequent users
+    return {
+      message: 'Votre compte a été créé avec succès. Un administrateur doit l\'activer avant que vous puissiez vous connecter.',
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.nomComplet,
+        role: user.role,
+        isActive: user.estActif,
+      },
+    };
   }
 
   /**

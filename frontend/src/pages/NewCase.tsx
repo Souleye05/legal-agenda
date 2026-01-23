@@ -178,7 +178,7 @@ export default function NewCase() {
               <Label htmlFor="ville">Ville</Label>
               <Input
                 id="ville"
-                placeholder="Ex: Paris"
+                placeholder="Ex: Dakar"
                 {...register('ville')}
               />
               {errors.ville && (

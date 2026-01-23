@@ -204,7 +204,7 @@ export default function Agenda() {
                   {/* Informations principales en cartes */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Date et heure */}
-                    <div className="group p-6 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover:border-primary/40 transition-all hover:shadow-lg">
+                    <div className="group p-6 rounded-2xl bg-muted/50 border border-border hover:border-primary/50 transition-all hover:shadow-lg">
                       <div className="flex items-start gap-4">
                         <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
                           <CalendarIcon className="h-6 w-6 text-primary" />
@@ -227,10 +227,10 @@ export default function Agenda() {
                     </div>
 
                     {/* Juridiction */}
-                    <div className="group p-6 rounded-2xl bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all hover:shadow-lg">
+                    <div className="group p-6 rounded-2xl bg-muted/50 border border-border hover:border-primary/50 transition-all hover:shadow-lg">
                       <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition-colors">
-                          <Building2 className="h-6 w-6 text-blue-600" />
+                        <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                          <Building2 className="h-6 w-6 text-primary" />
                         </div>
                         <div className="flex-1 space-y-2">
                           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -249,10 +249,10 @@ export default function Agenda() {
                   </div>
 
                   {/* Parties */}
-                  <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-500/5 to-amber-500/10 border border-amber-500/20">
+                  <div className="p-6 rounded-2xl bg-muted/50 border border-border">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-amber-500/10 rounded-xl">
-                        <Users className="h-6 w-6 text-amber-600" />
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Users className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1 space-y-2">
                         <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">

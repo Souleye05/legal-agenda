@@ -195,7 +195,7 @@ export default function EditCase() {
                 <Label htmlFor="ville">Ville</Label>
                 <Input
                   id="ville"
-                  placeholder="Ex: Paris, Lyon..."
+                  placeholder="Ex: Dakar, Lyon..."
                   {...register('ville')}
                 />
                 {errors.ville && (

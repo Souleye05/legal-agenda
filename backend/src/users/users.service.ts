@@ -31,7 +31,7 @@ export class UsersService {
     });
   }
 
-  async create(data: { email: string; motDePasse: string; nomComplet: string; role: 'ADMIN' | 'COLLABORATEUR' }) {
+  async create(data: { email: string; motDePasse: string; nomComplet: string; role: 'ADMIN' | 'COLLABORATEUR'; estActif?: boolean }) {
     // Vérifier si l'email existe déjà
     const existingUser = await this.findByEmail(data.email);
     if (existingUser) {
@@ -39,7 +39,45 @@ export class UsersService {
     }
 
     return this.prisma.utilisateur.create({
-      data,
+      data: {
+        email: data.email,
+        motDePasse: data.motDePasse,
+        nomComplet: data.nomComplet,
+        role: data.role,
+        estActif: data.estActif ?? false, // Par défaut inactif sauf si spécifié
+      },
+    });
+  }
+
+  async updateStatus(id: string, estActif: boolean) {
+    return this.prisma.utilisateur.update({
+      where: { id },
+      data: { estActif },
+      select: {
+        id: true,
+        email: true,
+        nomComplet: true,
+        role: true,
+        estActif: true,
+        createdAt: true,
+        lastLoginAt: true,
+      },
+    });
+  }
+
+  async updateRole(id: string, role: 'ADMIN' | 'COLLABORATEUR') {
+    return this.prisma.utilisateur.update({
+      where: { id },
+      data: { role },
+      select: {
+        id: true,
+        email: true,
+        nomComplet: true,
+        role: true,
+        estActif: true,
+        createdAt: true,
+        lastLoginAt: true,
+      },
     });
   }
 
