@@ -11,14 +11,33 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { api } from '@/lib/api';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { JURISDICTION_OPTIONS, CHAMBER_OPTIONS } from '@/lib/constants';
 
+const partySchema = z.object({
+  nom: z.string().min(1, 'Le nom est obligatoire'),
+  role: z.enum(['DEMANDEUR', 'DEFENDEUR', 'CONSEIL_ADVERSE']),
+});
+
 const updateCaseSchema = z.object({
+  reference: z.string().min(1, 'La référence est obligatoire'),
   titre: z.string().min(1, 'Le titre est obligatoire'),
+  parties: z.array(partySchema).default([]),
   juridiction: z.string().min(1, 'La juridiction est obligatoire'),
   chambre: z.string().optional(),
   ville: z.string().optional(),
@@ -31,11 +50,13 @@ export default function EditCase() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [caseData, setCaseData] = useState<any>(null);
   const [showCustomJurisdiction, setShowCustomJurisdiction] = useState(false);
   const [showCustomChamber, setShowCustomChamber] = useState(false);
+  const [parties, setParties] = useState<Array<{ nom: string; role: 'DEMANDEUR' | 'DEFENDEUR' | 'CONSEIL_ADVERSE' }>>([]);
 
   const {
     register,
@@ -57,11 +78,15 @@ export default function EditCase() {
       const caseInfo: any = await api.get(`/cases/${id}`);
       setCaseData(caseInfo);
 
+      setValue('reference', caseInfo.reference);
       setValue('titre', caseInfo.titre);
       setValue('juridiction', caseInfo.juridiction);
       setValue('chambre', caseInfo.chambre || '');
       setValue('ville', caseInfo.ville || '');
       setValue('observations', caseInfo.observations || '');
+      
+      // Load parties
+      setParties(caseInfo.parties || []);
 
       // Check if loaded values are in predefined options, if not show custom input
       if (caseInfo.juridiction && !JURISDICTION_OPTIONS.includes(caseInfo.juridiction)) {
@@ -85,7 +110,9 @@ export default function EditCase() {
   const updateCaseMutation = useMutation({
     mutationFn: (data: UpdateCaseFormData) => {
       return api.patch(`/cases/${id}`, {
+        reference: data.reference,
         titre: data.titre,
+        parties: parties,
         juridiction: data.juridiction,
         chambre: data.chambre || undefined,
         ville: data.ville || undefined,
@@ -109,6 +136,39 @@ export default function EditCase() {
       });
     },
   });
+
+  const deleteCaseMutation = useMutation({
+    mutationFn: () => api.delete(`/cases/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cases'] });
+      toast({
+        title: 'Succès',
+        description: 'L\'affaire a été supprimée avec succès',
+      });
+      navigate('/affaires');
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erreur',
+        description: error.response?.data?.message || 'Impossible de supprimer l\'affaire',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const addParty = (role: 'DEMANDEUR' | 'DEFENDEUR') => {
+    setParties([...parties, { nom: '', role }]);
+  };
+
+  const removeParty = (index: number) => {
+    setParties(parties.filter((_, i) => i !== index));
+  };
+
+  const updateParty = (index: number, field: 'nom' | 'role', value: string) => {
+    const updated = [...parties];
+    updated[index] = { ...updated[index], [field]: value };
+    setParties(updated);
+  };
 
   const onSubmit = (data: UpdateCaseFormData) => {
     updateCaseMutation.mutate(data);
@@ -148,6 +208,18 @@ export default function EditCase() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
+                <Label htmlFor="reference">Numéro de référence *</Label>
+                <Input
+                  id="reference"
+                  placeholder="Ex: RG-2024-001"
+                  {...register('reference')}
+                />
+                {errors.reference && (
+                  <p className="text-sm text-destructive">{errors.reference.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="titre">Intitulé de l'affaire *</Label>
                 <Input
                   id="titre"
@@ -157,6 +229,95 @@ export default function EditCase() {
                 {errors.titre && (
                   <p className="text-sm text-destructive">{errors.titre.message}</p>
                 )}
+              </div>
+
+              {/* Parties Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Parties (optionnel)</Label>
+                </div>
+
+                {/* Demandeurs */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm text-muted-foreground">Demandeur(s)</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addParty('DEMANDEUR')}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Ajouter
+                    </Button>
+                  </div>
+                  {parties.filter(p => p.role === 'DEMANDEUR').length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic">Aucun demandeur ajouté</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {parties.map((party, index) => 
+                        party.role === 'DEMANDEUR' && (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              placeholder="Nom du demandeur"
+                              value={party.nom}
+                              onChange={(e) => updateParty(index, 'nom', e.target.value)}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeParty(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Défendeurs */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm text-muted-foreground">Défendeur(s)</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addParty('DEFENDEUR')}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Ajouter
+                    </Button>
+                  </div>
+                  {parties.filter(p => p.role === 'DEFENDEUR').length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic">Aucun défendeur ajouté</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {parties.map((party, index) => 
+                        party.role === 'DEFENDEUR' && (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              placeholder="Nom du défendeur"
+                              value={party.nom}
+                              onChange={(e) => updateParty(index, 'nom', e.target.value)}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeParty(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -292,13 +453,6 @@ export default function EditCase() {
                 )}
               </div>
 
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Note :</strong> La modification des parties et du numéro de référence n'est pas disponible pour le moment.
-                  Contactez un administrateur si vous devez modifier ces informations.
-                </p>
-              </div>
-
               {/* Actions */}
               <div className="flex gap-3 pt-4">
                 <Button
@@ -309,6 +463,37 @@ export default function EditCase() {
                 >
                   Annuler
                 </Button>
+                {user?.role === 'ADMIN' && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={deleteCaseMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir supprimer cette affaire ? Cette action est irréversible et supprimera également toutes les audiences associées.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteCaseMutation.mutate()}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
                 <Button
                   type="submit"
                   className="flex-1"

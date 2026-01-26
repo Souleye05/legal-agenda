@@ -2,6 +2,8 @@ import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards } f
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CasesService } from './cases.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateCaseDto, UpdateCaseDto } from './dto/case.dto';
 
@@ -47,15 +49,18 @@ export class CasesController {
   @ApiOperation({ summary: 'Modifier une affaire' })
   @ApiResponse({ status: 200, description: 'Affaire modifiée' })
   @ApiResponse({ status: 404, description: 'Affaire non trouvée' })
-  update(@Param('id') id: string, @Body() dto: UpdateCaseDto) {
-    return this.casesService.update(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateCaseDto, @CurrentUser() user: any) {
+    return this.casesService.update(id, dto, user.userId);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Supprimer une affaire' })
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Supprimer une affaire (Admin uniquement)' })
   @ApiResponse({ status: 200, description: 'Affaire supprimée' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
   @ApiResponse({ status: 404, description: 'Affaire non trouvée' })
-  remove(@Param('id') id: string) {
-    return this.casesService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.casesService.remove(id, user.userId);
   }
 }

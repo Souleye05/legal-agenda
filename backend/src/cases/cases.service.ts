@@ -87,12 +87,30 @@ export class CasesService {
     return caseData;
   }
 
-  async update(id: string, dto: UpdateCaseDto) {
+  async update(id: string, dto: UpdateCaseDto, userId: string) {
     const oldCase = await this.findOne(id);
+
+    // Handle parties update if provided
+    if (dto.parties) {
+      // Delete existing parties
+      await this.prisma.partie.deleteMany({
+        where: { affaireId: id },
+      });
+
+      // Create new parties
+      await this.prisma.partie.createMany({
+        data: dto.parties.map(p => ({
+          affaireId: id,
+          nom: p.nom,
+          role: p.role,
+        })),
+      });
+    }
 
     const updated = await this.prisma.affaire.update({
       where: { id },
       data: {
+        reference: dto.reference,
         titre: dto.titre,
         juridiction: dto.juridiction,
         chambre: dto.chambre,
@@ -105,16 +123,16 @@ export class CasesService {
       },
     });
 
-    await this.auditService.log('Affaire', id, 'MODIFICATION', JSON.stringify(oldCase), JSON.stringify(updated), oldCase.createurId);
+    await this.auditService.log('Affaire', id, 'MODIFICATION', JSON.stringify(oldCase), JSON.stringify(updated), userId);
 
     return updated;
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     const caseData = await this.findOne(id);
     await this.prisma.affaire.delete({ where: { id } });
-    await this.auditService.log('Affaire', id, 'SUPPRESSION', JSON.stringify(caseData), null, caseData.createurId);
-    return { message: 'Case deleted successfully' };
+    await this.auditService.log('Affaire', id, 'SUPPRESSION', JSON.stringify(caseData), null, userId);
+    return { message: 'Affaire supprimée avec succès' };
   }
 
   async getStats() {

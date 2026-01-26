@@ -50,10 +50,22 @@ export class CreateCaseDto {
 
 export class UpdateCaseDto {
   @IsOptional()
+  @IsString({ message: 'Le numéro de référence doit être une chaîne de caractères' })
+  @MinLength(1, { message: 'Le numéro de référence est obligatoire' })
+  @MaxLength(50, { message: 'Le numéro de référence ne peut pas dépasser 50 caractères' })
+  reference?: string;
+
+  @IsOptional()
   @IsString({ message: 'Le titre doit être une chaîne de caractères' })
   @MinLength(3, { message: 'Le titre doit contenir au moins 3 caractères' })
   @MaxLength(200, { message: 'Le titre ne peut pas dépasser 200 caractères' })
   titre?: string;
+
+  @IsOptional()
+  @IsArray({ message: 'Les parties doivent être un tableau' })
+  @ValidateNested({ each: true })
+  @Type(() => PartyDto)
+  parties?: PartyDto[];
 
   @IsOptional()
   @IsString({ message: 'La juridiction doit être une chaîne de caractères' })
