@@ -17,6 +17,10 @@ export class CreateHearingDto {
   @IsOptional()
   @IsString()
   notesPreparation?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  rappelEnrolement?: boolean;
 }
 
 export class UpdateHearingDto {
@@ -39,6 +43,10 @@ export class UpdateHearingDto {
   @IsOptional()
   @IsBoolean()
   estPreparee?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  rappelEnrolement?: boolean;
 }
 
 export class RecordResultDto {

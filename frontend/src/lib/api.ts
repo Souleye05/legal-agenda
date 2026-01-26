@@ -273,6 +273,20 @@ class ApiClient {
     return this.request<Hearing[]>(`/hearings/calendar${query ? `?${query}` : ''}`);
   }
 
+  async getEnrollmentReminders(): Promise<Hearing[]> {
+    return this.request<Hearing[]>('/hearings/enrollment-reminders');
+  }
+
+  async getCompletedEnrollments(): Promise<Hearing[]> {
+    return this.request<Hearing[]>('/hearings/enrollment-reminders/completed');
+  }
+
+  async markEnrollmentComplete(id: string): Promise<Hearing> {
+    return this.request<Hearing>(`/hearings/${id}/enrollment-complete`, {
+      method: 'PATCH',
+    });
+  }
+
   // Users
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/users');

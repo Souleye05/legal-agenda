@@ -19,6 +19,7 @@ import RecordHearingResult from "./pages/RecordHearingResult";
 import EditCase from "./pages/EditCase";
 import UnreportedHearings from "./pages/UnreportedHearings";
 import TomorrowHearings from "./pages/TomorrowHearings";
+import EnrollementReminders from "./pages/EnrollementReminders";
 import DailyReports from "./pages/DailyReports";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
@@ -139,6 +140,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <TomorrowHearings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rappels-enrolement"
+              element={
+                <ProtectedRoute>
+                  <EnrollementReminders />
                 </ProtectedRoute>
               }
             />

@@ -132,6 +132,11 @@ model Audience {
   notesPreparation  String?        @db.Text
   estPreparee       Boolean        @default(false)
   
+  // Rappel d'enrôlement
+  rappelEnrolement     Boolean        @default(false)
+  dateRappelEnrolement DateTime?      // Date calculée: 4 jours ouvrables avant l'audience
+  enrolementEffectue   Boolean        @default(false) // Marqué comme effectué par l'utilisateur
+  
   affaireId         String
   affaire           Affaire        @relation(fields: [affaireId], references: [id], onDelete: Cascade)
   
@@ -148,6 +153,7 @@ model Audience {
   @@index([affaireId])
   @@index([date])
   @@index([statut])
+  @@index([rappelEnrolement, dateRappelEnrolement])
 }
 
 // ============================================

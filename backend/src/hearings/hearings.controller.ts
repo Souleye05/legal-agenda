@@ -44,6 +44,29 @@ export class HearingsController {
     return this.hearingsService.getCalendar(month, year);
   }
 
+  @Get('enrollment-reminders')
+  @ApiOperation({ summary: 'Rappels d\'enrôlement actifs' })
+  @ApiResponse({ status: 200, description: 'Liste des rappels d\'enrôlement' })
+  getEnrollmentReminders() {
+    return this.hearingsService.getEnrollmentReminders();
+  }
+
+  @Get('enrollment-reminders/completed')
+  @ApiOperation({ summary: 'Enrôlements effectués' })
+  @ApiResponse({ status: 200, description: 'Liste des enrôlements effectués' })
+  getCompletedEnrollments() {
+    return this.hearingsService.getCompletedEnrollments();
+  }
+
+  @Patch(':id/enrollment-complete')
+  @ApiOperation({ summary: 'Marquer l\'enrôlement comme effectué' })
+  @ApiResponse({ status: 200, description: 'Enrôlement marqué comme effectué' })
+  @ApiResponse({ status: 400, description: 'Pas de rappel d\'enrôlement activé' })
+  @ApiResponse({ status: 404, description: 'Audience non trouvée' })
+  markEnrollmentComplete(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.hearingsService.markEnrollmentComplete(id, user.userId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Détails d\'une audience' })
   @ApiResponse({ status: 200, description: 'Audience trouvée' })
