@@ -22,11 +22,18 @@ export function MainLayout({ children }: MainLayoutProps) {
     refetchInterval: 60000,
   });
 
+  const { data: enrollmentReminders = [] } = useQuery({
+    queryKey: ['enrollment-reminders'],
+    queryFn: () => api.getEnrollmentReminders(),
+    refetchInterval: 60000,
+  });
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar 
         unreportedCount={unreportedHearings.length} 
         tomorrowCount={tomorrowHearings.length}
+        enrollmentCount={enrollmentReminders.length}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />

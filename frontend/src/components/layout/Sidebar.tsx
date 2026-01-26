@@ -14,7 +14,8 @@ import {
   LogOut,
   File,
   Sparkles,
-  Crown
+  Crown,
+  ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,9 +33,10 @@ interface NavItem {
 interface SidebarProps {
   unreportedCount?: number;
   tomorrowCount?: number;
+  enrollmentCount?: number;
 }
 
-export function Sidebar({ unreportedCount = 0, tomorrowCount = 0 }: SidebarProps) {
+export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCount = 0 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
@@ -67,6 +69,12 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0 }: SidebarProps
       href: '/demain',
       icon: <CalendarCheck className="h-5 w-5" />,
       badge: tomorrowCount,
+    },
+    {
+      label: 'Rappels enrôlement',
+      href: '/rappels-enrolement',
+      icon: <ClipboardList className="h-5 w-5" />,
+      badge: enrollmentCount,
     },
     {
       label: 'Comptes rendus',

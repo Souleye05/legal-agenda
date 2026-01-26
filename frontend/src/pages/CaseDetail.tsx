@@ -9,7 +9,7 @@ import { HearingStatusBadge } from '@/components/hearings/HearingStatusBadge';
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, File, Users } from 'lucide-react';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
 
 export default function CaseDetail() {
