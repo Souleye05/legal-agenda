@@ -169,13 +169,13 @@ export function Sidebar({
                 "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 relative overflow-hidden",
                 "hover:bg-sidebar-accent/80 hover:shadow-md",
                 isActive(item.href)
-                  ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold shadow-sm border border-primary/20"
+                  ? "bg-white text-primary font-bold shadow-lg border-2 border-primary"
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
               )}
             >
               {/* Indicateur actif */}
               {isActive(item.href) && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-primary/70 rounded-r-full shadow-lg"></div>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary rounded-r-full shadow-lg"></div>
               )}
 
               <div className={cn(
@@ -230,12 +230,12 @@ export function Sidebar({
                   "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 relative overflow-hidden",
                   "hover:bg-sidebar-accent/80 hover:shadow-md",
                   isActive(item.href)
-                    ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold shadow-sm border border-primary/20"
+                    ? "bg-white text-primary font-bold shadow-lg border-2 border-primary"
                     : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
                 )}
               >
                 {isActive(item.href) && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-primary/70 rounded-r-full shadow-lg"></div>
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary rounded-r-full shadow-lg"></div>
                 )}
 
                 <div className={cn(
