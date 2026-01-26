@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
-import { Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { PlusCircle, Trash2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createCaseSchema, type CreateCaseFormData } from '@/lib/validations';
 import { JURISDICTION_OPTIONS, CHAMBER_OPTIONS } from '@/lib/constants';

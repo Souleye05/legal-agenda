@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 
 interface PageHeaderProps {
   title: string;
@@ -26,7 +26,7 @@ export function PageHeader({ title, description, action, children }: PageHeaderP
         {children}
         {action && (
           <Button onClick={action.onClick} className="gap-2">
-            {action.icon || <Plus className="h-4 w-4" />}
+            {action.icon || <PlusCircle className="h-4 w-4" />}
             {action.label}
           </Button>
         )}

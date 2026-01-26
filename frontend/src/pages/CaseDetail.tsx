@@ -9,7 +9,7 @@ import { HearingStatusBadge } from '@/components/hearings/HearingStatusBadge';
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Users, FileText, Clock, Plus } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, PlusCircle } from 'lucide-react';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
 
 export default function CaseDetail() {
@@ -189,7 +189,7 @@ export default function CaseDetail() {
               Audiences ({hearings.length})
             </CardTitle>
             <Button size="sm" onClick={() => navigate(`/agenda/nouvelle-audience?affaireId=${id}`)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <PlusCircle className="h-4 w-4 mr-2" />
               Nouvelle audience
             </Button>
           </CardHeader>

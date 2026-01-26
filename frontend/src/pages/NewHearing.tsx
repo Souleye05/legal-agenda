@@ -17,7 +17,7 @@ import { CreateCaseDialog } from '@/components/cases/CreateCaseDialog';
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CalendarIcon, ArrowLeft, Plus } from 'lucide-react';
+import { CalendarIcon, ArrowLeft, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
@@ -164,7 +164,7 @@ export default function NewHearing() {
                     onClick={() => setShowCreateCaseDialog(true)}
                     title="Créer une nouvelle affaire"
                   >
-                    <Plus className="h-4 w-4" />
+                    <PlusCircle className="h-4 w-4" />
                   </Button>
                 </div>
                 {errors.affaireId && (
