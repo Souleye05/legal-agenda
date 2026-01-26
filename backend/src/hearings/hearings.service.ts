@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AlertsService } from '../alerts/alerts.service';
+import { AppealsService } from '../appeals/appeals.service';
 import { CreateHearingDto, UpdateHearingDto, RecordResultDto } from './dto/hearing.dto';
 import { calculateEnrollmentReminderDate, shouldShowEnrollmentReminder } from './utils/enrollment-reminder.util';
 
@@ -11,6 +12,7 @@ export class HearingsService {
     private prisma: PrismaService,
     private auditService: AuditService,
     private alertsService: AlertsService,
+    private appealsService: AppealsService,
   ) {}
 
   async findAll(status?: string, caseId?: string) {
@@ -199,6 +201,23 @@ export class HearingsService {
         where: { id: hearing.affaireId },
         data: { statut: 'CLOTUREE' },
       });
+
+      // Créer un rappel de recours si demandé
+      if (dto.creerRappelRecours) {
+        const dateLimite = dto.dateLimiteRecours
+          ? new Date(dto.dateLimiteRecours)
+          : this.appealsService.calculateDefaultDeadline(new Date());
+
+        await this.appealsService.create(
+          {
+            affaireId: hearing.affaireId,
+            dateLimite: dateLimite.toISOString(),
+            notes: dto.notesRecours,
+            resultatAudienceId: result.id,
+          },
+          userId,
+        );
+      }
     }
 
     // Resolve any pending alerts for this hearing

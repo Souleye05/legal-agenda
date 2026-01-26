@@ -8,6 +8,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentHearings } from '@/components/dashboard/RecentHearings';
 import { UrgentAlerts } from '@/components/dashboard/UrgentAlerts';
 import { EnrollmentReminders } from '@/components/dashboard/EnrollmentReminders';
+import { AppealReminders } from '@/components/dashboard/AppealReminders';
 import { api } from '@/lib/api';
 import type { Case, Hearing } from '@/types/api';
 
@@ -100,6 +101,9 @@ export default function Dashboard() {
 
         {/* Enrollment Reminders */}
         <EnrollmentReminders />
+
+        {/* Appeal Reminders */}
+        <AppealReminders />
 
         {/* Alerts & Upcoming */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

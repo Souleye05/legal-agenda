@@ -20,6 +20,7 @@ import EditCase from "./pages/EditCase";
 import UnreportedHearings from "./pages/UnreportedHearings";
 import TomorrowHearings from "./pages/TomorrowHearings";
 import EnrollementReminders from "./pages/EnrollementReminders";
+import AppealReminders from "./pages/AppealReminders";
 import DailyReports from "./pages/DailyReports";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
@@ -148,6 +149,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EnrollementReminders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recours"
+              element={
+                <ProtectedRoute>
+                  <AppealReminders />
                 </ProtectedRoute>
               }
             />

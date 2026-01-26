@@ -34,9 +34,10 @@ interface SidebarProps {
   unreportedCount?: number;
   tomorrowCount?: number;
   enrollmentCount?: number;
+  appealCount?: number;
 }
 
-export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCount = 0 }: SidebarProps) {
+export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCount = 0, appealCount = 0 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
@@ -75,6 +76,12 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
       href: '/rappels-enrolement',
       icon: <ClipboardList className="h-5 w-5" />,
       badge: enrollmentCount,
+    },
+    {
+      label: 'Recours à faire',
+      href: '/recours',
+      icon: <Scale className="h-5 w-5" />,
+      badge: appealCount,
     },
     {
       label: 'Comptes rendus',

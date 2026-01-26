@@ -201,6 +201,50 @@ export interface RecordHearingResultDto {
   motifRenvoi?: string;
   motifRadiation?: string;
   texteDelibere?: string;
+  creerRappelRecours?: boolean;
+  dateLimiteRecours?: string;
+  notesRecours?: string;
+}
+
+/**
+ * Appeal Reminder interface (Rappel de recours)
+ */
+export interface AppealReminder {
+  id: string;
+  affaireId: string;
+  affaire?: Case;
+  resultatAudienceId?: string;
+  resultatAudience?: HearingResult;
+  dateLimite: string;
+  estEffectue: boolean;
+  dateEffectue?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  createurId: string;
+  createur?: {
+    id: string;
+    nomComplet: string;
+  };
+}
+
+/**
+ * Create appeal reminder DTO
+ */
+export interface CreateAppealReminderDto {
+  affaireId: string;
+  dateLimite: string;
+  notes?: string;
+  resultatAudienceId?: string;
+}
+
+/**
+ * Update appeal reminder DTO
+ */
+export interface UpdateAppealReminderDto {
+  dateLimite?: string;
+  notes?: string;
+  estEffectue?: boolean;
 }
 
 /**

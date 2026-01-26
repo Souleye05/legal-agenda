@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,10 +30,22 @@ export default function RecordHearingResult() {
   const [resultType, setResultType] = useState<HearingResultType>('RENVOI');
   const [newDate, setNewDate] = useState<Date | undefined>();
   const [reason, setReason] = useState('');
+  const [createAppealReminder, setCreateAppealReminder] = useState(true);
+  const [appealDeadline, setAppealDeadline] = useState<Date | undefined>();
+  const [appealNotes, setAppealNotes] = useState('');
 
   useEffect(() => {
     loadHearing();
   }, [id]);
+
+  // Set default appeal deadline when result type changes to DELIBERE
+  useEffect(() => {
+    if (resultType === 'DELIBERE' && !appealDeadline) {
+      const defaultDeadline = new Date();
+      defaultDeadline.setDate(defaultDeadline.getDate() + 10);
+      setAppealDeadline(defaultDeadline);
+    }
+  }, [resultType]);
 
   const loadHearing = async () => {
     try {
@@ -103,6 +116,11 @@ export default function RecordHearingResult() {
           return;
         }
         data.texteDelibere = reason;
+        if (createAppealReminder && appealDeadline) {
+          data.creerRappelRecours = true;
+          data.dateLimiteRecours = appealDeadline.toISOString();
+          data.notesRecours = appealNotes || undefined;
+        }
       }
 
       await api.recordHearingResult(id, data);
@@ -263,14 +281,81 @@ export default function RecordHearingResult() {
               )}
 
               {resultType === 'DELIBERE' && (
-                <div className="space-y-2">
-                  <Label>Résumé du délibéré *</Label>
-                  <Textarea
-                    placeholder="Ex: Condamnation à 5000€ de dommages-intérêts..."
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    rows={6}
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Résumé du délibéré *</Label>
+                    <Textarea
+                      placeholder="Ex: Condamnation à 5000€ de dommages-intérêts..."
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      rows={6}
+                    />
+                  </div>
+
+                  {/* Appeal Reminder Section */}
+                  <div className="p-4 border rounded-lg space-y-4 bg-muted/30">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="createAppealReminder"
+                        checked={createAppealReminder}
+                        onCheckedChange={(checked) => setCreateAppealReminder(checked as boolean)}
+                      />
+                      <Label
+                        htmlFor="createAppealReminder"
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        Créer un rappel de recours (recommandé)
+                      </Label>
+                    </div>
+
+                    {createAppealReminder && (
+                      <div className="space-y-4 pl-6">
+                        <div className="space-y-2">
+                          <Label>Date limite du recours</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className={cn(
+                                  'w-full justify-start text-left font-normal',
+                                  !appealDeadline && 'text-muted-foreground'
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {appealDeadline
+                                  ? format(appealDeadline, 'PPP', { locale: fr })
+                                  : 'Sélectionner une date'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={appealDeadline}
+                                onSelect={setAppealDeadline}
+                                initialFocus
+                                locale={fr}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <p className="text-xs text-muted-foreground">
+                            Par défaut : 10 jours après le délibéré
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="appealNotes">Notes sur le recours (optionnel)</Label>
+                          <Textarea
+                            id="appealNotes"
+                            placeholder="Ex: Vérifier les délais spécifiques, préparer les pièces..."
+                            value={appealNotes}
+                            onChange={(e) => setAppealNotes(e.target.value)}
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

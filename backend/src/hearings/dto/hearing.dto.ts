@@ -71,4 +71,17 @@ export class RecordResultDto {
   @IsOptional()
   @IsString()
   texteDelibere?: string;
+
+  // Rappel de recours (pour DELIBERE)
+  @IsOptional()
+  @IsBoolean()
+  creerRappelRecours?: boolean;
+
+  @IsOptional()
+  @IsDateString()
+  dateLimiteRecours?: string;
+
+  @IsOptional()
+  @IsString()
+  notesRecours?: string;
 }

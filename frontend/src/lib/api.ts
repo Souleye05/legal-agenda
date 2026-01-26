@@ -13,6 +13,9 @@ import type {
   CreateHearingDto,
   UpdateHearingDto,
   RecordHearingResultDto,
+  AppealReminder,
+  CreateAppealReminderDto,
+  UpdateAppealReminderDto,
   LoginDto,
   RegisterDto,
 } from '@/types/api';
@@ -275,6 +278,48 @@ class ApiClient {
 
   async getEnrollmentReminders(): Promise<Hearing[]> {
     return this.request<Hearing[]>('/hearings/enrollment-reminders');
+  }
+
+  // ============================================
+  // APPEAL REMINDERS (Rappels de recours)
+  // ============================================
+
+  async getAppealReminders(): Promise<AppealReminder[]> {
+    return this.request<AppealReminder[]>('/appeals');
+  }
+
+  async getCompletedAppealReminders(): Promise<AppealReminder[]> {
+    return this.request<AppealReminder[]>('/appeals/completed');
+  }
+
+  async getAppealReminder(id: string): Promise<AppealReminder> {
+    return this.request<AppealReminder>(`/appeals/${id}`);
+  }
+
+  async createAppealReminder(data: CreateAppealReminderDto): Promise<AppealReminder> {
+    return this.request<AppealReminder>('/appeals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateAppealReminder(id: string, data: UpdateAppealReminderDto): Promise<AppealReminder> {
+    return this.request<AppealReminder>(`/appeals/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async markAppealReminderComplete(id: string): Promise<AppealReminder> {
+    return this.request<AppealReminder>(`/appeals/${id}/complete`, {
+      method: 'PUT',
+    });
+  }
+
+  async deleteAppealReminder(id: string): Promise<void> {
+    return this.request<void>(`/appeals/${id}`, {
+      method: 'DELETE',
+    });
   }
 
   async getCompletedEnrollments(): Promise<Hearing[]> {

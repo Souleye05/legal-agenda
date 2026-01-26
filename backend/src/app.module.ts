@@ -10,6 +10,7 @@ import { CasesModule } from './cases/cases.module';
 import { HearingsModule } from './hearings/hearings.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { AuditModule } from './audit/audit.module';
+import { AppealsModule } from './appeals/appeals.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuditModule } from './audit/audit.module';
     HearingsModule,
     AlertsModule,
     AuditModule,
+    AppealsModule,
   ],
   providers: [
     // Apply rate limiting globally

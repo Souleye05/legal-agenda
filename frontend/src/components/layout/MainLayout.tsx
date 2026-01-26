@@ -28,12 +28,19 @@ export function MainLayout({ children }: MainLayoutProps) {
     refetchInterval: 60000,
   });
 
+  const { data: appealReminders = [] } = useQuery({
+    queryKey: ['appeal-reminders'],
+    queryFn: () => api.getAppealReminders(),
+    refetchInterval: 60000,
+  });
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar 
         unreportedCount={unreportedHearings.length} 
         tomorrowCount={tomorrowHearings.length}
         enrollmentCount={enrollmentReminders.length}
+        appealCount={appealReminders.length}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />
