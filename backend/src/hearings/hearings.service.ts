@@ -427,4 +427,45 @@ export class HearingsService {
 
     return updated;
   }
+
+  /**
+   * Active le rappel d'enrôlement manuellement pour une audience
+   */
+  async enableEnrollmentReminder(id: string, userId: string) {
+    const hearing = await this.findOne(id);
+
+    if (hearing.rappelEnrolement) {
+      throw new BadRequestException('Le rappel d\'enrôlement est déjà activé pour cette audience');
+    }
+
+    // Calculer la date de rappel (4 jours ouvrables avant)
+    const reminderDate = calculateEnrollmentReminderDate(new Date(hearing.date));
+
+    const updated = await this.prisma.audience.update({
+      where: { id },
+      data: {
+        rappelEnrolement: true,
+        dateRappelEnrolement: reminderDate,
+        enrolementEffectue: false,
+      },
+      include: {
+        affaire: {
+          include: {
+            parties: true,
+          },
+        },
+      },
+    });
+
+    await this.auditService.log(
+      'Audience',
+      id,
+      'MODIFICATION',
+      JSON.stringify({ rappelEnrolement: false }),
+      JSON.stringify({ rappelEnrolement: true, dateRappelEnrolement: reminderDate }),
+      userId
+    );
+
+    return updated;
+  }
 }

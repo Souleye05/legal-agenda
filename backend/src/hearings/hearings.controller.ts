@@ -67,6 +67,14 @@ export class HearingsController {
     return this.hearingsService.markEnrollmentComplete(id, user.userId);
   }
 
+  @Patch(':id/enable-enrollment-reminder')
+  @ApiOperation({ summary: 'Activer le rappel d\'enrôlement manuellement' })
+  @ApiResponse({ status: 200, description: 'Rappel d\'enrôlement activé' })
+  @ApiResponse({ status: 404, description: 'Audience non trouvée' })
+  enableEnrollmentReminder(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.hearingsService.enableEnrollmentReminder(id, user.userId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Détails d\'une audience' })
   @ApiResponse({ status: 200, description: 'Audience trouvée' })

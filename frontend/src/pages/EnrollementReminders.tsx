@@ -2,20 +2,39 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, isToday, isBefore, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ClipboardList, Calendar, ArrowLeft, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, CheckCircle2, Clock, AlertCircle, Plus } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { api } from '@/lib/api';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
 import { toast } from 'sonner';
 import type { Hearing } from '@/types/api';
+import { useState } from 'react';
 
 export default function EnrollmentReminders() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedHearing, setSelectedHearing] = useState<string | null>(null);
 
   // Fetch enrollment reminders from API
   const { data: reminders = [], isLoading } = useQuery<Hearing[]>({
@@ -31,6 +50,22 @@ export default function EnrollmentReminders() {
     refetchInterval: 60000,
   });
 
+  // Fetch all upcoming hearings without enrollment reminder
+  const { data: availableHearings = [] } = useQuery<Hearing[]>({
+    queryKey: ['available-hearings-for-enrollment'],
+    queryFn: async () => {
+      const allHearings = await api.getHearings();
+      const today = new Date();
+      // Filter: upcoming hearings without enrollment reminder
+      return allHearings.filter(h => 
+        new Date(h.date) > today && 
+        !h.rappelEnrolement &&
+        h.statut !== 'TENUE'
+      );
+    },
+    enabled: dialogOpen,
+  });
+
   // Mutation pour marquer comme effectué
   const markCompleteMutation = useMutation({
     mutationFn: (hearingId: string) => api.markEnrollmentComplete(hearingId),
@@ -44,10 +79,32 @@ export default function EnrollmentReminders() {
     },
   });
 
+  // Mutation pour activer le rappel manuellement
+  const enableReminderMutation = useMutation({
+    mutationFn: (hearingId: string) => api.enableEnrollmentReminder(hearingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['enrollment-reminders'] });
+      queryClient.invalidateQueries({ queryKey: ['available-hearings-for-enrollment'] });
+      queryClient.invalidateQueries({ queryKey: ['hearings'] });
+      setDialogOpen(false);
+      setSelectedHearing(null);
+      toast.success('Rappel d\'enrôlement activé avec succès');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erreur lors de l\'activation du rappel');
+    },
+  });
+
   const today = new Date();
 
   const handleMarkComplete = (reminderId: string) => {
     markCompleteMutation.mutate(reminderId);
+  };
+
+  const handleEnableReminder = () => {
+    if (selectedHearing) {
+      enableReminderMutation.mutate(selectedHearing);
+    }
   };
 
   const getReminderStatus = (reminderDate: string) => {
@@ -89,14 +146,84 @@ export default function EnrollmentReminders() {
   return (
     <MainLayout>
       <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center gap-">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <PageHeader
-            title="Rappels enrôlement"
-            description="Gérez vos rappels d'enrôlement pour les audiences à venir"
-          />
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <PageHeader
+              title="Rappels enrôlement"
+              description="Gérez vos rappels d'enrôlement pour les audiences à venir"
+            />
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Ajouter un rappel
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Ajouter un rappel d'enrôlement</DialogTitle>
+                <DialogDescription>
+                  Sélectionnez une audience pour activer le rappel d'enrôlement (4 jours ouvrables avant)
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Command className="border rounded-lg">
+                  <CommandInput placeholder="Rechercher une audience..." />
+                  <CommandList>
+                    <CommandEmpty>Aucune audience disponible</CommandEmpty>
+                    <CommandGroup>
+                      {availableHearings.map((hearing) => (
+                        <CommandItem
+                          key={hearing.id}
+                          value={`${hearing.affaire?.reference} ${hearing.affaire?.titre}`}
+                          onSelect={() => setSelectedHearing(hearing.id)}
+                          className={selectedHearing === hearing.id ? 'bg-accent' : ''}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {hearing.affaire?.reference}
+                              </span>
+                              <Badge variant="outline" className="text-xs">
+                                {HEARING_TYPE_LABELS[hearing.type]}
+                              </Badge>
+                            </div>
+                            <p className="font-medium">{hearing.affaire?.titre}</p>
+                            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                              <Calendar className="h-3 w-3" />
+                              <span>{format(new Date(hearing.date), 'dd MMMM yyyy', { locale: fr })}</span>
+                              {hearing.heure && <span>à {hearing.heure}</span>}
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setDialogOpen(false);
+                      setSelectedHearing(null);
+                    }}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={handleEnableReminder}
+                    disabled={!selectedHearing || enableReminderMutation.isPending}
+                  >
+                    {enableReminderMutation.isPending ? 'Activation...' : 'Activer le rappel'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Summary Cards */}

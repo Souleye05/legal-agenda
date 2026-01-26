@@ -332,6 +332,12 @@ class ApiClient {
     });
   }
 
+  async enableEnrollmentReminder(id: string): Promise<Hearing> {
+    return this.request<Hearing>(`/hearings/${id}/enable-enrollment-reminder`, {
+      method: 'PATCH',
+    });
+  }
+
   // Users
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/users');
