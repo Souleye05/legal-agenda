@@ -12,7 +12,7 @@ import {
   ChevronRight,
   Scale,
   LogOut,
-  FileText,
+  File,
   Sparkles,
   Crown
 } from 'lucide-react';
@@ -71,7 +71,7 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0 }: SidebarProps
     {
       label: 'Comptes rendus',
       href: '/comptes-rendus',
-      icon: <FileText className="h-5 w-5" />,
+      icon: <File className="h-5 w-5" />,
     }
   ];
 

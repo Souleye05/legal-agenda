@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FileText, Download, Printer, CalendarIcon, FileCheck } from 'lucide-react';
+import { File, Download, Printer, CalendarIcon, FileCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Hearing } from '@/types/api';
@@ -64,7 +64,7 @@ export default function DailyReports() {
         <div className="card-elevated p-6 space-y-4">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
+              <File className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Comptes rendus d'audience du jour</h3>

@@ -1,4 +1,4 @@
-import { Calendar, FileText, Clock } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function QuickActions() {
@@ -7,7 +7,7 @@ export function QuickActions() {
   const actions = [
     {
       label: 'Nouvelle affaire',
-      icon: Plus,
+      icon: () => <span className="text-2xl">+</span>,
       onClick: () => navigate('/affaires/nouvelle'),
       color: 'text-primary',
     },
@@ -19,7 +19,7 @@ export function QuickActions() {
     },
     {
       label: 'Renseigner résultat',
-      icon: FileText,
+      icon: () => <span className="text-2xl">📄</span>,
       onClick: () => navigate('/a-renseigner'),
       color: 'text-urgent',
     },

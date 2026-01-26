@@ -93,6 +93,9 @@ export interface Hearing {
   motifRadiation?: string;
   texteDelibere?: string;
   estPreparee: boolean;
+  rappelEnrolement?: boolean;
+  dateRappelEnrolement?: string;
+  enrolementEffectue?: boolean;
   createdAt: string;
   updatedAt: string;
   createdBy: string;

@@ -7,7 +7,7 @@ import {
   Calendar, 
   Clock, 
   MapPin, 
-  FileText, 
+  File, 
   Users, 
   Edit,
   Trash2,
@@ -268,7 +268,7 @@ export default function HearingDetail() {
                     <Separator />
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <File className="h-4 w-4 text-muted-foreground" />
                         <p className="text-sm font-medium">Notes de préparation</p>
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">

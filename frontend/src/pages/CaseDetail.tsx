@@ -88,7 +88,7 @@ export default function CaseDetail() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-serif flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+              <File className="h-5 w-5" />
               Informations générales
             </CardTitle>
           </CardHeader>
@@ -230,7 +230,7 @@ export default function CaseDetail() {
                           {hearing.notesPreparation && (
                             <div className="mt-2 p-2 bg-muted/50 rounded text-sm">
                               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                                <FileText className="h-3 w-3" />
+                                <File className="h-3 w-3" />
                                 Notes de préparation
                               </div>
                               <p className="text-foreground">{hearing.notesPreparation}</p>

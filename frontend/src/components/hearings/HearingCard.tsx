@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Clock, MapPin, FileText, FileEdit, CheckCircle, Eye } from 'lucide-react';
+import { Clock, MapPin, File, FileEdit, CheckCircle, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Hearing, Case } from '@/types/legal';
 import { HearingStatusBadge } from './HearingStatusBadge';
@@ -117,7 +117,7 @@ export function HearingCard({
           {hearing.preparationNotes && (
             <div className="mt-3 p-3 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                <FileText className="h-3.5 w-3.5" />
+                <File className="h-3.5 w-3.5" />
                 Notes de préparation
               </div>
               <p className="text-sm text-foreground">{hearing.preparationNotes}</p>
