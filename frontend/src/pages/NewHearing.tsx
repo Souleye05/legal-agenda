@@ -10,14 +10,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CreateCaseDialog } from '@/components/cases/CreateCaseDialog';
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CalendarIcon, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, ArrowLeft, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
@@ -48,8 +50,12 @@ export default function NewHearing() {
       heure: '',
       type: '' as HearingType,
       notesPreparation: '',
+      rappelEnrolement: true,
     },
   });
+
+  const [openCaseCombobox, setOpenCaseCombobox] = useState(false);
+  const [caseSearchQuery, setCaseSearchQuery] = useState('');
 
   // Fetch active cases
   const { data: cases = [], isLoading } = useQuery<Case[]>({
@@ -67,6 +73,7 @@ export default function NewHearing() {
         heure: data.heure || undefined,
         type: data.type,
         notesPreparation: data.notesPreparation || undefined,
+        rappelEnrolement: data.rappelEnrolement,
       });
     },
     onSuccess: () => {
@@ -101,6 +108,22 @@ export default function NewHearing() {
     });
   };
 
+  // Fonction pour obtenir le texte de recherche d'une affaire
+  const getCaseSearchText = (caseItem: Case): string => {
+    const parties = caseItem.parties
+      ?.map((p) => p.nom)
+      .join(' ')
+      .toLowerCase() || '';
+    return `${caseItem.reference} ${caseItem.titre} ${parties}`.toLowerCase();
+  };
+
+  // Filtrer les affaires selon la recherche
+  const filteredCases = activeCases.filter((c) => {
+    if (!caseSearchQuery) return true;
+    const searchText = getCaseSearchText(c);
+    return searchText.includes(caseSearchQuery.toLowerCase());
+  });
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -132,30 +155,81 @@ export default function NewHearing() {
               <CardTitle className="font-serif">Informations de l'audience</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Affaire */}
+              {/* Affaire avec Combobox recherche */}
               <div className="space-y-2">
                 <Label htmlFor="affaireId">Affaire liée *</Label>
                 <div className="flex gap-2">
                   <Controller
                     name="affaireId"
                     control={control}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Sélectionner une affaire" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {activeCases.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>
-                              <div className="flex flex-col">
-                                <span className="font-medium">{c.titre}</span>
-                                <span className="text-xs text-muted-foreground">{c.reference}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
+                    render={({ field }) => {
+                      const selectedCase = activeCases.find((c) => c.id === field.value);
+                      return (
+                        <Popover open={openCaseCombobox} onOpenChange={setOpenCaseCombobox}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openCaseCombobox}
+                              className="flex-1 justify-between"
+                            >
+                              {selectedCase ? (
+                                <div className="flex flex-col items-start text-left">
+                                  <span className="font-medium">{selectedCase.titre}</span>
+                                  <span className="text-xs text-muted-foreground">{selectedCase.reference}</span>
+                                </div>
+                              ) : (
+                                "Rechercher une affaire..."
+                              )}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[500px] p-0" align="start">
+                            <Command shouldFilter={false}>
+                              <CommandInput
+                                placeholder="Rechercher par référence, titre ou parties..."
+                                value={caseSearchQuery}
+                                onValueChange={setCaseSearchQuery}
+                              />
+                              <CommandList>
+                                <CommandEmpty>Aucune affaire trouvée.</CommandEmpty>
+                                <CommandGroup>
+                                  {filteredCases.map((c) => (
+                                    <CommandItem
+                                      key={c.id}
+                                      value={c.id}
+                                      onSelect={() => {
+                                        field.onChange(c.id);
+                                        setOpenCaseCombobox(false);
+                                        setCaseSearchQuery('');
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          field.value === c.id ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex flex-col flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium">{c.titre}</span>
+                                          <span className="text-xs text-muted-foreground">({c.reference})</span>
+                                        </div>
+                                        {c.parties && c.parties.length > 0 && (
+                                          <span className="text-xs text-muted-foreground">
+                                            {c.parties.map((p) => p.nom).join(' • ')}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      );
+                    }}
                   />
                   <Button
                     type="button"
@@ -260,6 +334,27 @@ export default function NewHearing() {
                 {errors.notesPreparation && (
                   <p className="text-sm text-destructive">{errors.notesPreparation.message}</p>
                 )}
+              </div>
+
+              {/* Rappel d'enrôlement */}
+              <div className="flex items-center space-x-2">
+                <Controller
+                  name="rappelEnrolement"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="rappelEnrolement"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label
+                  htmlFor="rappelEnrolement"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Rappel d'enrôlement (4 jours ouvrables avant l'audience)
+                </Label>
               </div>
 
               {/* Actions */}

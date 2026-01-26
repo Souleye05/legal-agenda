@@ -57,8 +57,9 @@ export const createCaseSchema = z.object({
     .or(z.literal('')),
   
   parties: z.array(partySchema)
-    .min(2, 'Au moins 2 parties sont requises (demandeur et défendeur)')
-    .max(10, 'Maximum 10 parties'),
+    .max(10, 'Maximum 10 parties')
+    .optional()
+    .default([]),
   
   observations: z.string()
     .max(2000, 'Maximum 2000 caractères')
@@ -108,6 +109,10 @@ export const createHearingSchema = z.object({
     .trim()
     .optional()
     .or(z.literal('')),
+  
+  rappelEnrolement: z.boolean()
+    .optional()
+    .default(true),
 });
 
 export type CreateHearingFormData = z.infer<typeof createHearingSchema>;

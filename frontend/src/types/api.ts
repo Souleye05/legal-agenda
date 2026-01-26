@@ -178,6 +178,7 @@ export interface CreateHearingDto {
   heure?: string;
   type: HearingType;
   notesPreparation?: string;
+  rappelEnrolement?: boolean;
 }
 
 /**

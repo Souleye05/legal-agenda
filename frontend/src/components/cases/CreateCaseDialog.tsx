@@ -43,10 +43,7 @@ export function CreateCaseDialog({ open, onOpenChange, onCaseCreated }: CreateCa
       chambre: '',
       ville: '',
       observations: '',
-      parties: [
-        { nom: '', role: 'demandeur' },
-        { nom: '', role: 'defendeur' },
-      ],
+      parties: [],
     },
   });
 
@@ -258,12 +255,12 @@ export function CreateCaseDialog({ open, onOpenChange, onCaseCreated }: CreateCa
 
             {/* Parties */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-sm">Parties</h3>
+              <h3 className="font-semibold text-sm">Parties (optionnel)</h3>
 
               {/* Demandeurs */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Demandeur(s) *</Label>
+                  <Label>Demandeur(s)</Label>
                   <Button 
                     type="button" 
                     variant="ghost" 
@@ -307,7 +304,7 @@ export function CreateCaseDialog({ open, onOpenChange, onCaseCreated }: CreateCa
               {/* Défendeurs */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Défendeur(s) *</Label>
+                  <Label>Défendeur(s)</Label>
                   <Button 
                     type="button" 
                     variant="ghost" 

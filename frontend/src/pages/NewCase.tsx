@@ -39,10 +39,7 @@ export default function NewCase() {
       chambre: '',
       ville: '',
       observations: '',
-      parties: [
-        { nom: '', role: 'demandeur' },
-        { nom: '', role: 'defendeur' },
-      ],
+      parties: [],
     },
   });
 
@@ -190,7 +187,7 @@ export default function NewCase() {
               </div>
 
               <div className="space-y-2">
-                <Label>Chambre</Label>
+                <Label>Chambre (optionnel)</Label>
                 {!showCustomChamber ? (
                   <>
                     <Select 
@@ -258,12 +255,12 @@ export default function NewCase() {
 
           {/* Parties */}
           <div className="card-elevated p-6 space-y-4">
-            <h3 className="font-semibold text-foreground">Parties</h3>
+            <h3 className="font-semibold text-foreground">Parties (optionnel)</h3>
 
             {/* Demandeurs */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Demandeur(s) *</Label>
+                <Label>Demandeur(s)</Label>
                 <Button 
                   type="button" 
                   variant="ghost" 
@@ -274,40 +271,42 @@ export default function NewCase() {
                   Ajouter
                 </Button>
               </div>
-              {fields.map((field, index) => {
-                if (watch(`parties.${index}.role`) !== 'demandeur') return null;
-                return (
-                  <div key={field.id} className="flex gap-2">
-                    <div className="flex-1 space-y-1">
-                      <Input
-                        placeholder="Nom du demandeur"
-                        {...register(`parties.${index}.nom`)}
-                      />
-                      {errors.parties?.[index]?.nom && (
-                        <p className="text-xs text-destructive">
-                          {errors.parties[index]?.nom?.message}
-                        </p>
-                      )}
-                    </div>
-                    {demandeurs.length > 1 && (
+              {demandeurs.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic">Aucun demandeur ajouté</p>
+              ) : (
+                fields.map((field, index) => {
+                  if (watch(`parties.${index}.role`) !== 'demandeur') return null;
+                  return (
+                    <div key={field.id} className="flex gap-2">
+                      <div className="flex-1 space-y-1">
+                        <Input
+                          placeholder="Nom du demandeur"
+                          {...register(`parties.${index}.nom`)}
+                        />
+                        {errors.parties?.[index]?.nom && (
+                          <p className="text-xs text-destructive">
+                            {errors.parties[index]?.nom?.message}
+                          </p>
+                        )}
+                      </div>
                       <Button 
                         type="button" 
                         variant="ghost" 
                         size="icon" 
                         onClick={() => remove(index)}
                       >
-                        <span className="text-destructive text-xl"></span>
+                        <span className="text-destructive text-xl">×</span>
                       </Button>
-                    )}
-                  </div>
-                );
-              })}
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             {/* Défendeurs */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Défendeur(s) *</Label>
+                <Label>Défendeur(s)</Label>
                 <Button 
                   type="button" 
                   variant="ghost" 
@@ -318,34 +317,36 @@ export default function NewCase() {
                   Ajouter
                 </Button>
               </div>
-              {fields.map((field, index) => {
-                if (watch(`parties.${index}.role`) !== 'defendeur') return null;
-                return (
-                  <div key={field.id} className="flex gap-2">
-                    <div className="flex-1 space-y-1">
-                      <Input
-                        placeholder="Nom du défendeur"
-                        {...register(`parties.${index}.nom`)}
-                      />
-                      {errors.parties?.[index]?.nom && (
-                        <p className="text-xs text-destructive">
-                          {errors.parties[index]?.nom?.message}
-                        </p>
-                      )}
-                    </div>
-                    {defendeurs.length > 1 && (
+              {defendeurs.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic">Aucun défendeur ajouté</p>
+              ) : (
+                fields.map((field, index) => {
+                  if (watch(`parties.${index}.role`) !== 'defendeur') return null;
+                  return (
+                    <div key={field.id} className="flex gap-2">
+                      <div className="flex-1 space-y-1">
+                        <Input
+                          placeholder="Nom du défendeur"
+                          {...register(`parties.${index}.nom`)}
+                        />
+                        {errors.parties?.[index]?.nom && (
+                          <p className="text-xs text-destructive">
+                            {errors.parties[index]?.nom?.message}
+                          </p>
+                        )}
+                      </div>
                       <Button 
                         type="button" 
                         variant="ghost" 
                         size="icon" 
                         onClick={() => remove(index)}
                       >
-                        <span className="text-destructive text-xl"></span>
+                        <span className="text-destructive text-xl">×</span>
                       </Button>
-                    )}
-                  </div>
-                );
-              })}
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             {/* Conseils adverses */}
