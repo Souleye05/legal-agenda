@@ -15,7 +15,7 @@ import { HEARING_TYPE_LABELS } from '@/lib/constants';
 export default function CaseDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const { data: caseData, isLoading: caseLoading } = useQuery({
     queryKey: ['case', id],
     queryFn: () => api.getCase(id!),
@@ -31,7 +31,7 @@ export default function CaseDetail() {
   if (caseLoading || hearingsLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement...
           </div>
@@ -43,7 +43,7 @@ export default function CaseDetail() {
   if (!caseData) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-4xl mx-auto text-center">
+        <div className="text-center">
           <h2 className="text-xl font-semibold mb-4">Affaire non trouvée</h2>
           <Button onClick={() => navigate('/affaires')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -60,7 +60,7 @@ export default function CaseDetail() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate('/affaires')}>
             <ArrowLeft className="h-5 w-5" />
@@ -203,7 +203,7 @@ export default function CaseDetail() {
                 {hearings
                   .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .map((hearing: any) => (
-                    <div 
+                    <div
                       key={hearing.id}
                       className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
@@ -238,8 +238,8 @@ export default function CaseDetail() {
                           )}
                         </div>
                         {hearing.statut === 'NON_RENSEIGNEE' && (
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             className="text-urgent border-urgent hover:bg-urgent/10"
                             onClick={() => navigate(`/a-renseigner?hearing=${hearing.id}`)}

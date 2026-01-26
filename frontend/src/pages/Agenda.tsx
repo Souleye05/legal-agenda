@@ -59,10 +59,8 @@ export default function Agenda() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-7xl mx-auto">
-          <div className="card-elevated p-8 text-center text-muted-foreground">
-            Chargement du calendrier...
-          </div>
+        <div className="card-elevated p-8 text-center text-muted-foreground">
+          Chargement du calendrier...
         </div>
       </MainLayout>
     );
@@ -70,8 +68,8 @@ export default function Agenda() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
           title="Agenda"
           description="Calendrier de vos audiences"
           action={{
@@ -89,7 +87,7 @@ export default function Agenda() {
         </PageHeader>
 
         {viewMode === 'month' && (
-          <CalendarView 
+          <CalendarView
             events={events}
             onEventClick={handleEventClick}
             onDateClick={handleDateClick}
@@ -97,7 +95,7 @@ export default function Agenda() {
         )}
 
         {viewMode === 'week' && (
-          <WeekView 
+          <WeekView
             events={events}
             onEventClick={handleEventClick}
             onDateClick={handleDateClick}
@@ -109,7 +107,7 @@ export default function Agenda() {
             {events
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
               .map((event) => (
-                <div 
+                <div
                   key={event.id}
                   className="p-4 hover:bg-muted/50 cursor-pointer transition-colors"
                   onClick={() => handleEventClick(event)}
@@ -161,7 +159,7 @@ export default function Agenda() {
                 {/* Header avec gradient et effet glassmorphism */}
                 <div className="relative overflow-hidden border-b bg-gradient-to-r from-primary/10 via-primary/5 to-background backdrop-blur-xl">
                   <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(white,transparent_85%)]"></div>
-                  
+
                   <div className="relative p-8 space-y-4">
                     {/* Bouton fermer */}
                     <button
@@ -181,11 +179,11 @@ export default function Agenda() {
                           Détails de l'audience
                         </span>
                       </div>
-                      
+
                       <h2 className="text-3xl font-bold text-foreground leading-tight">
                         {selectedEvent.title}
                       </h2>
-                      
+
                       <div className="flex items-center gap-3 flex-wrap">
                         <Badge variant="outline" className="text-sm px-3 py-1.5 font-mono bg-muted/50 border-border/50">
                           {selectedEvent.caseReference}
@@ -288,7 +286,7 @@ export default function Agenda() {
                 {/* Footer avec actions */}
                 <div className="border-t bg-muted/30 backdrop-blur-xl p-6">
                   <div className="flex gap-3">
-                    <Button 
+                    <Button
                       variant="outline"
                       size="lg"
                       className="flex-1 h-12 rounded-xl font-semibold hover:bg-background hover:shadow-lg transition-all group"
@@ -301,9 +299,9 @@ export default function Agenda() {
                       Voir les détails complets
                       <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
-                    
+
                     {selectedEvent.status === 'NON_RENSEIGNEE' && (
-                      <Button 
+                      <Button
                         size="lg"
                         className="flex-1 h-12 rounded-xl font-semibold bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/90 hover:to-destructive hover:shadow-xl transition-all group"
                         onClick={() => {

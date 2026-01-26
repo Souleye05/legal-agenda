@@ -127,7 +127,7 @@ export default function NewHearing() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-2xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement...
           </div>
@@ -138,12 +138,12 @@ export default function NewHearing() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-2xl mx-auto space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <PageHeader 
+          <PageHeader
             title="Nouvelle audience"
             description="Planifier une nouvelle audience"
           />
@@ -359,16 +359,16 @@ export default function NewHearing() {
 
               {/* Actions */}
               <div className="flex gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   className="flex-1"
                   onClick={() => navigate(-1)}
                 >
                   Annuler
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="flex-1"
                   disabled={isSubmitting || createHearingMutation.isPending}
                 >

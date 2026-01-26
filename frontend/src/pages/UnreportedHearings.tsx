@@ -61,7 +61,7 @@ export default function UnreportedHearings() {
     setIsSubmitting(true);
     try {
       const data: any = { type: resultType };
-      
+
       if (resultType === 'RENVOI') {
         data.nouvelleDate = newDate?.toISOString();
         data.motifRenvoi = reason;
@@ -72,12 +72,12 @@ export default function UnreportedHearings() {
       }
 
       await api.recordHearingResult(selectedHearing.id, data);
-      
+
       toast({
         title: "Résultat enregistré",
         description: "L'audience a été mise à jour avec succès",
       });
-      
+
       setSelectedHearing(null);
       refetch();
     } catch (error: any) {
@@ -94,7 +94,7 @@ export default function UnreportedHearings() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement...
           </div>
@@ -111,8 +111,8 @@ export default function UnreportedHearings() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
           title="Audiences à renseigner"
           description="Ces audiences sont passées et nécessitent un résultat"
         />
@@ -132,7 +132,7 @@ export default function UnreportedHearings() {
             <div className="flex items-center gap-2 p-4 rounded-lg bg-urgent/10 border border-urgent/20">
               <AlertTriangle className="h-5 w-5 text-urgent flex-shrink-0" />
               <p className="text-sm text-foreground">
-                <strong>{unreportedHearings.length} audience{unreportedHearings.length > 1 ? 's' : ''}</strong> en attente de résultat. 
+                <strong>{unreportedHearings.length} audience{unreportedHearings.length > 1 ? 's' : ''}</strong> en attente de résultat.
                 Renseignez-les pour arrêter les alertes quotidiennes.
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function UnreportedHearings() {
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious 
+                      <PaginationPrevious
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                       />
@@ -170,7 +170,7 @@ export default function UnreportedHearings() {
                       </PaginationItem>
                     ))}
                     <PaginationItem>
-                      <PaginationNext 
+                      <PaginationNext
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                       />
@@ -188,7 +188,7 @@ export default function UnreportedHearings() {
             <DialogHeader>
               <DialogTitle className="font-serif">Renseigner le résultat</DialogTitle>
             </DialogHeader>
-            
+
             {selectedHearing && (
               <div className="space-y-6">
                 <div className="p-3 bg-muted rounded-lg">
@@ -200,8 +200,8 @@ export default function UnreportedHearings() {
 
                 <div className="space-y-3">
                   <Label>Type de résultat</Label>
-                  <RadioGroup 
-                    value={resultType} 
+                  <RadioGroup
+                    value={resultType}
                     onValueChange={(v) => setResultType(v as HearingResultType)}
                     className="grid grid-cols-3 gap-3"
                   >
@@ -304,14 +304,14 @@ export default function UnreportedHearings() {
                 )}
 
                 <div className="flex gap-3">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => setSelectedHearing(null)}
                   >
                     Annuler
                   </Button>
-                  <Button 
+                  <Button
                     className="flex-1"
                     onClick={handleSubmit}
                     disabled={

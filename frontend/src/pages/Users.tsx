@@ -4,13 +4,13 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import {
   Select,
@@ -123,7 +123,7 @@ export default function Users() {
 
   return (
     <MainLayout>
-      <div className="space-y-6 m-8">
+      <div className="space-y-6">
         <PageHeader
           title="Gestion des utilisateurs"
           description="Gérer les comptes utilisateurs et leurs permissions"
@@ -157,7 +157,7 @@ export default function Users() {
                     <TableCell>
                       <Select
                         value={user.role}
-                        onValueChange={(value: 'ADMIN' | 'COLLABORATEUR') => 
+                        onValueChange={(value: 'ADMIN' | 'COLLABORATEUR') =>
                           handleChangeRole(user.id, value)
                         }
                       >
@@ -219,7 +219,7 @@ export default function Users() {
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious 
+                      <PaginationPrevious
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                       />
@@ -236,7 +236,7 @@ export default function Users() {
                       </PaginationItem>
                     ))}
                     <PaginationItem>
-                      <PaginationNext 
+                      <PaginationNext
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                       />

@@ -21,19 +21,24 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Search, 
-  Bell, 
-  User, 
-  LogOut, 
+import {
+  Search,
+  Bell,
+  User,
+  LogOut,
   AlertCircle,
   Sparkles,
   Settings,
+  Menu,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-export function Navbar() {
+interface NavbarProps {
+  onMenuClick?: () => void;
+}
+
+export function Navbar({ onMenuClick }: NavbarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -92,21 +97,32 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-sm">
       <div className="container flex h-20 items-center justify-between px-6">
-        {/* Welcome Message */}
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
-            <div className="relative p-2.5 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          {/* Welcome Message */}
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+              <div className="relative p-2.5 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg">
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
+              </div>
             </div>
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm text-muted-foreground font-medium">
-              {getGreeting()},
-            </p>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              {getFirstName()}
-            </h1>
+            <div className="hidden sm:block">
+              <p className="text-sm text-muted-foreground font-medium">
+                {getGreeting()},
+              </p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                {getFirstName()}
+              </h1>
+            </div>
           </div>
         </div>
 
@@ -130,15 +146,15 @@ export function Navbar() {
           {/* Alerts */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="relative h-11 w-11 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-200"
               >
                 <Bell className="h-5 w-5" />
                 {unreportedHearings.length > 0 && (
-                  <Badge 
-                    variant="destructive" 
+                  <Badge
+                    variant="destructive"
                     className="absolute -top-1.5 -right-1.5 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold shadow-lg animate-pulse"
                   >
                     {unreportedHearings.length}
@@ -211,8 +227,8 @@ export function Navbar() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="h-11 rounded-xl hover:bg-primary/10 px-3 transition-all duration-200"
               >
                 <div className="flex items-center space-x-2">
@@ -247,7 +263,7 @@ export function Navbar() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer rounded-lg py-2.5"
                 onClick={() => navigate("/profil")}
               >
@@ -259,8 +275,8 @@ export function Navbar() {
                 <span className="font-medium">Paramètres</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={handleLogout} 
+              <DropdownMenuItem
+                onClick={handleLogout}
                 className="cursor-pointer text-destructive focus:text-destructive rounded-lg py-2.5 font-medium"
               >
                 <LogOut className="mr-3 h-4 w-4" />

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Briefcase, 
-  AlertTriangle, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Briefcase,
+  AlertTriangle,
   CalendarCheck,
   Settings,
   Users,
@@ -35,9 +35,18 @@ interface SidebarProps {
   tomorrowCount?: number;
   enrollmentCount?: number;
   appealCount?: number;
+  className?: string;
+  onItemClick?: () => void;
 }
 
-export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCount = 0, appealCount = 0 }: SidebarProps) {
+export function Sidebar({
+  unreportedCount = 0,
+  tomorrowCount = 0,
+  enrollmentCount = 0,
+  appealCount = 0,
+  className,
+  onItemClick
+}: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
@@ -118,10 +127,11 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
   };
 
   return (
-    <aside 
+    <aside
       className={cn(
         "flex flex-col h-screen bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 border-r border-sidebar-border/50 transition-all duration-300 shadow-xl",
-        collapsed ? "w-[70px]" : "w-[280px]"
+        collapsed ? "w-[70px]" : "w-64",
+        className
       )}
     >
       {/* Logo avec effet glassmorphism */}
@@ -154,11 +164,12 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
             <Link
               key={item.href}
               to={item.href}
+              onClick={onItemClick}
               className={cn(
                 "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 relative overflow-hidden",
                 "hover:bg-sidebar-accent/80 hover:shadow-md",
-                isActive(item.href) 
-                  ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold shadow-sm border border-primary/20" 
+                isActive(item.href)
+                  ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold shadow-sm border border-primary/20"
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
               )}
             >
@@ -166,19 +177,19 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
               {isActive(item.href) && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-primary/70 rounded-r-full shadow-lg"></div>
               )}
-              
+
               <div className={cn(
                 "flex items-center justify-center transition-transform group-hover:scale-110",
                 isActive(item.href) && "text-primary"
               )}>
                 {item.icon}
               </div>
-              
+
               {!collapsed && (
                 <>
                   <span className="flex-1 text-sm font-medium">{item.label}</span>
                   {item.badge !== undefined && item.badge > 0 && (
-                    <Badge 
+                    <Badge
                       variant={item.badgeVariant === 'urgent' ? 'destructive' : 'secondary'}
                       className={cn(
                         "ml-auto h-6 px-2 text-xs font-bold shadow-md",
@@ -190,7 +201,7 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
                   )}
                 </>
               )}
-              
+
               {collapsed && item.badge !== undefined && item.badge > 0 && (
                 <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive flex items-center justify-center">
                   <span className="text-[10px] font-bold text-destructive-foreground">{item.badge}</span>
@@ -218,22 +229,22 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
                 className={cn(
                   "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 relative overflow-hidden",
                   "hover:bg-sidebar-accent/80 hover:shadow-md",
-                  isActive(item.href) 
-                    ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold shadow-sm border border-primary/20" 
+                  isActive(item.href)
+                    ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold shadow-sm border border-primary/20"
                     : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
                 )}
               >
                 {isActive(item.href) && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-primary/70 rounded-r-full shadow-lg"></div>
                 )}
-                
+
                 <div className={cn(
                   "flex items-center justify-center transition-transform group-hover:scale-110",
                   isActive(item.href) && "text-primary"
                 )}>
                   {item.icon}
                 </div>
-                
+
                 {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
               </Link>
             ))}
@@ -278,7 +289,7 @@ export function Sidebar({ unreportedCount = 0, tomorrowCount = 0, enrollmentCoun
             </div>
           </div>
         )}
-        
+
         {/* Bouton réduire/agrandir */}
         <Button
           variant="ghost"

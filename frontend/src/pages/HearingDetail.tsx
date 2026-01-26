@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  File, 
-  Users, 
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  MapPin,
+  File,
+  Users,
   Edit,
   Trash2,
   CheckCircle,
@@ -211,7 +211,7 @@ export default function HearingDetail() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 m-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main info */}
           <div className="lg:col-span-2 space-y-6 lg:pr-4">
             {/* Audience info */}

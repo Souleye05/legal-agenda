@@ -169,7 +169,7 @@ export default function AppealReminders() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-5xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement des rappels...
           </div>
@@ -184,7 +184,7 @@ export default function AppealReminders() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -338,10 +338,10 @@ export default function AppealReminders() {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
+        </div >
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        < div className="grid grid-cols-1 md:grid-cols-3 gap-4" >
           <Card className="card-elevated">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-3 rounded-xl bg-destructive/10">
@@ -375,135 +375,138 @@ export default function AppealReminders() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div >
 
         {/* Active Reminders */}
-        {reminders.length > 0 ? (
-          <Card className="card-elevated">
-            <CardContent className="p-0">
-              <div className="p-4 border-b border-border/50">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Scale className="h-5 w-5 text-primary" />
-                  Recours à effectuer ({reminders.length})
-                </h3>
-              </div>
-              <div className="divide-y divide-border/50">
-                {reminders.map((reminder) => {
-                  const status = getReminderStatus(reminder.dateLimite);
-                  const daysLeftText = getDaysLeftText(reminder.dateLimite);
+        {
+          reminders.length > 0 ? (
+            <Card className="card-elevated">
+              <CardContent className="p-0">
+                <div className="p-4 border-b border-border/50">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Scale className="h-5 w-5 text-primary" />
+                    Recours à effectuer ({reminders.length})
+                  </h3>
+                </div>
+                <div className="divide-y divide-border/50">
+                  {reminders.map((reminder) => {
+                    const status = getReminderStatus(reminder.dateLimite);
+                    const daysLeftText = getDaysLeftText(reminder.dateLimite);
 
-                  return (
-                    <div
-                      key={reminder.id}
-                      className="p-4 hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-medium text-muted-foreground">
-                              {reminder.affaire?.reference}
-                            </span>
-                            {getStatusBadge(status)}
-                          </div>
-                          <p className="font-medium text-foreground">
-                            {reminder.affaire?.titre}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {reminder.affaire?.juridiction} • {reminder.affaire?.chambre}
-                          </p>
-                          {reminder.notes && (
-                            <p className="text-sm text-muted-foreground mt-2 italic">
-                              {reminder.notes}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-4 mt-3 text-sm">
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <Calendar className="h-4 w-4" />
-                              <span>
-                                Date limite: {format(new Date(reminder.dateLimite), 'dd MMMM yyyy', { locale: fr })}
+                    return (
+                      <div
+                        key={reminder.id}
+                        className="p-4 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {reminder.affaire?.reference}
                               </span>
+                              {getStatusBadge(status)}
                             </div>
-                            <span
-                              className={`font-medium ${
-                                status === 'expired'
+                            <p className="font-medium text-foreground">
+                              {reminder.affaire?.titre}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {reminder.affaire?.juridiction} • {reminder.affaire?.chambre}
+                            </p>
+                            {reminder.notes && (
+                              <p className="text-sm text-muted-foreground mt-2 italic">
+                                {reminder.notes}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-4 mt-3 text-sm">
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                <span>
+                                  Date limite: {format(new Date(reminder.dateLimite), 'dd MMMM yyyy', { locale: fr })}
+                                </span>
+                              </div>
+                              <span
+                                className={`font-medium ${status === 'expired'
                                   ? 'text-destructive'
                                   : status === 'today' || status === 'urgent'
-                                  ? 'text-urgent'
-                                  : 'text-muted-foreground'
-                              }`}
+                                    ? 'text-urgent'
+                                    : 'text-muted-foreground'
+                                  }`}
+                              >
+                                {daysLeftText}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleMarkComplete(reminder.id)}
+                              disabled={markCompleteMutation.isPending}
+                              className="bg-success hover:bg-success/90"
                             >
-                              {daysLeftText}
-                            </span>
+                              <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                              {markCompleteMutation.isPending ? 'En cours...' : 'Marquer effectué'}
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleMarkComplete(reminder.id)}
-                            disabled={markCompleteMutation.isPending}
-                            className="bg-success hover:bg-success/90"
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-1.5" />
-                            {markCompleteMutation.isPending ? 'En cours...' : 'Marquer effectué'}
-                          </Button>
-                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="card-elevated">
-            <CardContent className="p-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
-                <CheckCircle2 className="h-6 w-6 text-success" />
-              </div>
-              <h3 className="font-semibold text-foreground">Tout est à jour</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Aucun recours en attente
-              </p>
-            </CardContent>
-          </Card>
-        )}
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="card-elevated">
+              <CardContent className="p-8 text-center">
+                <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="h-6 w-6 text-success" />
+                </div>
+                <h3 className="font-semibold text-foreground">Tout est à jour</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Aucun recours en attente
+                </p>
+              </CardContent>
+            </Card>
+          )
+        }
 
         {/* Completed Reminders */}
-        {completedReminders.length > 0 && (
-          <Card className="card-elevated opacity-75">
-            <CardContent className="p-0">
-              <div className="p-4 border-b border-border/50">
-                <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  Recours effectués ({completedReminders.length})
-                </h3>
-              </div>
-              <div className="divide-y divide-border/50">
-                {completedReminders.slice(0, 10).map((reminder) => (
-                  <div key={reminder.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-muted-foreground line-through">
-                          {reminder.affaire?.titre}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Effectué le{' '}
-                          {reminder.dateEffectue &&
-                            format(new Date(reminder.dateEffectue), 'dd/MM/yyyy', { locale: fr })}
-                        </p>
+        {
+          completedReminders.length > 0 && (
+            <Card className="card-elevated opacity-75">
+              <CardContent className="p-0">
+                <div className="p-4 border-b border-border/50">
+                  <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5" />
+                    Recours effectués ({completedReminders.length})
+                  </h3>
+                </div>
+                <div className="divide-y divide-border/50">
+                  {completedReminders.slice(0, 10).map((reminder) => (
+                    <div key={reminder.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-muted-foreground line-through">
+                            {reminder.affaire?.titre}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Effectué le{' '}
+                            {reminder.dateEffectue &&
+                              format(new Date(reminder.dateEffectue), 'dd/MM/yyyy', { locale: fr })}
+                          </p>
+                        </div>
+                        <Badge variant="secondary" className="bg-success/10 text-success">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Effectué
+                        </Badge>
                       </div>
-                      <Badge variant="secondary" className="bg-success/10 text-success">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Effectué
-                      </Badge>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </MainLayout>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        }
+      </div >
+    </MainLayout >
   );
 }

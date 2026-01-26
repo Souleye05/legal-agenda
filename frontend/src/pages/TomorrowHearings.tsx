@@ -73,7 +73,7 @@ export default function TomorrowHearings() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement...
           </div>
@@ -84,8 +84,8 @@ export default function TomorrowHearings() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
           title="Audiences de demain"
           description={format(tomorrow, "EEEE d MMMM yyyy", { locale: fr })}
         >
@@ -122,7 +122,7 @@ export default function TomorrowHearings() {
               <div className="flex items-center gap-2 p-4 rounded-lg bg-accent/10 border border-accent/20">
                 <CalendarCheck className="h-5 w-5 text-accent flex-shrink-0" />
                 <p className="text-sm text-foreground">
-                  <strong>{tomorrowHearings.length} audience{tomorrowHearings.length > 1 ? 's' : ''}</strong> prévue{tomorrowHearings.length > 1 ? 's' : ''} demain. 
+                  <strong>{tomorrowHearings.length} audience{tomorrowHearings.length > 1 ? 's' : ''}</strong> prévue{tomorrowHearings.length > 1 ? 's' : ''} demain.
                   {preparedIds.size < tomorrowHearings.length && (
                     <> {tomorrowHearings.length - preparedIds.size} restante{tomorrowHearings.length - preparedIds.size > 1 ? 's' : ''} à préparer.</>
                   )}

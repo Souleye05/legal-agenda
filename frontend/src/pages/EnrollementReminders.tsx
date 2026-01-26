@@ -16,7 +16,7 @@ import type { Hearing } from '@/types/api';
 export default function EnrollmentReminders() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   // Fetch enrollment reminders from API
   const { data: reminders = [], isLoading } = useQuery<Hearing[]>({
     queryKey: ['enrollment-reminders'],
@@ -77,7 +77,7 @@ export default function EnrollmentReminders() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-5xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement des rappels...
           </div>
@@ -88,12 +88,12 @@ export default function EnrollmentReminders() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <PageHeader 
+          <PageHeader
             title="Rappels enrôlement"
             description="Gérez vos rappels d'enrôlement pour les audiences à venir"
           />
@@ -149,13 +149,13 @@ export default function EnrollmentReminders() {
               <div className="divide-y divide-border/50">
                 {pendingReminders.map((reminder) => {
                   if (!reminder.dateRappelEnrolement) return null;
-                  
+
                   const status = getReminderStatus(reminder.dateRappelEnrolement);
                   const hearingDate = new Date(reminder.date);
                   const daysUntilHearing = differenceInDays(hearingDate, today);
-                  
+
                   return (
-                    <div 
+                    <div
                       key={reminder.id}
                       className="p-4 hover:bg-muted/30 transition-colors"
                     >
@@ -193,7 +193,7 @@ export default function EnrollmentReminders() {
                           <p className={`text-sm font-medium ${status === 'overdue' ? 'text-urgent' : status === 'today' ? 'text-warning' : 'text-muted-foreground'}`}>
                             Rappel: {format(new Date(reminder.dateRappelEnrolement), 'dd/MM/yyyy', { locale: fr })}
                           </p>
-                          <Button 
+                          <Button
                             size="sm"
                             onClick={() => handleMarkComplete(reminder.id)}
                             disabled={markCompleteMutation.isPending}

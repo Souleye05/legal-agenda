@@ -52,7 +52,7 @@ export default function RecordHearingResult() {
       setLoading(true);
       const hearing: any = await api.get(`/hearings/${id}`);
       setHearing(hearing);
-      
+
       if (hearing.resultat) {
         toast({
           title: 'Attention',
@@ -81,7 +81,7 @@ export default function RecordHearingResult() {
     setIsSubmitting(true);
     try {
       const data: any = { type: resultType };
-      
+
       if (resultType === 'RENVOI') {
         if (!newDate || !reason) {
           toast({
@@ -124,12 +124,12 @@ export default function RecordHearingResult() {
       }
 
       await api.recordHearingResult(id, data);
-      
+
       toast({
         title: 'Succès',
         description: 'Le résultat a été enregistré avec succès',
       });
-      
+
       navigate(`/audiences/${id}`);
     } catch (error: any) {
       toast({
@@ -158,7 +158,7 @@ export default function RecordHearingResult() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-2xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -186,8 +186,8 @@ export default function RecordHearingResult() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-3">
                 <Label>Type de résultat *</Label>
-                <RadioGroup 
-                  value={resultType} 
+                <RadioGroup
+                  value={resultType}
                   onValueChange={(v) => setResultType(v as HearingResultType)}
                   className="grid grid-cols-3 gap-3"
                 >
@@ -360,15 +360,15 @@ export default function RecordHearingResult() {
               )}
 
               <div className="flex gap-3 pt-4">
-                <Button 
+                <Button
                   type="button"
-                  variant="outline" 
+                  variant="outline"
                   className="flex-1"
                   onClick={() => navigate(-1)}
                 >
                   Annuler
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   className="flex-1"
                   disabled={isSubmitting}

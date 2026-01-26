@@ -54,11 +54,11 @@ export default function Cases() {
 
   const filteredCases = useMemo(() => {
     return transformedCases.filter((c) => {
-      const matchesSearch = 
+      const matchesSearch =
         c.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         c.reference.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         (c.parties && c.parties.some((p) => p.nom?.toLowerCase().includes(debouncedSearch.toLowerCase())));
-      
+
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -93,8 +93,8 @@ export default function Cases() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
           title="Affaires"
           description="Gérez vos dossiers et affaires en cours"
           action={{
@@ -151,7 +151,7 @@ export default function Cases() {
                         <Pagination>
                           <PaginationContent>
                             <PaginationItem>
-                              <PaginationPrevious 
+                              <PaginationPrevious
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                               />
@@ -168,7 +168,7 @@ export default function Cases() {
                               </PaginationItem>
                             ))}
                             <PaginationItem>
-                              <PaginationNext 
+                              <PaginationNext
                                 onClick={() => setCurrentPage(p => Math.min(totalActivePages, p + 1))}
                                 className={currentPage === totalActivePages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                               />
@@ -197,7 +197,7 @@ export default function Cases() {
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>
-                          <PaginationPrevious 
+                          <PaginationPrevious
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                             className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                           />
@@ -214,7 +214,7 @@ export default function Cases() {
                           </PaginationItem>
                         ))}
                         <PaginationItem>
-                          <PaginationNext 
+                          <PaginationNext
                             onClick={() => setCurrentPage(p => Math.min(totalClosedPages, p + 1))}
                             className={currentPage === totalClosedPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                           />

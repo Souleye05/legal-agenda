@@ -130,12 +130,12 @@ export default function EditCase() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-2xl mx-auto space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <PageHeader 
+          <PageHeader
             title="Modifier l'affaire"
             description={`Référence: ${caseData.reference}`}
           />
@@ -164,8 +164,8 @@ export default function EditCase() {
                   <Label>Juridiction *</Label>
                   {!showCustomJurisdiction ? (
                     <>
-                      <Select 
-                        value={watch('juridiction')} 
+                      <Select
+                        value={watch('juridiction')}
                         onValueChange={(value) => {
                           if (value === '__custom__') {
                             setShowCustomJurisdiction(true);
@@ -217,8 +217,8 @@ export default function EditCase() {
                   <Label>Chambre</Label>
                   {!showCustomChamber ? (
                     <>
-                      <Select 
-                        value={watch('chambre') || ''} 
+                      <Select
+                        value={watch('chambre') || ''}
                         onValueChange={(value) => {
                           if (value === '__custom__') {
                             setShowCustomChamber(true);
@@ -294,23 +294,23 @@ export default function EditCase() {
 
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Note :</strong> La modification des parties et du numéro de référence n'est pas disponible pour le moment. 
+                  <strong>Note :</strong> La modification des parties et du numéro de référence n'est pas disponible pour le moment.
                   Contactez un administrateur si vous devez modifier ces informations.
                 </p>
               </div>
 
               {/* Actions */}
               <div className="flex gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   className="flex-1"
                   onClick={() => navigate(-1)}
                 >
                   Annuler
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="flex-1"
                   disabled={isSubmitting || updateCaseMutation.isPending}
                 >

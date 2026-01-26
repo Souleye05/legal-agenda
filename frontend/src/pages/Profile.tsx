@@ -20,7 +20,7 @@ export default function Profile() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement...
           </div>
@@ -32,7 +32,7 @@ export default function Profile() {
   if (!user) {
     return (
       <MainLayout>
-        <div className="p-6 md:p-8 max-w-4xl mx-auto">
+        <div>
           <div className="card-elevated p-8 text-center">
             <p className="text-muted-foreground">Impossible de charger le profil</p>
           </div>
@@ -43,8 +43,8 @@ export default function Profile() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
           title="Mon profil"
           description="Gérer vos informations personnelles"
         />
@@ -67,7 +67,7 @@ export default function Profile() {
                 <h2 className="text-2xl font-semibold text-foreground">{user.fullName}</h2>
                 <p className="text-muted-foreground">{user.email}</p>
               </div>
-              <Badge 
+              <Badge
                 variant={user.role === 'ADMIN' ? 'default' : 'secondary'}
                 className="text-sm"
               >

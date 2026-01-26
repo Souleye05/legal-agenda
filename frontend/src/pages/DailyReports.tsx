@@ -54,8 +54,8 @@ export default function DailyReports() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-8 animate-fade-in">
+        <PageHeader
           title="Comptes rendus"
           description="Générer les comptes rendus d'audience et fiches de suivi"
         />
@@ -198,8 +198,8 @@ export default function DailyReports() {
           </div>
 
           <div className="text-xs text-muted-foreground mt-4 p-3 border border-dashed rounded-lg">
-            <strong>Utilisation :</strong> Cette fiche permet aux collaborateurs de noter les résultats d'audience 
-            (renvoi avec date et motif, radiation avec motif, ou délibéré) directement sur papier, 
+            <strong>Utilisation :</strong> Cette fiche permet aux collaborateurs de noter les résultats d'audience
+            (renvoi avec date et motif, radiation avec motif, ou délibéré) directement sur papier,
             puis de transmettre la fiche à la secrétaire pour saisie dans l'application.
           </div>
         </div>

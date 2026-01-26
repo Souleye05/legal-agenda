@@ -93,12 +93,12 @@ export default function NewCase() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/affaires')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <PageHeader 
+          <PageHeader
             title="Nouvelle affaire"
             description="Créer un nouveau dossier"
           />
@@ -107,7 +107,7 @@ export default function NewCase() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="card-elevated p-6 space-y-4">
             <h3 className="font-semibold text-foreground">Informations générales</h3>
-            
+
             <div className="space-y-2">
               <Label htmlFor="reference">Numéro de référence *</Label>
               <Input
@@ -137,8 +137,8 @@ export default function NewCase() {
                 <Label>Juridiction *</Label>
                 {!showCustomJurisdiction ? (
                   <>
-                    <Select 
-                      value={watch('juridiction')} 
+                    <Select
+                      value={watch('juridiction')}
                       onValueChange={(value) => {
                         if (value === '__custom__') {
                           setShowCustomJurisdiction(true);
@@ -190,8 +190,8 @@ export default function NewCase() {
                 <Label>Chambre (optionnel)</Label>
                 {!showCustomChamber ? (
                   <>
-                    <Select 
-                      value={watch('chambre') || ''} 
+                    <Select
+                      value={watch('chambre') || ''}
                       onValueChange={(value) => {
                         if (value === '__custom__') {
                           setShowCustomChamber(true);
@@ -261,10 +261,10 @@ export default function NewCase() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Demandeur(s)</Label>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => append({ nom: '', role: 'demandeur' })}
                 >
                   <span className="text-lg mr-1">+</span>
@@ -289,10 +289,10 @@ export default function NewCase() {
                           </p>
                         )}
                       </div>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => remove(index)}
                       >
                         <span className="text-destructive text-xl">×</span>
@@ -307,10 +307,10 @@ export default function NewCase() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Défendeur(s)</Label>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => append({ nom: '', role: 'defendeur' })}
                 >
                   <span className="text-lg mr-1">+</span>
@@ -335,10 +335,10 @@ export default function NewCase() {
                           </p>
                         )}
                       </div>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => remove(index)}
                       >
                         <span className="text-destructive text-xl">×</span>
@@ -353,10 +353,10 @@ export default function NewCase() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Conseil adverse (optionnel)</Label>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => append({ nom: '', role: 'conseil_adverse' })}
                 >
                   <span className="text-lg mr-1">+</span>
@@ -378,10 +378,10 @@ export default function NewCase() {
                         </p>
                       )}
                     </div>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => remove(index)}
                     >
                       <span className="text-destructive text-xl"></span>
@@ -415,17 +415,17 @@ export default function NewCase() {
 
           {/* Actions */}
           <div className="flex gap-3">
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="flex-1" 
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
               onClick={() => navigate('/affaires')}
             >
               Annuler
             </Button>
-            <Button 
-              type="submit" 
-              className="flex-1" 
+            <Button
+              type="submit"
+              className="flex-1"
               disabled={isSubmitting || createCaseMutation.isPending}
             >
               {isSubmitting || createCaseMutation.isPending ? 'Création...' : 'Créer l\'affaire'}

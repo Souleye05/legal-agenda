@@ -47,8 +47,8 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
-      <div className="p-6 md:p-8 max-w-4xl  mx-auto space-y-8 animate-fade-in">
-        <PageHeader 
+      <div className="space-y-8 animate-fade-in">
+        <PageHeader
           title="Tableau de bord"
           description="Vue d'ensemble de votre activité juridique"
         />
