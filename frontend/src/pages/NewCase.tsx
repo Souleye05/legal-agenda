@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
-import { PlusCircle, Trash2, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createCaseSchema, type CreateCaseFormData } from '@/lib/validations';
 import { JURISDICTION_OPTIONS, CHAMBER_OPTIONS } from '@/lib/constants';
@@ -270,7 +270,7 @@ export default function NewCase() {
                   size="sm" 
                   onClick={() => append({ nom: '', role: 'demandeur' })}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <span className="text-lg mr-1">+</span>
                   Ajouter
                 </Button>
               </div>
@@ -296,7 +296,7 @@ export default function NewCase() {
                         size="icon" 
                         onClick={() => remove(index)}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <span className="text-destructive text-xl"></span>
                       </Button>
                     )}
                   </div>
@@ -314,7 +314,7 @@ export default function NewCase() {
                   size="sm" 
                   onClick={() => append({ nom: '', role: 'defendeur' })}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <span className="text-lg mr-1">+</span>
                   Ajouter
                 </Button>
               </div>
@@ -340,7 +340,7 @@ export default function NewCase() {
                         size="icon" 
                         onClick={() => remove(index)}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <span className="text-destructive text-xl"></span>
                       </Button>
                     )}
                   </div>
@@ -358,7 +358,7 @@ export default function NewCase() {
                   size="sm" 
                   onClick={() => append({ nom: '', role: 'conseil_adverse' })}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <span className="text-lg mr-1">+</span>
                   Ajouter
                 </Button>
               </div>
@@ -383,7 +383,7 @@ export default function NewCase() {
                       size="icon" 
                       onClick={() => remove(index)}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <span className="text-destructive text-xl"></span>
                     </Button>
                   </div>
                 );

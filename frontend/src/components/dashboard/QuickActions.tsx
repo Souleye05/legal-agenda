@@ -1,4 +1,4 @@
-import { PlusCircle, Calendar, FileText, Clock } from 'lucide-react';
+import { Calendar, FileText, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function QuickActions() {
