@@ -63,7 +63,7 @@ model Affaire {
   reference   String        @unique // AFF-2026-0001
   titre       String        // X c/ Y - expulsion
   juridiction String
-  chambre     String
+  chambre     String?
   ville       String?
   statut      StatutAffaire @default(ACTIVE)
   observations String?      @db.Text
