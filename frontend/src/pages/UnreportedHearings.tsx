@@ -4,11 +4,13 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { HearingCard } from '@/components/hearings/HearingCard';
 import { api } from '@/lib/api';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Gavel } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -47,12 +49,23 @@ export default function UnreportedHearings() {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // Appeal reminder states
+  const [hasAppealReminder, setHasAppealReminder] = useState(true);
+  const [appealDeadlineDays, setAppealDeadlineDays] = useState(10);
+  
+  // Calculate appeal deadline date
+  const appealDeadlineDate = hasAppealReminder && resultType === 'DELIBERE'
+    ? new Date(Date.now() + appealDeadlineDays * 24 * 60 * 60 * 1000)
+    : undefined;
 
   const handleRecordResult = (hearing: Hearing & { affaire: Case }) => {
     setSelectedHearing(hearing);
     setResultType('RENVOI');
     setNewDate(undefined);
     setReason('');
+    setHasAppealReminder(true);
+    setAppealDeadlineDays(10);
   };
 
   const handleSubmit = async () => {
@@ -69,6 +82,12 @@ export default function UnreportedHearings() {
         data.motifRadiation = reason;
       } else if (resultType === 'DELIBERE') {
         data.texteDelibere = reason;
+        
+        // Add appeal reminder if enabled
+        if (hasAppealReminder && appealDeadlineDate) {
+          data.creerRappelRecours = true;
+          data.dateLimiteRecours = appealDeadlineDate.toISOString();
+        }
       }
 
       await api.recordHearingResult(selectedHearing.id, data);
@@ -292,17 +311,68 @@ export default function UnreportedHearings() {
                 )}
 
                 {resultType === 'DELIBERE' && (
-                  <div className="space-y-2">
-                    <Label>Résumé du délibéré *</Label>
-                    <Textarea
-                      placeholder="Ex: Condamnation à 5000€ de dommages-intérêts..."
-                      value={reason}
-                      onChange={(e) => setReason(e.target.value)}
-                      rows={4}
-                    />
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Résumé du délibéré *</Label>
+                      <Textarea
+                        placeholder="Ex: Condamnation à 5000€ de dommages-intérêts..."
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+
+                    {/* Rappel recours */}
+                    <div className="space-y-3 p-4 rounded-xl bg-warning/5 border border-warning/20">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id="appealReminder"
+                          checked={hasAppealReminder}
+                          onCheckedChange={(checked) => setHasAppealReminder(checked as boolean)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <Gavel className="h-4 w-4 text-warning" />
+                          <Label htmlFor="appealReminder" className="text-sm font-medium cursor-pointer">
+                            Activer le rappel de recours
+                          </Label>
+                        </div>
+                      </div>
+
+                      {hasAppealReminder && (
+                        <div className="ml-6 space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">
+                              Délai de recours (jours)
+                            </Label>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={365}
+                              value={appealDeadlineDays}
+                              onChange={(e) => setAppealDeadlineDays(parseInt(e.target.value) || 10)}
+                              className="w-24"
+                            />
+                          </div>
+
+                          {appealDeadlineDate && (
+                            <div className="p-3 rounded-lg bg-card border border-border/50">
+                              <p className="text-sm text-muted-foreground">
+                                Date limite de recours:{' '}
+                                <span className="font-semibold text-foreground">
+                                  {format(appealDeadlineDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                                </span>
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Rappel quotidien jusqu'au recours effectué
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-
+                
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
