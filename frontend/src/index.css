@@ -26,8 +26,8 @@
     --muted: 220 14% 96%;
     --muted-foreground: 215 16% 47%;
 
-    /* Subtle Blue Accent */
-    --accent: 217 91% 60%;
+    /* Subtle Gray Accent */
+    --accent: 0 0% 15%;
     --accent-foreground: 0 0% 100%;
 
     /* Urgent/Warning - Amber Gold */
@@ -57,19 +57,19 @@
     /* Sidebar */
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 47% 18%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 222 47% 18%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 0 0% 0%;
 
     /* Status Colors */
     --status-active: 142 71% 45%;
     --status-closed: 215 16% 47%;
     --status-radiated: 0 84% 60%;
     --status-pending: 38 92% 50%;
-    --status-upcoming: 217 91% 60%;
+    --status-upcoming: 0 0% 20%;
   }
 
   .dark {
@@ -91,7 +91,7 @@
     --muted: 222 47% 15%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 60%;
+    --accent: 0 0% 20%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 30%;
@@ -103,12 +103,12 @@
 
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 47% 12%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 222 47% 12%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 0 0% 0%;
   }
 }
 
@@ -175,7 +175,7 @@
 
   /* Quick action button */
   .quick-action {
-    @apply flex flex-col items-center gap-2 p-4 rounded-xl bg-card border hover:border-primary/30 hover:shadow-[var(--shadow-md)] transition-all cursor-pointer;
+    @apply flex flex-col items-center gap-2 p-4 rounded-xl bg-card border hover:border-black/30 hover:shadow-[var(--shadow-md)] transition-all cursor-pointer;
   }
 
   /* Calendar cell */
