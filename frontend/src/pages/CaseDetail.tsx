@@ -208,7 +208,8 @@ export default function CaseDetail() {
                   .map((hearing: any) => (
                     <div
                       key={hearing.id}
-                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/audiences/${hearing.id}`)}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
@@ -245,7 +246,10 @@ export default function CaseDetail() {
                             size="sm"
                             variant="outline"
                             className="text-urgent border-urgent hover:bg-urgent/10"
-                            onClick={() => navigate(`/a-renseigner?hearing=${hearing.id}`)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/a-renseigner?hearing=${hearing.id}`);
+                            }}
                           >
                             Renseigner
                           </Button>

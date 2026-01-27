@@ -14,9 +14,9 @@ const CABINET_CONTACT = "Tel : +221 33 823 85 06 - Fax : +221 33 842 38 31 - BP 
 
 // Helper to add cabinet header with logo - matching the template
 function addCabinetHeader(doc: jsPDF, yPosition: number): number {
-  // Add logo at top left
+  // Add logo at top left - Agrandir pour meilleure visibilité
   try {
-    doc.addImage(logoCabinet, 'PNG', 20, yPosition, 50, 25);
+    doc.addImage(logoCabinet, 'PNG', 20, yPosition, 70, 35);
   } catch (e) {
     // Fallback if logo fails to load
     doc.setFontSize(14);
@@ -24,7 +24,7 @@ function addCabinetHeader(doc: jsPDF, yPosition: number): number {
     doc.text("CABINET Me IBRAHIMA NIANG", 20, yPosition + 15);
   }
   
-  return yPosition + 35;
+  return yPosition + 45;
 }
 
 // Helper to add footer with cabinet address
@@ -218,15 +218,15 @@ export function generateTrackingSheetPDF(hearings: HearingWithCase[], date: Date
         y = 20;
       }
       
-      // Jurisdiction header - Black background, white text
-      doc.setFillColor(20, 20, 20);
-      doc.rect(20, y - 5, 170, 8, 'F');
-      doc.setTextColor(255, 255, 255);
+      // Jurisdiction header - Simple border with bold text (économie d'encre)
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(20, y - 5, 170, 8, 'S');
+      doc.setTextColor(0, 0, 0);
       doc.setFontSize(11);
       doc.setFont('times', 'bold');
       doc.text(jurisdiction.toUpperCase(), 25, y);
       y += 10;
-      doc.setTextColor(0, 0, 0);
       
       jurisdictionHearings.forEach((hearing, index) => {
         if (y > 250) {
@@ -298,13 +298,6 @@ export function generateTrackingSheetPDF(hearings: HearingWithCase[], date: Date
   y += 10;
   doc.text('Signature: _________________________', 25, y);
   
-  // Add footers
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    addFooter(doc);
-  }
-  
   doc.save(`fiche-suivi-${format(date, 'yyyy-MM-dd')}.pdf`);
 }
 
@@ -340,9 +333,7 @@ export function generateTomorrowHearingsPDF(hearings: HearingWithCase[], date: D
       const demandeurs = parties.filter(p => p.role === 'DEMANDEUR').map(p => p.nom).join(', ');
       const defendeurs = parties.filter(p => p.role === 'DEFENDEUR').map(p => p.nom).join(', ');
       
-      // Header - Light gray background
-      doc.setFillColor(248, 248, 248);
-      doc.rect(20, y - 5, 170, 8, 'F');
+      // Header - Simple border (économie d'encre)
       doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.3);
       doc.rect(20, y - 5, 170, 8, 'S');

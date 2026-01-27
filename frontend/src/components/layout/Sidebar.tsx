@@ -134,16 +134,16 @@ export function Sidebar({
       )}
     >
       {/* Logo */}
-      <div className="flex items-center h-20 px-4 border-b border-gray-800">
+      <div className="flex items-center h-24 px-4 border-b border-gray-800">
         <Link to="/" className="flex items-center gap-3 w-full group">
           {!collapsed ? (
             <img 
               src={logoCabinet} 
               alt="Cabinet Me Ibrahima Niang" 
-              className="h-16 w-auto object-contain"
+              className="h-20 w-auto object-contain"
             />
           ) : (
-            <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-white overflow-hidden">
+            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white overflow-hidden">
               <img 
                 src={logoCabinet} 
                 alt="Cabinet" 

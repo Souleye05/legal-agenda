@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, Calendar, AlertTriangle, CalendarCheck, ClipboardList, Gavel } from 'lucide-react';
+import { Briefcase, Calendar, AlertTriangle, CalendarCheck, ClipboardList, Scale } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -59,6 +59,13 @@ export default function Dashboard() {
     queryFn: () => api.getEnrollmentReminders(),
   });
 
+  const { data: appealRemindersData = [] } = useQuery({
+    queryKey: ['appeal-reminders'],
+    queryFn: () => api.getAppealReminders(),
+  });
+
+  const appealReminders = Array.isArray(appealRemindersData) ? appealRemindersData : (appealRemindersData as any).data || [];
+
   // Calculate stats
   const activeCases = cases.filter((c) => c.statut === 'ACTIVE').length;
   const upcomingHearings = hearings.filter((h) => h.statut === 'A_VENIR').length;
@@ -113,8 +120,8 @@ export default function Dashboard() {
           />
           <StatCard
             title="Recours"
-            value={AppealReminders.length}
-            icon={Gavel}
+            value={appealReminders.length}
+            icon={Scale}
             variant="warning"
             description="À effectuer"
             onClick={() => navigate('/recours')}

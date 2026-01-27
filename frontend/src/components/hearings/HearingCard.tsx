@@ -43,9 +43,10 @@ export function HearingCard({
   return (
     <div 
       className={cn(
-        "card-elevated p-4",
+        "card-elevated p-4 cursor-pointer transition-all hover:shadow-lg",
         isUrgent && "border-urgent/30 bg-urgent/5"
       )}
+      onClick={() => navigate(`/audiences/${hearing.id}`)}
     >
       <div className="flex flex-col md:flex-row md:items-start gap-4">
         {/* Date block */}
@@ -130,7 +131,10 @@ export function HearingCard({
           <Button 
             size="sm"
             variant="outline"
-            onClick={() => navigate(`/audiences/${hearing.id}`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/audiences/${hearing.id}`);
+            }}
           >
             <Eye className="h-4 w-4 mr-1" />
             Détails
@@ -139,14 +143,20 @@ export function HearingCard({
             <Button 
               size="sm"
               className="bg-urgent hover:bg-urgent/90 text-urgent-foreground"
-              onClick={onRecordResult}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRecordResult();
+              }}
             >
               <FileEdit className="h-4 w-4 mr-1" />
               Renseigner
             </Button>
           )}
           {isUpcoming && (onTogglePrepared || onMarkPrepared) && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card">
+            <div 
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Switch
                 id={`prepared-${hearing.id}`}
                 checked={hearing.isPrepared}
