@@ -1,19 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Calendar,
-  Briefcase,
-  AlertTriangle,
+import { 
+  LayoutDashboard, 
+  Calendar, 
+  Briefcase, 
+  AlertTriangle, 
   CalendarCheck,
   Settings,
   Users,
   ChevronLeft,
   ChevronRight,
   Scale,
-  LogOut,
   File,
-  Sparkles,
   Crown,
   ClipboardList
 } from 'lucide-react';
@@ -39,13 +37,13 @@ interface SidebarProps {
   onItemClick?: () => void;
 }
 
-export function Sidebar({
-  unreportedCount = 0,
-  tomorrowCount = 0,
-  enrollmentCount = 0,
+export function Sidebar({ 
+  unreportedCount = 0, 
+  tomorrowCount = 0, 
+  enrollmentCount = 0, 
   appealCount = 0,
   className,
-  onItemClick
+  onItemClick 
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
@@ -129,26 +127,23 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex flex-col h-screen bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 border-r border-sidebar-border/50 transition-all duration-300 shadow-xl",
+        "flex flex-col h-screen bg-black border-r border-gray-800 transition-all duration-300",
         collapsed ? "w-[70px]" : "w-64",
         className
       )}
     >
-      {/* Logo avec effet glassmorphism */}
-      <div className="flex items-center h-20 px-4 border-b border-sidebar-border/30 bg-sidebar/50 backdrop-blur-sm">
+      {/* Logo */}
+      <div className="flex items-center h-20 px-4 border-b border-gray-800">
         <Link to="/" className="flex items-center gap-3 w-full group">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-lg rounded-xl group-hover:blur-xl transition-all"></div>
-            <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/80 shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200">
-              <Scale className="h-6 w-6 text-primary-foreground" />
-            </div>
+          <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-white">
+            <Scale className="h-6 w-6 text-black" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-base font-bold text-sidebar-foreground group-hover:text-primary transition-colors">
+              <span className="text-base font-bold text-white">
                 Legal Agenda
               </span>
-              <span className="text-xs text-sidebar-foreground/60 font-medium">
+              <span className="text-xs text-gray-400 font-medium">
                 Gestion Juridique
               </span>
             </div>
@@ -157,7 +152,7 @@ export function Sidebar({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         {/* Section principale */}
         <div className="space-y-1">
           {navItems.map((item) => (
@@ -166,34 +161,25 @@ export function Sidebar({
               to={item.href}
               onClick={onItemClick}
               className={cn(
-                "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 relative overflow-hidden",
-                "hover:bg-sidebar-accent/80 hover:shadow-md",
+                "group flex items-center gap-3 px-3.5 py-3 rounded-lg transition-all duration-200",
                 isActive(item.href)
-                  ? "bg-white text-primary font-bold shadow-lg border-2 border-primary"
-                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                  ? "bg-white text-black font-semibold"
+                  : "text-gray-400 hover:text-white hover:bg-gray-900"
               )}
             >
-              {/* Indicateur actif */}
-              {isActive(item.href) && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary rounded-r-full shadow-lg"></div>
-              )}
-
-              <div className={cn(
-                "flex items-center justify-center transition-transform group-hover:scale-110",
-                isActive(item.href) && "text-primary"
-              )}>
+              <div className="flex items-center justify-center">
                 {item.icon}
               </div>
-
+              
               {!collapsed && (
                 <>
                   <span className="flex-1 text-sm font-medium">{item.label}</span>
                   {item.badge !== undefined && item.badge > 0 && (
-                    <Badge
+                    <Badge 
                       variant={item.badgeVariant === 'urgent' ? 'destructive' : 'secondary'}
                       className={cn(
-                        "ml-auto h-6 px-2 text-xs font-bold shadow-md",
-                        item.badgeVariant === 'urgent' && "bg-destructive/90 text-destructive-foreground animate-pulse"
+                        "ml-auto h-6 px-2 text-xs font-bold",
+                        item.badgeVariant === 'urgent' && "bg-orange-500 text-white"
                       )}
                     >
                       {item.badge}
@@ -201,10 +187,10 @@ export function Sidebar({
                   )}
                 </>
               )}
-
+              
               {collapsed && item.badge !== undefined && item.badge > 0 && (
-                <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-destructive-foreground">{item.badge}</span>
+                <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-white">{item.badge}</span>
                 </div>
               )}
             </Link>
@@ -212,91 +198,78 @@ export function Sidebar({
         </div>
 
         {/* Section Administration */}
-        <div className="pt-6 mt-6 border-t border-sidebar-border/30">
-          {!collapsed && (
-            <div className="flex items-center gap-2 px-3 mb-3">
-              <Crown className="h-3.5 w-3.5 text-sidebar-foreground/40" />
-              <span className="text-xs font-bold text-sidebar-foreground/40 uppercase tracking-wider">
-                Administration
-              </span>
+        {settingsItems.length > 0 && (
+          <div className="pt-6 mt-6 border-t border-gray-800">
+            {!collapsed && (
+              <div className="flex items-center gap-2 px-3 mb-3">
+                <Crown className="h-3.5 w-3.5 text-gray-500" />
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Administration
+                </span>
+              </div>
+            )}
+            <div className="space-y-1">
+              {settingsItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={cn(
+                    "group flex items-center gap-3 px-3.5 py-3 rounded-lg transition-all duration-200",
+                    isActive(item.href)
+                      ? "bg-white text-black font-semibold"
+                      : "text-gray-400 hover:text-white hover:bg-gray-900"
+                  )}
+                >
+                  <div className="flex items-center justify-center">
+                    {item.icon}
+                  </div>
+                  
+                  {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                </Link>
+              ))}
             </div>
-          )}
-          <div className="space-y-1">
-            {settingsItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 relative overflow-hidden",
-                  "hover:bg-sidebar-accent/80 hover:shadow-md",
-                  isActive(item.href)
-                    ? "bg-white text-primary font-bold shadow-lg border-2 border-primary"
-                    : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
-                )}
-              >
-                {isActive(item.href) && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary rounded-r-full shadow-lg"></div>
-                )}
-
-                <div className={cn(
-                  "flex items-center justify-center transition-transform group-hover:scale-110",
-                  isActive(item.href) && "text-primary"
-                )}>
-                  {item.icon}
-                </div>
-
-                {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-              </Link>
-            ))}
           </div>
-        </div>
+        )}
       </nav>
 
       {/* Footer avec profil utilisateur */}
-      <div className="p-4 border-t border-sidebar-border/30 bg-sidebar/50 backdrop-blur-sm space-y-3">
+      <div className="p-4 border-t border-gray-800 space-y-3">
         {/* Profil utilisateur */}
         {!collapsed && (
-          <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-sidebar-accent/50 hover:bg-sidebar-accent transition-all duration-200 cursor-pointer group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-md rounded-full"></div>
-              <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-primary via-primary/90 to-primary/70 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all">
-                <span className="text-sm font-bold text-primary-foreground">
-                  {getInitials()}
-                </span>
-              </div>
+          <div className="flex items-center gap-3 px-3 py-3 rounded-lg bg-gray-900 hover:bg-gray-800 transition-all duration-200 cursor-pointer group">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+              <span className="text-sm font-bold text-black">
+                {getInitials()}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-sidebar-foreground truncate">
+              <p className="text-sm font-semibold text-white truncate">
                 {user?.fullName || 'Utilisateur'}
               </p>
-              <p className="text-xs text-sidebar-foreground/60 truncate font-medium">
+              <p className="text-xs text-gray-400 truncate font-medium">
                 {user?.role === 'ADMIN' ? 'Administrateur' : 'Collaborateur'}
               </p>
             </div>
-            <Sparkles className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
           </div>
         )}
 
         {collapsed && (
           <div className="flex justify-center">
-            <div className="relative group cursor-pointer">
-              <div className="absolute inset-0 bg-primary/20 blur-md rounded-full"></div>
-              <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-primary via-primary/90 to-primary/70 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all">
-                <span className="text-sm font-bold text-primary-foreground">
-                  {getInitials()}
-                </span>
-              </div>
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center cursor-pointer hover:scale-105 transition-all">
+              <span className="text-sm font-bold text-black">
+                {getInitials()}
+              </span>
             </div>
           </div>
         )}
-
+        
         {/* Bouton réduire/agrandir */}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
-            "w-full justify-center text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-xl h-10 font-medium transition-all duration-200 hover:shadow-md",
+            "w-full justify-center text-gray-400 hover:text-white hover:bg-gray-900 rounded-lg h-10 font-medium transition-all duration-200",
             collapsed && "px-0"
           )}
         >
