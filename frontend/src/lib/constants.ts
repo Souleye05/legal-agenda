@@ -97,7 +97,7 @@ export const QUERY_CONFIG = {
  * Limites de pagination
  */
 export const PAGINATION = {
-  DEFAULT_PAGE_SIZE: 20,
+  DEFAULT_PAGE_SIZE: 10,
   MAX_PAGE_SIZE: 100,
 } as const;
 
