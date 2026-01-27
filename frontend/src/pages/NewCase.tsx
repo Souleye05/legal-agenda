@@ -124,7 +124,7 @@ export default function NewCase() {
               <Label htmlFor="titre">Intitulé de l'affaire *</Label>
               <Input
                 id="titre"
-                placeholder="Ex: Dupont c/ Martin - Expulsion"
+                placeholder="Moustapha NDIAYE c/ SGBS"
                 {...register('titre')}
               />
               {errors.titre && (

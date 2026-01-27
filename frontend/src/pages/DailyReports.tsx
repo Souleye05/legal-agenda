@@ -11,7 +11,7 @@ import { File, Download, Printer, CalendarIcon, FileCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Hearing } from '@/types/api';
-// import { generateDailyReportPDF, generateTrackingSheetPDF } from '@/lib/pdf-generator';
+import { generateDailyReportPDF, generateTrackingSheetPDF } from '@/lib/pdf-generator';
 import { toast } from 'sonner';
 
 export default function DailyReports() {
@@ -24,32 +24,66 @@ export default function DailyReports() {
     queryFn: () => api.getHearings(),
   });
 
+  // Fetch all cases
+  const { data: allCases = [] } = useQuery({
+    queryKey: ['cases'],
+    queryFn: () => api.getCases(),
+  });
+
   const getHearingsForDate = (date: Date): Hearing[] => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return allHearings.filter(h => format(new Date(h.date), 'yyyy-MM-dd') === dateStr);
   };
 
-  const selectedDateHearings = getHearingsForDate(selectedDate);
-  const tomorrowHearings = getHearingsForDate(tomorrowDate);
+  // Enrich hearings with case data
+  const enrichHearingsWithCases = (hearings: Hearing[]) => {
+    return hearings.map(hearing => ({
+      ...hearing,
+      affaire: allCases.find(c => c.id === hearing.affaireId)
+    })).filter(h => h.affaire); // Only include hearings with valid cases
+  };
+
+  const selectedDateHearings = enrichHearingsWithCases(getHearingsForDate(selectedDate));
+  const tomorrowHearings = enrichHearingsWithCases(getHearingsForDate(tomorrowDate));
 
   const handleGenerateDailyReport = () => {
-    // generateDailyReportPDF(selectedDateHearings, selectedDate);
-    toast.success('Compte rendu PDF téléchargé');
+    try {
+      generateDailyReportPDF(selectedDateHearings as any, selectedDate);
+      toast.success('Compte rendu PDF téléchargé');
+    } catch (error) {
+      toast.error('Erreur lors de la génération du PDF');
+      console.error(error);
+    }
   };
 
   const handlePrintDailyReport = () => {
-    // generateDailyReportPDF(selectedDateHearings, selectedDate);
-    toast.success('PDF généré - utilisez Ctrl+P pour imprimer');
+    try {
+      generateDailyReportPDF(selectedDateHearings as any, selectedDate);
+      toast.success('PDF généré - utilisez Ctrl+P pour imprimer');
+    } catch (error) {
+      toast.error('Erreur lors de la génération du PDF');
+      console.error(error);
+    }
   };
 
   const handleGenerateTrackingSheet = () => {
-    // generateTrackingSheetPDF(tomorrowHearings, tomorrowDate);
-    toast.success('Fiche de suivi PDF téléchargée');
+    try {
+      generateTrackingSheetPDF(tomorrowHearings as any, tomorrowDate);
+      toast.success('Fiche de suivi PDF téléchargée');
+    } catch (error) {
+      toast.error('Erreur lors de la génération du PDF');
+      console.error(error);
+    }
   };
 
   const handlePrintTrackingSheet = () => {
-    // generateTrackingSheetPDF(tomorrowHearings, tomorrowDate);
-    toast.success('PDF généré - utilisez Ctrl+P pour imprimer');
+    try {
+      generateTrackingSheetPDF(tomorrowHearings as any, tomorrowDate);
+      toast.success('PDF généré - utilisez Ctrl+P pour imprimer');
+    } catch (error) {
+      toast.error('Erreur lors de la génération du PDF');
+      console.error(error);
+    }
   };
 
   return (

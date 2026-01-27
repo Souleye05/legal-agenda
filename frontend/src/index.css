@@ -16,19 +16,19 @@
     --popover-foreground: 222 47% 11%;
 
     /* Deep Navy Blue - Trust & Professionalism */
-    --primary: 0 0% 0%;
+    --primary: 0 0% 8%;
     --primary-foreground: 0 0% 100%;
 
-    /* Soft Gray-Blue */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+   /* Light Gray */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Subtle Gray Accent */
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Subtle Gray */
+    --accent: 0 0% 92%;
+    --accent-foreground: 0 0% 10%;
 
     /* Urgent/Warning - Amber Gold */
     --urgent: 38 92% 50%;

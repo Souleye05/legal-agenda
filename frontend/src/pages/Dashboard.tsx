@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, Calendar, AlertTriangle, CalendarCheck, ClipboardList } from 'lucide-react';
+import { Briefcase, Calendar, AlertTriangle, CalendarCheck, ClipboardList, Gavel } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -54,11 +54,12 @@ export default function Dashboard() {
         />
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           <StatCard
             title="Affaires actives"
             value={activeCases}
             icon={Briefcase}
+            variant="primary"
             onClick={() => navigate('/affaires')}
           />
           <StatCard
@@ -88,8 +89,17 @@ export default function Dashboard() {
             title="Enrôlements"
             value={enrollmentReminders.length}
             icon={ClipboardList}
+            variant='primary'
             description="Rappels actifs"
             onClick={() => navigate('/rappels-enrolement')}
+          />
+          <StatCard
+            title="Recours"
+            value={AppealReminders.length}
+            icon={Gavel}
+            variant="warning"
+            description="À effectuer"
+            onClick={() => navigate('/recours')}
           />
         </div>
 

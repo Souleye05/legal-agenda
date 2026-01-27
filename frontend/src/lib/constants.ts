@@ -37,7 +37,8 @@ export const CASE_STATUS_LABELS: Record<CaseStatus, string> = {
  * Options de juridiction
  */
 export const JURISDICTION_OPTIONS = [
-  'Tribunal Judiciaire',
+  'Tribunal de Grande Instance',
+  'Tribunal d\'Instance',
   'Tribunal de Commerce',
   'Tribunal de Travail',
   'Cour d\'Appel',
@@ -53,6 +54,7 @@ export const CHAMBER_OPTIONS = [
   'Chambre civile',
   'Chambre commerciale',
   'Chambre sociale',
+  'Chambre criminelle',
   'Chambre des référés',
   'Chambre correctionnelle',
   'Chambre de l\'instruction',

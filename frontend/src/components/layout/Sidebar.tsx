@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import logoCabinet from '@/assets/logo-cabinet.png';
 
 interface NavItem {
   label: string;
@@ -135,17 +136,19 @@ export function Sidebar({
       {/* Logo */}
       <div className="flex items-center h-20 px-4 border-b border-gray-800">
         <Link to="/" className="flex items-center gap-3 w-full group">
-          <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-white">
-            <Scale className="h-6 w-6 text-black" />
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="text-base font-bold text-white">
-                Legal Agenda
-              </span>
-              <span className="text-xs text-gray-400 font-medium">
-                Gestion Juridique
-              </span>
+          {!collapsed ? (
+            <img 
+              src={logoCabinet} 
+              alt="Cabinet Me Ibrahima Niang" 
+              className="h-16 w-auto object-contain"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-white overflow-hidden">
+              <img 
+                src={logoCabinet} 
+                alt="Cabinet" 
+                className="h-full w-full object-cover"
+              />
             </div>
           )}
         </Link>
