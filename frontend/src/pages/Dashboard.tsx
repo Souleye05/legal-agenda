@@ -19,16 +19,30 @@ export default function Dashboard() {
   const { data: casesData = [] } = useQuery({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   const { data: hearingsData = [] } = useQuery({
     queryKey: ['hearings'],
     queryFn: () => api.getHearings(),
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Gérer le cas où l'API retourne un objet paginé ou un tableau
   const cases = Array.isArray(casesData) ? casesData : (casesData as any).data || [];
   const hearings = Array.isArray(hearingsData) ? hearingsData : (hearingsData as any).data || [];
+
+  // Debug logging
+  console.log('[Dashboard] Cases data:', { 
+    raw: casesData, 
+    processed: cases, 
+    length: cases.length,
+    active: cases.filter((c: any) => c.statut === 'ACTIVE').length 
+  });
 
   const { data: unreportedHearings = [] } = useQuery<Hearing[]>({
     queryKey: ['unreported-hearings'],

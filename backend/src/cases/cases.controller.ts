@@ -52,13 +52,33 @@ export class CasesController {
   })
   findAll(
     @Query('status') status?: string,
-    @Query() pagination?: PaginationDto,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    // Si page ou limit est fourni, utiliser la pagination
-    if (pagination?.page || pagination?.limit) {
+    // Convertir en nombres et vérifier si fournis
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    
+    // Log pour debug
+    console.log('[CasesController] findAll called with:', { 
+      status, 
+      page: pageNum, 
+      limit: limitNum,
+      hasPagination: pageNum !== undefined || limitNum !== undefined 
+    });
+    
+    // Si page ou limit est explicitement fourni, utiliser la pagination
+    if (pageNum !== undefined || limitNum !== undefined) {
+      console.log('[CasesController] Using pagination');
+      const pagination: PaginationDto = {
+        page: pageNum || 1,
+        limit: limitNum || 10,
+      };
       return this.casesService.findAll(status, pagination);
     }
+    
     // Sinon, retourner toutes les données (rétrocompatibilité)
+    console.log('[CasesController] Returning all data (no pagination)');
     return this.casesService.findAll(status);
   }
 

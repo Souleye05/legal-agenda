@@ -31,9 +31,16 @@ export class AppealsController {
     status: 200, 
     description: 'Liste des rappels de recours (paginée si page/limit fournis)',
   })
-  findAll(@Query() pagination?: PaginationDto) {
-    // Si page ou limit est fourni, utiliser la pagination
-    if (pagination?.page || pagination?.limit) {
+  findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    // Si page ou limit est explicitement fourni, utiliser la pagination
+    if (page !== undefined || limit !== undefined) {
+      const pagination: PaginationDto = {
+        page: page || 1,
+        limit: limit || 10,
+      };
       return this.appealsService.findAll(pagination);
     }
     // Sinon, retourner toutes les données (rétrocompatibilité)

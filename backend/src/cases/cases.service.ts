@@ -47,7 +47,7 @@ export class CasesService {
     }
 
     // Sinon, retourner toutes les données (rétrocompatibilité)
-    return this.prisma.affaire.findMany({
+    const allCases = await this.prisma.affaire.findMany({
       where,
       include: {
         parties: true,
@@ -65,6 +65,11 @@ export class CasesService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    // Log pour debug
+    console.log(`[CasesService] findAll - Total cases: ${allCases.length}, Active: ${allCases.filter(c => c.statut === 'ACTIVE').length}`);
+    
+    return allCases;
   }
 
   async findOne(id: string) {
