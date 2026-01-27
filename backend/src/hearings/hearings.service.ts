@@ -5,6 +5,7 @@ import { AlertsService } from '../alerts/alerts.service';
 import { AppealsService } from '../appeals/appeals.service';
 import { CreateHearingDto, UpdateHearingDto, RecordResultDto } from './dto/hearing.dto';
 import { calculateEnrollmentReminderDate, shouldShowEnrollmentReminder } from './utils/enrollment-reminder.util';
+import { PaginationDto, createPaginatedResult } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class HearingsService {
@@ -15,12 +16,47 @@ export class HearingsService {
     private appealsService: AppealsService,
   ) {}
 
-  async findAll(status?: string, caseId?: string) {
+  async findAll(status?: string, caseId?: string, pagination?: PaginationDto) {
+    const where = {
+      ...(status && { statut: status as any }),
+      ...(caseId && { affaireId: caseId }),
+    };
+
+    // Si pagination est fournie, utiliser la pagination
+    if (pagination) {
+      const { page = 1, limit = 10 } = pagination;
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.prisma.audience.findMany({
+          where,
+          include: {
+            affaire: {
+              include: {
+                parties: true,
+              },
+            },
+            resultat: true,
+            createur: {
+              select: {
+                id: true,
+                nomComplet: true,
+              },
+            },
+          },
+          orderBy: { date: 'asc' },
+          skip,
+          take: limit,
+        }),
+        this.prisma.audience.count({ where }),
+      ]);
+
+      return createPaginatedResult(data, total, page, limit);
+    }
+
+    // Sinon, retourner toutes les données (rétrocompatibilité)
     return this.prisma.audience.findMany({
-      where: {
-        ...(status && { statut: status as any }),
-        ...(caseId && { affaireId: caseId }),
-      },
+      where,
       include: {
         affaire: {
           include: {

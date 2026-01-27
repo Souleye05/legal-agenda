@@ -32,11 +32,14 @@ export default function AppealReminders() {
   const [caseSearchQuery, setCaseSearchQuery] = useState('');
 
   // Fetch appeal reminders
-  const { data: reminders = [], isLoading } = useQuery<AppealReminder[]>({
+  const { data: remindersData = [], isLoading } = useQuery({
     queryKey: ['appeal-reminders'],
     queryFn: () => api.getAppealReminders(),
     refetchInterval: 60000,
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const reminders = Array.isArray(remindersData) ? remindersData : (remindersData as any).data || [];
 
   // Fetch completed reminders
   const { data: completedReminders = [] } = useQuery<AppealReminder[]>({
@@ -46,12 +49,15 @@ export default function AppealReminders() {
   });
 
   // Fetch cases for selection
-  const { data: cases = [] } = useQuery<Case[]>({
+  const { data: casesData = [] } = useQuery({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
   });
 
-  const activeCases = cases.filter((c) => c.statut === 'ACTIVE' || c.statut === 'CLOTUREE');
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const cases = Array.isArray(casesData) ? casesData : (casesData as any).data || [];
+
+  const activeCases = cases.filter((c: Case) => c.statut === 'ACTIVE' || c.statut === 'CLOTUREE');
 
   // Filter cases based on search
   const getCaseSearchText = (caseItem: Case): string => {

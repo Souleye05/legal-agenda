@@ -58,10 +58,13 @@ export default function NewHearing() {
   const [caseSearchQuery, setCaseSearchQuery] = useState('');
 
   // Fetch active cases
-  const { data: cases = [], isLoading } = useQuery<Case[]>({
+  const { data: casesData = [], isLoading } = useQuery({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const cases = Array.isArray(casesData) ? casesData : (casesData as any).data || [];
 
   const activeCases = cases.filter((c) => c.statut === 'ACTIVE');
 

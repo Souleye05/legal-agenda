@@ -19,16 +19,22 @@ export default function DailyReports() {
   const [tomorrowDate, setTomorrowDate] = useState<Date>(addDays(new Date(), 1));
 
   // Fetch all hearings
-  const { data: allHearings = [] } = useQuery<Hearing[]>({
+  const { data: allHearingsData = [] } = useQuery({
     queryKey: ['hearings'],
     queryFn: () => api.getHearings(),
   });
 
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const allHearings = Array.isArray(allHearingsData) ? allHearingsData : (allHearingsData as any).data || [];
+
   // Fetch all cases
-  const { data: allCases = [] } = useQuery({
+  const { data: allCasesData = [] } = useQuery({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const allCases = Array.isArray(allCasesData) ? allCasesData : (allCasesData as any).data || [];
 
   const getHearingsForDate = (date: Date): Hearing[] => {
     const dateStr = format(date, 'yyyy-MM-dd');

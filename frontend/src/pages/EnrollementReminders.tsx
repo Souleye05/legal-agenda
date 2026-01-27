@@ -51,13 +51,15 @@ export default function EnrollmentReminders() {
   });
 
   // Fetch all upcoming hearings without enrollment reminder
-  const { data: availableHearings = [] } = useQuery<Hearing[]>({
+  const { data: availableHearings = [] } = useQuery({
     queryKey: ['available-hearings-for-enrollment'],
     queryFn: async () => {
-      const allHearings = await api.getHearings();
+      const allHearingsData = await api.getHearings();
+      // Gérer le cas où l'API retourne un objet paginé ou un tableau
+      const allHearings = Array.isArray(allHearingsData) ? allHearingsData : (allHearingsData as any).data || [];
       const today = new Date();
       // Filter: upcoming hearings without enrollment reminder
-      return allHearings.filter(h => 
+      return allHearings.filter((h: Hearing) => 
         new Date(h.date) > today && 
         !h.rappelEnrolement &&
         h.statut !== 'TENUE'

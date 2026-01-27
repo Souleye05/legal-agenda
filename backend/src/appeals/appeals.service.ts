@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateAppealReminderDto, UpdateAppealReminderDto } from './dto/appeal.dto';
+import { PaginationDto, createPaginatedResult } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class AppealsService {
@@ -13,14 +14,55 @@ export class AppealsService {
   /**
    * Récupère tous les rappels de recours actifs (non effectués)
    */
-  async findAll() {
+  async findAll(pagination?: PaginationDto) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const where = {
+      estEffectue: false,
+    };
+
+    // Si pagination est fournie, utiliser la pagination
+    if (pagination) {
+      const { page = 1, limit = 10 } = pagination;
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.prisma.rappelRecours.findMany({
+          where,
+          include: {
+            affaire: {
+              include: {
+                parties: true,
+              },
+            },
+            resultatAudience: {
+              include: {
+                audience: true,
+              },
+            },
+            createur: {
+              select: {
+                id: true,
+                nomComplet: true,
+              },
+            },
+          },
+          orderBy: [
+            { dateLimite: 'asc' },
+          ],
+          skip,
+          take: limit,
+        }),
+        this.prisma.rappelRecours.count({ where }),
+      ]);
+
+      return createPaginatedResult(data, total, page, limit);
+    }
+
+    // Sinon, retourner toutes les données (rétrocompatibilité)
     return this.prisma.rappelRecours.findMany({
-      where: {
-        estEffectue: false,
-      },
+      where,
       include: {
         affaire: {
           include: {

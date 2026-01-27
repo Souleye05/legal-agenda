@@ -12,11 +12,14 @@ import type { AppealReminder } from '@/types/api';
 export function AppealReminders() {
   const navigate = useNavigate();
   
-  const { data: reminders = [] } = useQuery<AppealReminder[]>({
+  const { data: remindersData = [] } = useQuery({
     queryKey: ['appeal-reminders'],
     queryFn: () => api.getAppealReminders(),
     refetchInterval: 60000,
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const reminders = Array.isArray(remindersData) ? remindersData : (remindersData as any).data || [];
 
   const today = new Date();
 
@@ -39,7 +42,7 @@ export function AppealReminders() {
   };
 
   // Show only urgent reminders (expired, today, or <= 3 days)
-  const urgentReminders = reminders.filter((r) => {
+  const urgentReminders = reminders.filter((r: AppealReminder) => {
     const status = getReminderStatus(r.dateLimite);
     return status === 'expired' || status === 'today' || status === 'urgent';
   });

@@ -11,10 +11,13 @@ import { HEARING_TYPE_LABELS } from '@/lib/constants';
 export function RecentHearings() {
   const navigate = useNavigate();
 
-  const { data: hearings = [] } = useQuery({
+  const { data: hearingsData = [] } = useQuery({
     queryKey: ['hearings'],
     queryFn: () => api.getHearings(),
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const hearings = Array.isArray(hearingsData) ? hearingsData : (hearingsData as any).data || [];
 
   // Get next 5 upcoming hearings
   const upcomingHearings = hearings

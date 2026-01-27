@@ -22,11 +22,14 @@ export default function CaseDetail() {
     enabled: !!id,
   });
 
-  const { data: hearings = [], isLoading: hearingsLoading } = useQuery({
+  const { data: hearingsData = [], isLoading: hearingsLoading } = useQuery({
     queryKey: ['hearings', id],
     queryFn: () => api.getHearings({ caseId: id }),
     enabled: !!id,
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const hearings = Array.isArray(hearingsData) ? hearingsData : (hearingsData as any).data || [];
 
   if (caseLoading || hearingsLoading) {
     return (

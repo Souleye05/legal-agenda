@@ -4,6 +4,7 @@ import { HearingsService } from './hearings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateHearingDto, UpdateHearingDto, RecordResultDto } from './dto/hearing.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @ApiTags('hearings')
 @ApiBearerAuth('JWT-auth')
@@ -13,11 +14,25 @@ export class HearingsController {
   constructor(private hearingsService: HearingsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Liste toutes les audiences' })
+  @ApiOperation({ summary: 'Liste toutes les audiences avec pagination optionnelle' })
   @ApiQuery({ name: 'status', required: false, enum: ['A_VENIR', 'TENUE', 'NON_RENSEIGNEE'] })
   @ApiQuery({ name: 'caseId', required: false, description: 'ID de l\'affaire' })
-  @ApiResponse({ status: 200, description: 'Liste des audiences' })
-  findAll(@Query('status') status?: string, @Query('caseId') caseId?: string) {
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Numéro de page (défaut: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Éléments par page (défaut: 10, max: 100)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Liste des audiences (paginée si page/limit fournis)',
+  })
+  findAll(
+    @Query('status') status?: string,
+    @Query('caseId') caseId?: string,
+    @Query() pagination?: PaginationDto,
+  ) {
+    // Si page ou limit est fourni, utiliser la pagination
+    if (pagination?.page || pagination?.limit) {
+      return this.hearingsService.findAll(status, caseId, pagination);
+    }
+    // Sinon, retourner toutes les données (rétrocompatibilité)
     return this.hearingsService.findAll(status, caseId);
   }
 

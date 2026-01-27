@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateCaseDto, UpdateCaseDto } from './dto/case.dto';
+import { PaginationDto, createPaginatedResult } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class CasesService {
@@ -10,9 +11,44 @@ export class CasesService {
     private auditService: AuditService,
   ) {}
 
-  async findAll(status?: string) {
+  async findAll(status?: string, pagination?: PaginationDto) {
+    const where = status ? { statut: status as any } : undefined;
+
+    // Si pagination est fournie, utiliser la pagination
+    if (pagination) {
+      const { page = 1, limit = 10 } = pagination;
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.prisma.affaire.findMany({
+          where,
+          include: {
+            parties: true,
+            audiences: {
+              orderBy: { date: 'desc' },
+              take: 1,
+            },
+            createur: {
+              select: {
+                id: true,
+                nomComplet: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        this.prisma.affaire.count({ where }),
+      ]);
+
+      return createPaginatedResult(data, total, page, limit);
+    }
+
+    // Sinon, retourner toutes les données (rétrocompatibilité)
     return this.prisma.affaire.findMany({
-      where: status ? { statut: status as any } : undefined,
+      where,
       include: {
         parties: true,
         audiences: {

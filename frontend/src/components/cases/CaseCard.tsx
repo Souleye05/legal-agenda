@@ -16,12 +16,15 @@ export function CaseCard({ caseData }: CaseCardProps) {
   const navigate = useNavigate();
   
   // Fetch hearings for this case
-  const { data: hearings = [] } = useQuery<Hearing[]>({
+  const { data: hearingsData = [] } = useQuery({
     queryKey: ['hearings', caseData.id],
     queryFn: () => api.getHearings({ affaireId: caseData.id }),
   });
   
-  const upcomingHearings = hearings.filter(h => h.statut === 'A_VENIR').length;
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const hearings = Array.isArray(hearingsData) ? hearingsData : (hearingsData as any).data || [];
+  
+  const upcomingHearings = hearings.filter((h: Hearing) => h.statut === 'A_VENIR').length;
 
   const demandeurs = caseData.parties.filter(p => p.role === 'DEMANDEUR' || p.role === 'demandeur');
   const defendeurs = caseData.parties.filter(p => p.role === 'DEFENDEUR' || p.role === 'defendeur');

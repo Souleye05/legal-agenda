@@ -6,6 +6,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateCaseDto, UpdateCaseDto } from './dto/case.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @ApiTags('cases')
 @ApiBearerAuth('JWT-auth')
@@ -15,10 +16,49 @@ export class CasesController {
   constructor(private casesService: CasesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Liste toutes les affaires' })
+  @ApiOperation({ summary: 'Liste toutes les affaires avec pagination optionnelle' })
   @ApiQuery({ name: 'status', required: false, enum: ['ACTIVE', 'CLOTUREE', 'RADIEE'] })
-  @ApiResponse({ status: 200, description: 'Liste des affaires' })
-  findAll(@Query('status') status?: string) {
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Numéro de page (défaut: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Éléments par page (défaut: 10, max: 100)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Liste des affaires (paginée si page/limit fournis)',
+    schema: {
+      oneOf: [
+        {
+          type: 'array',
+          description: 'Liste simple (sans pagination)',
+        },
+        {
+          type: 'object',
+          description: 'Résultat paginé',
+          properties: {
+            data: { type: 'array' },
+            meta: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                totalPages: { type: 'number' },
+                hasNextPage: { type: 'boolean' },
+                hasPreviousPage: { type: 'boolean' },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  findAll(
+    @Query('status') status?: string,
+    @Query() pagination?: PaginationDto,
+  ) {
+    // Si page ou limit est fourni, utiliser la pagination
+    if (pagination?.page || pagination?.limit) {
+      return this.casesService.findAll(status, pagination);
+    }
+    // Sinon, retourner toutes les données (rétrocompatibilité)
     return this.casesService.findAll(status);
   }
 

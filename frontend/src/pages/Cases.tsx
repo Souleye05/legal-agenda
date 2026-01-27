@@ -29,14 +29,17 @@ export default function Cases() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch cases from API
-  const { data: cases = [], isLoading } = useQuery<Case[]>({
+  const { data: casesData = [], isLoading } = useQuery({
     queryKey: ['cases'],
     queryFn: () => api.getCases(),
   });
 
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const cases = Array.isArray(casesData) ? casesData : (casesData as any).data || [];
+
   // Transform API data to match frontend format
   const transformedCases = useMemo(() => {
-    return cases.map((c) => ({
+    return cases.map((c: Case) => ({
       id: c.id,
       reference: c.reference,
       title: c.titre,

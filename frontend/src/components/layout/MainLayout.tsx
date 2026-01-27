@@ -3,7 +3,8 @@ import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -31,11 +32,14 @@ export function MainLayout({ children }: MainLayoutProps) {
     refetchInterval: 60000,
   });
 
-  const { data: appealReminders = [] } = useQuery({
+  const { data: appealRemindersData = [] } = useQuery({
     queryKey: ['appeal-reminders'],
     queryFn: () => api.getAppealReminders(),
     refetchInterval: 60000,
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const appealReminders = Array.isArray(appealRemindersData) ? appealRemindersData : (appealRemindersData as any).data || [];
 
   const sidebarProps = {
     unreportedCount: unreportedHearings.length,
@@ -55,6 +59,12 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Sidebar Mobile */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="left" className="p-0 w-64 border-none">
+          <VisuallyHidden>
+            <SheetTitle>Menu de navigation</SheetTitle>
+            <SheetDescription>
+              Accédez aux différentes sections de l'application
+            </SheetDescription>
+          </VisuallyHidden>
           <Sidebar
             {...sidebarProps}
             onItemClick={() => setMobileMenuOpen(false)}

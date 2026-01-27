@@ -23,10 +23,13 @@ export default function Agenda() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   // Fetch hearings from API
-  const { data: hearings = [], isLoading } = useQuery({
+  const { data: hearingsData = [], isLoading } = useQuery({
     queryKey: ['hearings'],
     queryFn: () => api.getHearings(),
   });
+
+  // Gérer le cas où l'API retourne un objet paginé ou un tableau
+  const hearings = Array.isArray(hearingsData) ? hearingsData : (hearingsData as any).data || [];
 
   // Transform hearings to calendar events
   const events = useMemo(() => {
