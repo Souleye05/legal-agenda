@@ -73,19 +73,9 @@ export default function Cases() {
     setCurrentPage(1);
   }, [debouncedSearch, statusFilter]);
 
-  const activeCases = filteredCases.filter((c) => c.status === 'ACTIVE');
-  const closedCases = filteredCases.filter((c) => c.status !== 'ACTIVE');
-
-  // Pagination for active cases
-  const totalActivePages = Math.ceil(activeCases.length / ITEMS_PER_PAGE);
-  const paginatedActiveCases = activeCases.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  // Pagination for closed cases
-  const totalClosedPages = Math.ceil(closedCases.length / ITEMS_PER_PAGE);
-  const paginatedClosedCases = closedCases.slice(
+  // Pagination
+  const totalPages = Math.ceil(filteredCases.length / ITEMS_PER_PAGE);
+  const paginatedCases = filteredCases.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -130,105 +120,50 @@ export default function Cases() {
           <div className="card-elevated p-8 text-center text-muted-foreground">
             Chargement des affaires...
           </div>
+        ) : filteredCases.length === 0 ? (
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            Aucune affaire trouvée
+          </div>
         ) : (
           /* Results */
-          <div className="space-y-6">
-            {statusFilter === 'all' || statusFilter === 'ACTIVE' ? (
-              <div>
-                <h2 className="text-lg font-semibold text-foreground mb-4 font-serif">
-                  Affaires actives ({activeCases.length})
-                </h2>
-                {activeCases.length === 0 ? (
-                  <div className="card-elevated p-8 text-center text-muted-foreground">
-                    Aucune affaire active trouvée
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      {paginatedActiveCases.map((c) => (
-                        <CaseCard key={c.id} caseData={c} />
-                      ))}
-                    </div>
-                    {totalActivePages > 1 && (
-                      <div className="mt-6">
-                        <Pagination>
-                          <PaginationContent>
-                            <PaginationItem>
-                              <PaginationPrevious
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                              />
-                            </PaginationItem>
-                            {Array.from({ length: totalActivePages }, (_, i) => i + 1).map((page) => (
-                              <PaginationItem key={page}>
-                                <PaginationLink
-                                  onClick={() => setCurrentPage(page)}
-                                  isActive={currentPage === page}
-                                  className="cursor-pointer"
-                                >
-                                  {page}
-                                </PaginationLink>
-                              </PaginationItem>
-                            ))}
-                            <PaginationItem>
-                              <PaginationNext
-                                onClick={() => setCurrentPage(p => Math.min(totalActivePages, p + 1))}
-                                className={currentPage === totalActivePages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                              />
-                            </PaginationItem>
-                          </PaginationContent>
-                        </Pagination>
-                      </div>
-                    )}
-                  </>
-                )}
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {paginatedCases.map((c) => (
+                <CaseCard key={c.id} caseData={c} />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <div className="mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
-            ) : null}
-
-            {(statusFilter === 'all' || statusFilter === 'CLOTUREE' || statusFilter === 'RADIEE') && closedCases.length > 0 ? (
-              <div>
-                <h2 className="text-lg font-semibold text-foreground mb-4 font-serif">
-                  Affaires clôturées ({closedCases.length})
-                </h2>
-                <div className="grid gap-4">
-                  {paginatedClosedCases.map((c) => (
-                    <CaseCard key={c.id} caseData={c} />
-                  ))}
-                </div>
-                {totalClosedPages > 1 && (
-                  <div className="mt-6">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                          />
-                        </PaginationItem>
-                        {Array.from({ length: totalClosedPages }, (_, i) => i + 1).map((page) => (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                              className="cursor-pointer"
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() => setCurrentPage(p => Math.min(totalClosedPages, p + 1))}
-                            className={currentPage === totalClosedPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div>
+            )}
+          </>
         )}
       </div>
     </MainLayout>
