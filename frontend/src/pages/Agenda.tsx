@@ -5,27 +5,44 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { WeekView } from '@/components/calendar/WeekView';
+import { DayView } from '@/components/calendar/DayView';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api } from '@/lib/api';
-import { CalendarEvent } from '@/types/legal';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CalendarEvent, HearingStatus } from '@/types/legal';
 import { HearingStatusBadge } from '@/components/hearings/HearingStatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { MapPin, Clock, FileEdit, Calendar as CalendarIcon, Users, Building2, X, ArrowRight, Eye } from 'lucide-react';
+import { MapPin, Clock, FileEdit, Calendar as CalendarIcon, Users, Building2, ArrowRight, X } from 'lucide-react';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { EventSearchBar } from '@/components/agenda/EventSearchBar';
+import { StatusFilterButton } from '@/components/agenda/StatusFilterButton';
+import { StatusLegend } from '@/components/agenda/StatusLegend';
+import { EventDetailsDialog } from '@/components/agenda/EventDetailsDialog';
+import { useEventFilters } from '@/hooks/useEventFilters';
 
 export default function Agenda() {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>('month');
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<HearingStatus | 'all'>('all');
 
-  // Fetch hearings from API
-  const { data: hearingsData = [], isLoading } = useQuery({
-    queryKey: ['hearings'],
-    queryFn: () => api.getHearings(),
+  // Fetch hearings from API using the calendar optimized endpoint
+  const { data: hearingsData = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ['hearings', format(currentDate, 'yyyy-MM'), viewMode],
+    queryFn: () => {
+      if (viewMode === 'month' || viewMode === 'week') {
+        return api.getCalendar(
+          format(currentDate, 'MM'),
+          format(currentDate, 'yyyy')
+        );
+      }
+      return api.getHearings(); // List view might still want all or a specific range
+    },
   });
 
   // Gérer le cas où l'API retourne un objet paginé ou un tableau
@@ -47,6 +64,13 @@ export default function Agenda() {
     })) as CalendarEvent[];
   }, [hearings]);
 
+  // Use custom hook for filtering and grouping
+  const { filteredEvents, groupedEvents } = useEventFilters({
+    events,
+    searchQuery,
+    statusFilter,
+  });
+
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
   };
@@ -59,11 +83,35 @@ export default function Agenda() {
     navigate('/agenda/nouvelle-audience');
   };
 
+  const handleDateChange = (date: Date) => {
+    setCurrentDate(date);
+  };
+
   if (isLoading) {
     return (
       <MainLayout>
         <div className="card-elevated p-8 text-center text-muted-foreground">
           Chargement du calendrier...
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <MainLayout>
+        <div className="card-elevated p-8 text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="p-3 bg-destructive/10 rounded-full">
+              <X className="h-6 w-6 text-destructive" />
+            </div>
+          </div>
+          <p className="text-muted-foreground font-medium">
+            Une erreur est survenue lors du chargement de l'agenda.
+          </p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Réessayer
+          </Button>
         </div>
       </MainLayout>
     );
@@ -84,245 +132,176 @@ export default function Agenda() {
             <TabsList>
               <TabsTrigger value="month">Mois</TabsTrigger>
               <TabsTrigger value="week">Semaine</TabsTrigger>
+              <TabsTrigger value="day">Jour</TabsTrigger>
               <TabsTrigger value="list">Liste</TabsTrigger>
             </TabsList>
           </Tabs>
         </PageHeader>
 
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/30 p-4 rounded-2xl border border-border/50">
+          <EventSearchBar value={searchQuery} onChange={setSearchQuery} />
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
+            <StatusFilterButton
+              status="all"
+              label="Tous"
+              isActive={statusFilter === 'all'}
+              onClick={() => setStatusFilter('all')}
+            />
+            <StatusFilterButton
+              status="NON_RENSEIGNEE"
+              label="À renseigner"
+              icon={FileEdit}
+              isActive={statusFilter === 'NON_RENSEIGNEE'}
+              onClick={() => setStatusFilter('NON_RENSEIGNEE')}
+            />
+            <StatusFilterButton
+              status="A_VENIR"
+              label="À venir"
+              isActive={statusFilter === 'A_VENIR'}
+              onClick={() => setStatusFilter('A_VENIR')}
+            />
+            <StatusFilterButton
+              status="TENUE"
+              label="Tenue"
+              isActive={statusFilter === 'TENUE'}
+              onClick={() => setStatusFilter('TENUE')}
+            />
+          </div>
+        </div>
+        <StatusLegend />
+
         {viewMode === 'month' && (
           <CalendarView
-            events={events}
+            events={filteredEvents}
             onEventClick={handleEventClick}
             onDateClick={handleDateClick}
+            currentMonth={currentDate}
+            onMonthChange={handleDateChange}
           />
         )}
 
         {viewMode === 'week' && (
           <WeekView
-            events={events}
+            events={filteredEvents}
             onEventClick={handleEventClick}
             onDateClick={handleDateClick}
+            currentWeek={currentDate}
+            onWeekChange={handleDateChange}
+          />
+        )}
+
+        {viewMode === 'day' && (
+          <DayView
+            events={filteredEvents}
+            selectedDate={currentDate}
+            onEventClick={handleEventClick}
           />
         )}
 
         {viewMode === 'list' && (
-          <div className="card-elevated divide-y divide-border">
-            {events
-              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-              .map((event) => (
-                <div
-                  key={event.id}
-                  className="p-4 hover:bg-muted/50 cursor-pointer transition-colors"
-                  onClick={() => handleEventClick(event)}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-mono text-muted-foreground">
-                          {event.caseReference}
-                        </span>
-                        <Badge variant="outline" className="text-xs">
-                          {HEARING_TYPE_LABELS[event.type]}
-                        </Badge>
-                        <HearingStatusBadge status={event.status} />
-                      </div>
-                      <p className="font-medium text-foreground">{event.title}</p>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5" />
-                          {event.jurisdiction}
-                        </span>
-                        {event.time && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {event.time}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-foreground">
-                        {format(new Date(event.date), 'dd MMM yyyy', { locale: fr })}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {format(new Date(event.date), 'EEEE', { locale: fr })}
-                      </p>
-                    </div>
+          <div className="space-y-8">
+            {groupedEvents.length === 0 ? (
+              <div className="card-elevated p-12 text-center space-y-4">
+                <div className="flex justify-center">
+                  <div className="p-4 bg-muted rounded-full">
+                    <CalendarIcon className="h-8 w-8 text-muted-foreground" />
                   </div>
                 </div>
-              ))}
-          </div>
-        )}
-
-        {/* Modern Event Detail Dialog */}
-        <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
-          <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] overflow-hidden p-0 gap-0 bg-gradient-to-br from-background via-background to-muted/20">
-            {selectedEvent && (
-              <div className="flex flex-col h-full max-h-[95vh]">
-                {/* Header avec gradient et effet glassmorphism */}
-                <div className="relative overflow-hidden border-b bg-gradient-to-r from-primary/10 via-primary/5 to-background backdrop-blur-xl">
-                  <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(white,transparent_85%)]"></div>
-
-                  <div className="relative p-8 space-y-4">
-                    {/* Bouton fermer */}
-                    <button
-                      onClick={() => setSelectedEvent(null)}
-                      className="absolute top-4 right-4 p-2 rounded-xl bg-background/80 hover:bg-background border border-border/50 transition-all hover:shadow-lg group"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                    </button>
-
-                    {/* Titre et référence */}
-                    <div className="pr-12 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <CalendarIcon className="h-5 w-5 text-primary" />
-                        </div>
-                        <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                          Détails de l'audience
-                        </span>
-                      </div>
-
-                      <h2 className="text-3xl font-bold text-foreground leading-tight">
-                        {selectedEvent.title}
-                      </h2>
-
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <Badge variant="outline" className="text-sm px-3 py-1.5 font-mono bg-muted/50 border-border/50">
-                          {selectedEvent.caseReference}
-                        </Badge>
-                        <Badge variant="outline" className="text-sm px-3 py-1.5 bg-background/50">
-                          {HEARING_TYPE_LABELS[selectedEvent.type]}
-                        </Badge>
-                        <HearingStatusBadge status={selectedEvent.status} />
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <h3 className="text-lg font-medium">Aucune audience trouvée</h3>
+                  <p className="text-muted-foreground">
+                    {searchQuery || statusFilter !== 'all'
+                      ? "Aucune audience ne correspond à vos critères de recherche."
+                      : "Vous n'avez pas encore d'audiences programmées."}
+                  </p>
                 </div>
+                {!searchQuery && statusFilter === 'all' && (
+                  <Button onClick={handleNewHearing} variant="outline" size="sm">
+                    Ajouter une audience
+                  </Button>
+                )}
+              </div>
+            ) : (
+              groupedEvents.map((group) => (
+                <div key={group.title} className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border border-border/50">
+                      {group.title}
+                    </h3>
+                    <div className="h-px flex-1 bg-border/50" />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    {group.events.map((event) => (
+                      <div
+                        key={event.id}
+                        className="group card-elevated p-5 hover:border-primary/50 cursor-pointer transition-all hover:shadow-lg relative overflow-hidden"
+                        onClick={() => handleEventClick(event)}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                {/* Content scrollable */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                  {/* Informations principales en cartes */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Date et heure */}
-                    <div className="group p-6 rounded-2xl bg-muted/50 border border-border hover:border-primary/50 transition-all hover:shadow-lg">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                          <CalendarIcon className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1 space-y-2">
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                            Date & Heure
-                          </span>
-                          <p className="text-xl font-bold text-foreground capitalize">
-                            {format(new Date(selectedEvent.date), 'EEEE dd MMMM yyyy', { locale: fr })}
-                          </p>
-                          {selectedEvent.time && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span className="font-semibold text-lg">{selectedEvent.time}</span>
+                        <div className="relative flex items-center justify-between gap-6">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                {event.caseReference}
+                              </span>
+                              <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight bg-background/50 border-border/50">
+                                {HEARING_TYPE_LABELS[event.type]}
+                              </Badge>
+                              <HearingStatusBadge status={event.status} />
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Juridiction */}
-                    <div className="group p-6 rounded-2xl bg-muted/50 border border-border hover:border-primary/50 transition-all hover:shadow-lg">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                          <Building2 className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1 space-y-2">
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                            Juridiction
-                          </span>
-                          <p className="text-lg font-bold text-foreground">
-                            {selectedEvent.jurisdiction}
-                          </p>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="h-4 w-4" />
-                            <span className="font-medium">{selectedEvent.chamber}</span>
+                            <h4 className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                              {event.title}
+                            </h4>
+
+                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1.5 font-medium">
+                                <Building2 className="h-3.5 w-3.5" />
+                                {event.jurisdiction}
+                              </span>
+                              {event.time && (
+                                <span className="flex items-center gap-1.5 font-medium py-1 px-2 bg-muted/50 rounded-lg">
+                                  <Clock className="h-3.5 w-3.5 text-primary" />
+                                  {event.time}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1.5 font-medium">
+                                <Users className="h-3.5 w-3.5" />
+                                {event.parties.split(' / ')[0]}...
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <div className="p-2 bg-muted/50 rounded-xl border border-border group-hover:bg-primary group-hover:border-primary transition-all">
+                              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest group-hover:text-primary-foreground transition-colors">
+                                {format(new Date(event.date), 'MMM', { locale: fr })}
+                              </p>
+                              <p className="text-2xl font-black text-foreground group-hover:text-primary-foreground transition-colors">
+                                {format(new Date(event.date), 'dd')}
+                              </p>
+                            </div>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1 tracking-tighter">
+                              {format(new Date(event.date), 'EEEE', { locale: fr })}
+                            </p>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Parties */}
-                  <div className="p-6 rounded-2xl bg-muted/50 border border-border">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-primary/10 rounded-xl">
-                        <Users className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                          Parties au litige
-                        </span>
-                        <p className="text-lg font-semibold text-foreground leading-relaxed">
-                          {selectedEvent.parties || 'Non renseigné'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Alerte si non renseigné */}
-                  {selectedEvent.status === 'NON_RENSEIGNEE' && (
-                    <div className="p-5 rounded-2xl bg-gradient-to-r from-destructive/10 to-destructive/5 border-2 border-destructive/30 border-dashed">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 bg-destructive/20 rounded-lg">
-                          <FileEdit className="h-5 w-5 text-destructive" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-destructive mb-1">
-                            ⚠️ Audience non renseignée
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Cette audience nécessite que vous renseigniez son résultat.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer avec actions */}
-                <div className="border-t bg-muted/30 backdrop-blur-xl p-6">
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="flex-1 h-12 rounded-xl font-semibold hover:bg-background hover:shadow-lg transition-all group"
-                      onClick={() => {
-                        setSelectedEvent(null);
-                        navigate(`/audiences/${selectedEvent.id}`);
-                      }}
-                    >
-                      <Eye className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                      Voir les détails complets
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-
-                    {selectedEvent.status === 'NON_RENSEIGNEE' && (
-                      <Button
-                        size="lg"
-                        className="flex-1 h-12 rounded-xl font-semibold bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/90 hover:to-destructive hover:shadow-xl transition-all group"
-                        onClick={() => {
-                          setSelectedEvent(null);
-                          navigate(`/a-renseigner?hearing=${selectedEvent.id}`);
-                        }}
-                      >
-                        <FileEdit className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-                        Renseigner le résultat
-                        <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    )}
+                    ))}
                   </div>
                 </div>
-              </div>
+              ))
             )}
-          </DialogContent>
-        </Dialog>
+          </div>
+        )}
+
+        <EventDetailsDialog
+          event={selectedEvent}
+          open={!!selectedEvent}
+          onOpenChange={(open) => !open && setSelectedEvent(null)}
+        />
       </div>
     </MainLayout>
   );

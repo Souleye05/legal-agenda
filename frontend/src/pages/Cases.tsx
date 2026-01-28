@@ -144,7 +144,7 @@ export default function Cases() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                       {paginatedActiveCases.map((c) => (
                         <CaseCard key={c.id} caseData={c} />
                       ))}

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
   addDays,
   addMonths,
   subMonths,
@@ -17,22 +17,25 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CalendarEvent, HearingStatus } from '@/types/legal';
 import { cn } from '@/lib/utils';
+import { getStatusClassName, getStatusDotClassName } from '@/lib/statusConfig';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
   onDateClick?: (date: Date) => void;
+  currentMonth?: Date;
+  onMonthChange?: (date: Date) => void;
 }
 
-const statusClasses: Record<HearingStatus, string> = {
-  A_VENIR: 'hearing-upcoming',
-  TENUE: 'hearing-done',
-  NON_RENSEIGNEE: 'hearing-pending',
-};
+// Status classes are now imported from centralized config
 
-export function CalendarView({ events, onEventClick, onDateClick }: CalendarViewProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
+export function CalendarView({
+  events,
+  onEventClick,
+  onDateClick,
+  currentMonth = new Date(),
+  onMonthChange
+}: CalendarViewProps) {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -63,21 +66,21 @@ export function CalendarView({ events, onEventClick, onDateClick }: CalendarView
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            onClick={() => onMonthChange?.(subMonths(currentMonth, 1))}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setCurrentMonth(new Date())}
+            onClick={() => onMonthChange?.(new Date())}
           >
             Aujourd'hui
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            onClick={() => onMonthChange?.(addMonths(currentMonth, 1))}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -97,47 +100,71 @@ export function CalendarView({ events, onEventClick, onDateClick }: CalendarView
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 divide-x divide-y divide-border border-b border-r border-border">
         {days.map((day, idx) => {
           const dayEvents = getEventsForDay(day);
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const isCurrentDay = isToday(day);
 
+          // Summary of statuses
+          const statusCounts = dayEvents.reduce((acc, e) => {
+            acc[e.status] = (acc[e.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+
           return (
             <div
               key={idx}
               className={cn(
-                "calendar-cell",
-                !isCurrentMonth && "bg-muted/30",
-                isCurrentDay && "calendar-cell-today"
+                "min-h-[120px] p-2 cursor-pointer transition-colors hover:bg-muted/50",
+                !isCurrentMonth && "bg-muted/20",
+                isCurrentDay && "bg-primary/5"
               )}
               onClick={() => onDateClick?.(day)}
             >
-              <div className={cn(
-                "text-sm mb-1",
-                isCurrentDay && "w-7 h-7 flex items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold",
-                !isCurrentDay && !isCurrentMonth && "text-muted-foreground/50",
-                !isCurrentDay && isCurrentMonth && "text-foreground font-medium"
-              )}>
-                {format(day, 'd')}
+              <div className="flex justify-between items-start mb-2">
+                <div className={cn(
+                  "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors",
+                  isCurrentDay ? "bg-primary text-primary-foreground" :
+                    isCurrentMonth ? "text-foreground" : "text-muted-foreground/40"
+                )}>
+                  {format(day, 'd')}
+                </div>
+
+                {dayEvents.length > 0 && (
+                  <div className="flex gap-0.5">
+                    {Object.entries(statusCounts).map(([status, count]) => (
+                      <div
+                        key={status}
+                        className={cn("w-2 h-2 rounded-full", getStatusDotClassName(status as HearingStatus))}
+                        title={`${count} ${status}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="space-y-1 overflow-hidden max-h-[80px]">
-                {dayEvents.slice(0, 3).map((event) => (
+
+              <div className="space-y-1">
+                {dayEvents.slice(0, 2).map((event) => (
                   <div
                     key={event.id}
-                    className={cn("hearing-item", statusClasses[event.status])}
+                    className={cn(
+                      "px-1.5 py-0.5 rounded text-[10px] font-bold truncate border transition-opacity hover:opacity-80",
+                      getStatusClassName(event.status)
+                    )}
                     onClick={(e) => {
                       e.stopPropagation();
                       onEventClick?.(event);
                     }}
                     title={`${event.time || ''} ${event.title}`}
                   >
-                    {event.time && <span className="font-medium">{event.time}</span>} {event.caseReference}
+                    {event.time && <span className="opacity-70 mr-1">{event.time}</span>}
+                    {event.caseReference}
                   </div>
                 ))}
-                {dayEvents.length > 3 && (
-                  <div className="text-xs text-muted-foreground text-center">
-                    +{dayEvents.length - 3} autres
+                {dayEvents.length > 2 && (
+                  <div className="text-[10px] font-bold text-muted-foreground px-1 py-0.5 bg-muted/50 rounded text-center border border-border/50">
+                    +{dayEvents.length - 2} autres
                   </div>
                 )}
               </div>
