@@ -57,34 +57,43 @@ export function CalendarView({
 
   return (
     <div className="card-elevated overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground font-serif capitalize">
-          {format(currentMonth, 'MMMM yyyy', { locale: fr })}
-        </h2>
-        <div className="flex items-center gap-1">
+      {/* FullCalendar-style Navigation Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+        {/* Left: Navigation arrows + Today button */}
+        <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => onMonthChange?.(subMonths(currentMonth, 1))}
+            className="h-9 w-9"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMonthChange?.(new Date())}
-          >
-            Aujourd'hui
-          </Button>
-          <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => onMonthChange?.(addMonths(currentMonth, 1))}
+            className="h-9 w-9"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onMonthChange?.(new Date())}
+            className="ml-2 font-medium"
+          >
+            Aujourd'hui
+          </Button>
         </div>
+
+        {/* Center: Month/Year title */}
+        <h2 className="text-lg font-bold text-foreground capitalize">
+          {format(currentMonth, 'MMMM yyyy', { locale: fr })}
+        </h2>
+
+        {/* Right: Empty space for symmetry (view buttons are in parent) */}
+        <div className="w-[200px]" />
       </div>
 
       {/* Week days header */}

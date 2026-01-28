@@ -19,7 +19,6 @@ import { HEARING_TYPE_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { EventSearchBar } from '@/components/agenda/EventSearchBar';
 import { StatusFilterButton } from '@/components/agenda/StatusFilterButton';
-import { StatusLegend } from '@/components/agenda/StatusLegend';
 import { EventDetailsDialog } from '@/components/agenda/EventDetailsDialog';
 import { useEventFilters } from '@/hooks/useEventFilters';
 
@@ -127,17 +126,9 @@ export default function Agenda() {
             label: 'Nouvelle audience',
             onClick: handleNewHearing,
           }}
-        >
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as typeof viewMode)}>
-            <TabsList>
-              <TabsTrigger value="month">Mois</TabsTrigger>
-              <TabsTrigger value="week">Semaine</TabsTrigger>
-              <TabsTrigger value="day">Jour</TabsTrigger>
-              <TabsTrigger value="list">Liste</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </PageHeader>
+        />
 
+        {/* Filters Bar */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/30 p-4 rounded-2xl border border-border/50">
           <EventSearchBar value={searchQuery} onChange={setSearchQuery} />
 
@@ -169,7 +160,18 @@ export default function Agenda() {
             />
           </div>
         </div>
-        <StatusLegend />
+
+        {/* View Mode Tabs */}
+        <div className="flex justify-end">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as typeof viewMode)}>
+            <TabsList>
+              <TabsTrigger value="month">Mois</TabsTrigger>
+              <TabsTrigger value="week">Semaine</TabsTrigger>
+              <TabsTrigger value="day">Jour</TabsTrigger>
+              <TabsTrigger value="list">Liste</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         {viewMode === 'month' && (
           <CalendarView

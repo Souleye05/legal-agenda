@@ -42,6 +42,10 @@ export function StatusFilterButton({ status, label, icon: Icon, isActive, onClic
                     : colors.buttonHover
             )}
         >
+            <div className={cn(
+                "w-2.5 h-2.5 rounded-full",
+                isActive ? "bg-white" : colors.dot
+            )} />
             {Icon && <Icon className="h-3.5 w-3.5" />}
             {label}
         </Button>
