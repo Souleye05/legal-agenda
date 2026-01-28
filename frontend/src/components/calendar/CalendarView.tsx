@@ -15,6 +15,7 @@ import {
 import { fr } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarEvent, HearingStatus } from '@/types/legal';
 import { cn } from '@/lib/utils';
 import { getStatusClassName, getStatusDotClassName } from '@/lib/statusConfig';
@@ -36,6 +37,8 @@ export function CalendarView({
   currentMonth = new Date(),
   onMonthChange
 }: CalendarViewProps) {
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -172,9 +175,68 @@ export function CalendarView({
                   </div>
                 ))}
                 {dayEvents.length > 2 && (
-                  <div className="text-[10px] font-bold text-muted-foreground px-1 py-0.5 bg-muted/50 rounded text-center border border-border/50">
-                    +{dayEvents.length - 2} autres
-                  </div>
+                  <Popover 
+                    open={openPopover === `day-${idx}`} 
+                    onOpenChange={(open) => setOpenPopover(open ? `day-${idx}` : null)}
+                  >
+                    <PopoverTrigger asChild>
+                      <div 
+                        className="text-[10px] font-bold text-muted-foreground px-1 py-0.5 bg-muted/50 rounded text-center border border-border/50 cursor-pointer hover:bg-muted transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        +{dayEvents.length - 2} autres
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      className="w-80 p-0" 
+                      align="start"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="p-3 border-b border-border bg-muted/30">
+                        <h4 className="font-semibold text-sm">
+                          {format(day, 'EEEE d MMMM yyyy', { locale: fr })}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {dayEvents.length} audience{dayEvents.length > 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+                        {dayEvents.map((event) => (
+                          <div
+                            key={event.id}
+                            className={cn(
+                              "p-1.5 rounded border cursor-pointer transition-all hover:shadow-sm",
+                              getStatusClassName(event.status)
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenPopover(null);
+                              onEventClick?.(event);
+                            }}
+                          >
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[10px] font-mono font-bold">
+                                {event.caseReference}
+                              </span>
+                              {event.time && (
+                                <span className="text-[10px] font-medium opacity-70">
+                                  {event.time}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] font-medium truncate">
+                              {event.title}
+                            </p>
+                            {event.jurisdiction && (
+                              <p className="text-[9px] text-muted-foreground truncate mt-0.5">
+                                {event.jurisdiction}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 )}
               </div>
             </div>
