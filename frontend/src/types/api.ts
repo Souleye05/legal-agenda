@@ -106,14 +106,17 @@ export interface Hearing {
  */
 export interface AuditLog {
   id: string;
+  typeEntite: string;
+  idEntite: string;
+  action: 'CREATION' | 'MODIFICATION' | 'SUPPRESSION';
+  ancienneValeur?: string | null;
+  nouvelleValeur?: string | null;
   utilisateurId: string;
-  utilisateur?: User;
-  action: string;
-  entite: string;
-  entiteId?: string;
-  details?: Record<string, any>;
-  ipAddress?: string;
-  userAgent?: string;
+  utilisateur: {
+    id: string;
+    nomComplet: string;
+    email: string;
+  };
   createdAt: string;
 }
 

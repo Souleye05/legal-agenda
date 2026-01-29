@@ -28,6 +28,7 @@ export default function Cases() {
   const debouncedSearch = useDebouncedValue(searchQuery, DEBOUNCE_DELAYS.SEARCH);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageInput, setPageInput] = useState('');
 
   // Read search parameter from URL
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function Cases() {
   // Reset to page 1 when filters change
   useMemo(() => {
     setCurrentPage(1);
+    setPageInput('');
   }, [debouncedSearch, statusFilter]);
 
   // Pagination
@@ -88,6 +90,29 @@ export default function Cases() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  // Gestion de la saisie de page
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^\d+$/.test(value)) {
+      setPageInput(value);
+    }
+  };
+
+  const handlePageInputSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNumber = parseInt(pageInput);
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      setPageInput('');
+    } else if (pageInput !== '') {
+      setPageInput('');
+    }
+  };
+
+  const handlePageInputBlur = () => {
+    handlePageInputSubmit({ preventDefault: () => {} } as React.FormEvent);
+  };
 
   const handleNewCase = () => {
     navigate('/affaires/nouvelle');
@@ -142,7 +167,8 @@ export default function Cases() {
               ))}
             </div>
             {totalPages > 1 && (
-              <div className="mt-6">
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Pagination principale */}
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
@@ -170,6 +196,22 @@ export default function Cases() {
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
+
+                {/* Aller à la page */}
+                <form onSubmit={handlePageInputSubmit} className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">Aller à la page</span>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={pageInput}
+                    onChange={handlePageInputChange}
+                    onBlur={handlePageInputBlur}
+                    placeholder={currentPage.toString()}
+                    className="w-16 h-9 text-center"
+                  />
+                  <span className="text-sm text-muted-foreground">/ {totalPages}</span>
+                </form>
               </div>
             )}
           </>

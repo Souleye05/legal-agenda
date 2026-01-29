@@ -24,6 +24,7 @@ import AppealReminders from "./pages/AppealReminders";
 import DailyReports from "./pages/DailyReports";
 import Profile from "./pages/Profile";
 import Users from "./pages/Users";
+import AuditLog from "./pages/AuditLog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -181,6 +182,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/journal-audit"
+              element={
+                <ProtectedRoute>
+                  <AuditLog />
                 </ProtectedRoute>
               }
             />
