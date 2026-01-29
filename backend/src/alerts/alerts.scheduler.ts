@@ -23,7 +23,7 @@ export class AlertsScheduler {
       where: {
         date: { lt: today },
         statut: 'A_VENIR',
-        resultat: null,
+        resultat: { is: null }, // Check if relation doesn't exist
       },
     });
 
@@ -59,7 +59,7 @@ export class AlertsScheduler {
       where: {
         date: { lt: today },
         statut: 'A_VENIR',
-        resultat: null,
+        resultat: { is: null }, // Check if relation doesn't exist
       },
     });
 

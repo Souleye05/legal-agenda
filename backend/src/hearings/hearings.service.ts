@@ -279,7 +279,7 @@ export class HearingsService {
       where: {
         date: { lt: today },
         statut: { in: ['A_VENIR', 'NON_RENSEIGNEE'] },
-        resultat: null,
+        resultat: { is: null }, // Check if relation doesn't exist
       },
       include: {
         affaire: {
@@ -354,7 +354,7 @@ export class HearingsService {
       where: {
         date: { lt: today },
         statut: 'A_VENIR',
-        resultat: null,
+        resultat: { is: null }, // Check if relation doesn't exist
       },
     });
 
