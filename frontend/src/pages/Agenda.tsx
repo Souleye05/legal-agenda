@@ -229,11 +229,11 @@ export default function Agenda() {
                 <div key={group.title} className="space-y-4">
                   <div className="flex items-center gap-4">
                     <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border border-border/50">
-                      {group.title}
+                      {group.title} ({group.events.length})
                     </h3>
                     <div className="h-px flex-1 bg-border/50" />
                   </div>
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {group.events.map((event) => (
                       <div
                         key={event.id}
@@ -281,11 +281,11 @@ export default function Agenda() {
                               <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest group-hover:text-primary-foreground transition-colors">
                                 {format(new Date(event.date), 'MMM', { locale: fr })}
                               </p>
-                              <p className="text-2xl font-black text-foreground group-hover:text-primary-foreground transition-colors">
+                              <p className="text-2xl text-center font-black text-foreground group-hover:text-primary-foreground transition-colors">
                                 {format(new Date(event.date), 'dd')}
                               </p>
                             </div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1 tracking-tighter">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1 tracking-tighter text-center">
                               {format(new Date(event.date), 'EEEE', { locale: fr })}
                             </p>
                           </div>
