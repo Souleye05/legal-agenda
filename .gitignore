@@ -70,3 +70,7 @@ data/
 
 #Cursor
 .cursorignore
+
+
+# Backups
+backups/
