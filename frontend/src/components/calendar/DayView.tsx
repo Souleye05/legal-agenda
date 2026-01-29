@@ -1,14 +1,19 @@
-import { format } from 'date-fns';
+import { format, addDays, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CalendarEvent, HearingStatus } from '@/types/legal';
 import { cn } from '@/lib/utils';
-import { MapPin, Users } from 'lucide-react';
+import { MapPin, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getStatusClassName, getStatusIcon } from '@/lib/statusConfig';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface DayViewProps {
     events: CalendarEvent[];
     selectedDate: Date;
     onEventClick: (event: CalendarEvent) => void;
+    onDateChange?: (date: Date) => void;
+    viewMode?: string;
+    onViewChange?: (mode: string) => void;
 }
 
 // Configuration constants
@@ -20,7 +25,14 @@ const DAY_VIEW_CONFIG = {
     EVENT_MARGIN: '1rem',
 } as const;
 
-export function DayView({ events, selectedDate, onEventClick }: DayViewProps) {
+export function DayView({
+    events,
+    selectedDate,
+    onEventClick,
+    onDateChange,
+    viewMode = 'day',
+    onViewChange
+}: DayViewProps) {
     const hours = Array.from(
         { length: DAY_VIEW_CONFIG.END_HOUR - DAY_VIEW_CONFIG.START_HOUR + 1 },
         (_, i) => i + DAY_VIEW_CONFIG.START_HOUR
@@ -74,10 +86,51 @@ export function DayView({ events, selectedDate, onEventClick }: DayViewProps) {
 
     return (
         <div className="card-elevated overflow-hidden bg-background">
-            <div className="p-6 border-b border-border bg-muted/30">
-                <h2 className="text-2xl font-bold text-foreground capitalize">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+                {/* Left: Navigation */}
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onDateChange?.(subDays(selectedDate, 1))}
+                        className="h-9 w-9 hover:scale-110 active:scale-95 transition-all hover:bg-muted"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onDateChange?.(addDays(selectedDate, 1))}
+                        className="h-9 w-9 hover:scale-110 active:scale-95 transition-all hover:bg-muted"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onDateChange?.(new Date())}
+                        className="ml-2 font-medium hover:scale-105 active:scale-95 transition-all"
+                    >
+                        Aujourd'hui
+                    </Button>
+                </div>
+
+                {/* Center: Title */}
+                <h2 className="text-xl font-bold text-foreground capitalize font-serif whitespace-nowrap">
                     {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
                 </h2>
+
+                {/* Right: View Tabs */}
+                <div className="flex items-center gap-2">
+                    <Tabs value={viewMode} onValueChange={onViewChange}>
+                        <TabsList className="bg-muted/50 border-none h-9 p-1">
+                            <TabsTrigger value="month" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Mois</TabsTrigger>
+                            <TabsTrigger value="week" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Semaine</TabsTrigger>
+                            <TabsTrigger value="day" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Jour</TabsTrigger>
+                            <TabsTrigger value="list" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Liste</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
             </div>
 
             <div className="relative flex overflow-y-auto max-h-[700px]">
@@ -155,6 +208,6 @@ export function DayView({ events, selectedDate, onEventClick }: DayViewProps) {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

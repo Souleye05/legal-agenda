@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { CaseCard } from '@/components/cases/CaseCard';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import {
   Pagination,
   PaginationContent,
@@ -111,7 +112,7 @@ export default function Cases() {
   };
 
   const handlePageInputBlur = () => {
-    handlePageInputSubmit({ preventDefault: () => {} } as React.FormEvent);
+    handlePageInputSubmit({ preventDefault: () => { } } as React.FormEvent);
   };
 
   const handleNewCase = () => {
@@ -140,11 +141,11 @@ export default function Cases() {
             />
           </div>
           <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as CaseStatus | 'all')}>
-            <TabsList>
-              <TabsTrigger value="all">Toutes</TabsTrigger>
-              <TabsTrigger value="ACTIVE">Actives</TabsTrigger>
-              <TabsTrigger value="CLOTUREE">Clôturées</TabsTrigger>
-              <TabsTrigger value="RADIEE">Radiées</TabsTrigger>
+            <TabsList className="bg-muted/50 border-none h-10 p-1">
+              <TabsTrigger value="all" className="text-sm px-4 h-8 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Toutes</TabsTrigger>
+              <TabsTrigger value="ACTIVE" className="text-sm px-4 h-8 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Actives</TabsTrigger>
+              <TabsTrigger value="CLOTUREE" className="text-sm px-4 h-8 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Clôturées</TabsTrigger>
+              <TabsTrigger value="RADIEE" className="text-sm px-4 h-8 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Radiées</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -174,7 +175,10 @@ export default function Cases() {
                     <PaginationItem>
                       <PaginationPrevious
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        className={cn(
+                          "transition-all duration-300 hover:scale-105 active:scale-95",
+                          currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-muted hover:shadow-sm'
+                        )}
                       />
                     </PaginationItem>
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -182,7 +186,7 @@ export default function Cases() {
                         <PaginationLink
                           onClick={() => setCurrentPage(page)}
                           isActive={currentPage === page}
-                          className="cursor-pointer"
+                          className="cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-md data-[active=true]:scale-110"
                         >
                           {page}
                         </PaginationLink>
@@ -191,7 +195,10 @@ export default function Cases() {
                     <PaginationItem>
                       <PaginationNext
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        className={cn(
+                          "transition-all duration-300 hover:scale-105 active:scale-95",
+                          currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-muted hover:shadow-sm'
+                        )}
                       />
                     </PaginationItem>
                   </PaginationContent>

@@ -158,7 +158,7 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    
+
     this.setTokens(data.access_token, data.refresh_token);
     localStorage.setItem('user', JSON.stringify(data.user));
     return data;
@@ -169,13 +169,13 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ email, password, fullName }),
     });
-    
+
     // Only set tokens if user is auto-logged in (first user)
     if (data.access_token) {
       this.setTokens(data.access_token, data.refresh_token);
       localStorage.setItem('user', JSON.stringify(data.user));
     }
-    
+
     return data;
   }
 
@@ -328,6 +328,12 @@ class ApiClient {
 
   async markEnrollmentComplete(id: string): Promise<Hearing> {
     return this.request<Hearing>(`/hearings/${id}/enrollment-complete`, {
+      method: 'PATCH',
+    });
+  }
+
+  async unmarkEnrollmentComplete(id: string): Promise<Hearing> {
+    return this.request<Hearing>(`/hearings/${id}/enrollment-uncomplete`, {
       method: 'PATCH',
     });
   }

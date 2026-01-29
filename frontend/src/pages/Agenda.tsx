@@ -161,18 +161,6 @@ export default function Agenda() {
           </div>
         </div>
 
-        {/* View Mode Tabs */}
-        <div className="flex justify-end">
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as typeof viewMode)}>
-            <TabsList>
-              <TabsTrigger value="month">Mois</TabsTrigger>
-              <TabsTrigger value="week">Semaine</TabsTrigger>
-              <TabsTrigger value="day">Jour</TabsTrigger>
-              <TabsTrigger value="list">Liste</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
         {viewMode === 'month' && (
           <CalendarView
             events={filteredEvents}
@@ -180,6 +168,8 @@ export default function Agenda() {
             onDateClick={handleDateClick}
             currentMonth={currentDate}
             onMonthChange={handleDateChange}
+            viewMode={viewMode}
+            onViewChange={(v) => setViewMode(v as typeof viewMode)}
           />
         )}
 
@@ -190,6 +180,8 @@ export default function Agenda() {
             onDateClick={handleDateClick}
             currentWeek={currentDate}
             onWeekChange={handleDateChange}
+            viewMode={viewMode}
+            onViewChange={(v) => setViewMode(v as typeof viewMode)}
           />
         )}
 
@@ -198,13 +190,39 @@ export default function Agenda() {
             events={filteredEvents}
             selectedDate={currentDate}
             onEventClick={handleEventClick}
+            onDateChange={handleDateChange}
+            viewMode={viewMode}
+            onViewChange={(v) => setViewMode(v as typeof viewMode)}
           />
         )}
 
         {viewMode === 'list' && (
           <div className="space-y-8">
+            <div className="card-elevated overflow-hidden bg-background">
+              <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+                {/* Left: Indicator */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-foreground capitalize font-serif ml-2">
+                    Liste des audiences
+                  </h2>
+                </div>
+
+                {/* Right: View Tabs */}
+                <div className="flex items-center gap-2">
+                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as typeof viewMode)}>
+                    <TabsList className="bg-muted/50 border-none h-9 p-1">
+                      <TabsTrigger value="month" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Mois</TabsTrigger>
+                      <TabsTrigger value="week" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Semaine</TabsTrigger>
+                      <TabsTrigger value="day" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Jour</TabsTrigger>
+                      <TabsTrigger value="list" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Liste</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              </div>
+            </div>
+
             {groupedEvents.length === 0 ? (
-              <div className="card-elevated p-12 text-center space-y-4">
+              <div className="card-elevated p-12 text-center space-y-4 animate-in fade-in slide-in-from-bottom-4">
                 <div className="flex justify-center">
                   <div className="p-4 bg-muted rounded-full">
                     <CalendarIcon className="h-8 w-8 text-muted-foreground" />
@@ -219,14 +237,14 @@ export default function Agenda() {
                   </p>
                 </div>
                 {!searchQuery && statusFilter === 'all' && (
-                  <Button onClick={handleNewHearing} variant="outline" size="sm">
+                  <Button onClick={handleNewHearing} variant="outline" size="sm" className="hover:scale-105 active:scale-95 transition-all">
                     Ajouter une audience
                   </Button>
                 )}
               </div>
             ) : (
               groupedEvents.map((group) => (
-                <div key={group.title} className="space-y-4">
+                <div key={group.title} className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
                   <div className="flex items-center gap-4">
                     <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border border-border/50">
                       {group.title} ({group.events.length})
@@ -237,15 +255,15 @@ export default function Agenda() {
                     {group.events.map((event) => (
                       <div
                         key={event.id}
-                        className="group card-elevated p-5 hover:border-primary/50 cursor-pointer transition-all hover:shadow-lg relative overflow-hidden"
+                        className="group card-elevated p-5 hover:border-primary/50 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
                         onClick={() => handleEventClick(event)}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                         <div className="relative flex items-center justify-between gap-6">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                              <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded transition-colors group-hover:bg-primary/20">
                                 <HighlightText text={event.caseReference} highlight={searchQuery} />
                               </span>
                               <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight bg-background/50 border-border/50">

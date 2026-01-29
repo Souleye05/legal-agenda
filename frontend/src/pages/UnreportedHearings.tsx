@@ -51,11 +51,11 @@ export default function UnreportedHearings() {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Appeal reminder states
   const [hasAppealReminder, setHasAppealReminder] = useState(true);
   const [appealDeadlineDays, setAppealDeadlineDays] = useState(10);
-  
+
   // Calculate appeal deadline date
   const appealDeadlineDate = hasAppealReminder && resultType === 'DELIBERE'
     ? new Date(Date.now() + appealDeadlineDays * 24 * 60 * 60 * 1000)
@@ -84,7 +84,7 @@ export default function UnreportedHearings() {
         data.motifRadiation = reason;
       } else if (resultType === 'DELIBERE') {
         data.texteDelibere = reason;
-        
+
         // Add appeal reminder if enabled
         if (hasAppealReminder && appealDeadlineDate) {
           data.creerRappelRecours = true;
@@ -119,7 +119,7 @@ export default function UnreportedHearings() {
         ...h,
         affaire: h.affaire!
       })).filter(h => h.affaire);
-      
+
       generateUnreportedHearingsPDF(hearingsWithCases as any);
       sonnerToast.success('PDF téléchargé avec succès');
     } catch (error) {
@@ -265,7 +265,7 @@ export default function UnreportedHearings() {
                       htmlFor="radiation"
                       className={cn(
                         "flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-colors",
-                        resultType === 'RADIATION' ? "border-destructive bg-destructive/5" : "border-border hover:border-destructive/50"
+                        resultType === 'RADIATION' ? "border-urgent bg-urgent/5 text-urgent" : "border-border hover:border-urgent/50"
                       )}
                     >
                       <RadioGroupItem value="RADIATION" id="radiation" className="sr-only" />
@@ -295,7 +295,7 @@ export default function UnreportedHearings() {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full justify-start text-left font-normal",
+                              "w-full justify-start text-left font-normal bg-white shadow-sm hover:bg-white/90",
                               !newDate && "text-muted-foreground"
                             )}
                           >
@@ -320,6 +320,7 @@ export default function UnreportedHearings() {
                         placeholder="Ex: Conclusions non échangées, absence partie adverse..."
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
+                        className="bg-white shadow-sm"
                       />
                     </div>
                   </div>
@@ -332,6 +333,7 @@ export default function UnreportedHearings() {
                       placeholder="Ex: Défaut de diligences, désistement..."
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
+                      className="bg-white shadow-sm"
                     />
                   </div>
                 )}
@@ -345,6 +347,7 @@ export default function UnreportedHearings() {
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         rows={4}
+                        className="bg-white shadow-sm"
                       />
                     </div>
 
@@ -376,12 +379,12 @@ export default function UnreportedHearings() {
                               max={365}
                               value={appealDeadlineDays}
                               onChange={(e) => setAppealDeadlineDays(parseInt(e.target.value) || 10)}
-                              className="w-24"
+                              className="w-24 bg-white shadow-sm"
                             />
                           </div>
 
                           {appealDeadlineDate && (
-                            <div className="p-3 rounded-lg bg-card border border-border/50">
+                            <div className="p-3 rounded-lg border border-border/50">
                               <p className="text-sm text-muted-foreground">
                                 Date limite de recours:{' '}
                                 <span className="font-semibold text-foreground">
@@ -398,7 +401,7 @@ export default function UnreportedHearings() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex gap-3">
                   <Button
                     variant="outline"

@@ -14,7 +14,7 @@ export class HearingsService {
     private auditService: AuditService,
     private alertsService: AlertsService,
     private appealsService: AppealsService,
-  ) {}
+  ) { }
 
   async findAll(status?: string, caseId?: string, pagination?: PaginationDto) {
     const where = {
@@ -155,7 +155,7 @@ export class HearingsService {
     if (dto.date || dto.rappelEnrolement !== undefined) {
       const hearingDate = dto.date ? new Date(dto.date) : oldHearing.date;
       const rappelEnabled = dto.rappelEnrolement !== undefined ? dto.rappelEnrolement : oldHearing.rappelEnrolement;
-      
+
       if (rappelEnabled) {
         dateRappelEnrolement = calculateEnrollmentReminderDate(hearingDate);
       } else {
@@ -458,6 +458,40 @@ export class HearingsService {
       'MODIFICATION',
       JSON.stringify({ enrolementEffectue: false }),
       JSON.stringify({ enrolementEffectue: true }),
+      userId
+    );
+
+    return updated;
+  }
+
+  /**
+   * Annule le marquage d'un enrôlement comme effectué
+   */
+  async unmarkEnrollmentComplete(id: string, userId: string) {
+    const hearing = await this.findOne(id);
+
+    if (!hearing.rappelEnrolement) {
+      throw new BadRequestException('Cette audience n\'a pas de rappel d\'enrôlement activé');
+    }
+
+    const updated = await this.prisma.audience.update({
+      where: { id },
+      data: { enrolementEffectue: false },
+      include: {
+        affaire: {
+          include: {
+            parties: true,
+          },
+        },
+      },
+    });
+
+    await this.auditService.log(
+      'Audience',
+      id,
+      'MODIFICATION',
+      JSON.stringify({ enrolementEffectue: true }),
+      JSON.stringify({ enrolementEffectue: false }),
       userId
     );
 

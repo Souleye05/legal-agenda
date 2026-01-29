@@ -16,9 +16,10 @@ import { fr } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarEvent, HearingStatus } from '@/types/legal';
 import { cn } from '@/lib/utils';
-import { getStatusClassName, getStatusDotClassName } from '@/lib/statusConfig';
+import { getStatusClassName, getStatusDotClassName, getStatusLabel } from '@/lib/statusConfig';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -26,6 +27,8 @@ interface CalendarViewProps {
   onDateClick?: (date: Date) => void;
   currentMonth?: Date;
   onMonthChange?: (date: Date) => void;
+  viewMode?: string;
+  onViewChange?: (mode: string) => void;
 }
 
 // Status classes are now imported from centralized config
@@ -35,7 +38,9 @@ export function CalendarView({
   onEventClick,
   onDateClick,
   currentMonth = new Date(),
-  onMonthChange
+  onMonthChange,
+  viewMode = 'month',
+  onViewChange
 }: CalendarViewProps) {
   const [openPopover, setOpenPopover] = useState<string | null>(null);
 
@@ -68,7 +73,7 @@ export function CalendarView({
             variant="outline"
             size="icon"
             onClick={() => onMonthChange?.(subMonths(currentMonth, 1))}
-            className="h-9 w-9"
+            className="h-9 w-9 hover:scale-110 active:scale-95 transition-all hover:bg-muted"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -76,7 +81,7 @@ export function CalendarView({
             variant="outline"
             size="icon"
             onClick={() => onMonthChange?.(addMonths(currentMonth, 1))}
-            className="h-9 w-9"
+            className="h-9 w-9 hover:scale-110 active:scale-95 transition-all hover:bg-muted"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -84,19 +89,28 @@ export function CalendarView({
             variant="outline"
             size="sm"
             onClick={() => onMonthChange?.(new Date())}
-            className="ml-2 font-medium"
+            className="ml-2 font-medium hover:scale-105 active:scale-95 transition-all"
           >
             Aujourd'hui
           </Button>
         </div>
 
         {/* Center: Month/Year title */}
-        <h2 className="text-lg font-bold text-foreground capitalize">
+        <h2 className="text-xl font-bold text-foreground capitalize font-serif">
           {format(currentMonth, 'MMMM yyyy', { locale: fr })}
         </h2>
 
-        {/* Right: Empty space for symmetry (view buttons are in parent) */}
-        <div className="w-[200px]" />
+        {/* Right: View Tabs */}
+        <div className="flex items-center gap-3">
+          <Tabs value={viewMode} onValueChange={onViewChange}>
+            <TabsList className="bg-muted/50 border-none h-9 p-1">
+              <TabsTrigger value="month" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Mois</TabsTrigger>
+              <TabsTrigger value="week" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Semaine</TabsTrigger>
+              <TabsTrigger value="day" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Jour</TabsTrigger>
+              <TabsTrigger value="list" className="text-xs px-3 h-7 transition-all duration-300 ease-out hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg hover:bg-background/50 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:scale-105 active:scale-95 active:translate-y-0">Liste</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {/* Week days header */}
@@ -128,7 +142,7 @@ export function CalendarView({
             <div
               key={idx}
               className={cn(
-                "min-h-[120px] p-2 cursor-pointer transition-colors hover:bg-muted/50",
+                "min-h-[120px] p-2 cursor-pointer transition-all duration-300 hover:bg-muted/80 hover:shadow-[inset_0_0_20px_rgba(0,0,0,0.02)]",
                 !isCurrentMonth && "bg-muted/20",
                 isCurrentDay && "bg-primary/5"
               )}
@@ -136,20 +150,20 @@ export function CalendarView({
             >
               <div className="flex justify-between items-start mb-2">
                 <div className={cn(
-                  "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors",
-                  isCurrentDay ? "bg-primary text-primary-foreground" :
-                    isCurrentMonth ? "text-foreground" : "text-muted-foreground/40"
+                  "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300",
+                  isCurrentDay ? "bg-primary text-primary-foreground shadow-md scale-110" :
+                    isCurrentMonth ? "text-foreground hover:bg-muted hover:scale-110" : "text-muted-foreground/40"
                 )}>
                   {format(day, 'd')}
                 </div>
 
                 {dayEvents.length > 0 && (
-                  <div className="flex gap-0.5">
+                  <div className="flex gap-0.5 animate-in fade-in zoom-in duration-500">
                     {Object.entries(statusCounts).map(([status, count]) => (
                       <div
                         key={status}
-                        className={cn("w-2 h-2 rounded-full", getStatusDotClassName(status as HearingStatus))}
-                        title={`${count} ${status}`}
+                        className={cn("w-2 h-2 rounded-full ring-1 ring-background scale-100 hover:scale-150 transition-transform", getStatusDotClassName(status as HearingStatus))}
+                        title={`${count} ${getStatusLabel(status as HearingStatus)}`}
                       />
                     ))}
                   </div>
@@ -161,7 +175,7 @@ export function CalendarView({
                   <div
                     key={event.id}
                     className={cn(
-                      "px-1.5 py-0.5 rounded text-[10px] font-bold truncate border transition-opacity hover:opacity-80",
+                      "px-1.5 py-0.5 rounded text-[10px] font-bold truncate border transition-all duration-300 hover:scale-[1.05] hover:shadow-md hover:z-10 relative",
                       getStatusClassName(event.status)
                     )}
                     onClick={(e) => {
@@ -175,20 +189,20 @@ export function CalendarView({
                   </div>
                 ))}
                 {dayEvents.length > 2 && (
-                  <Popover 
-                    open={openPopover === `day-${idx}`} 
+                  <Popover
+                    open={openPopover === `day-${idx}`}
                     onOpenChange={(open) => setOpenPopover(open ? `day-${idx}` : null)}
                   >
                     <PopoverTrigger asChild>
-                      <div 
+                      <div
                         className="text-[10px] font-bold text-muted-foreground px-1 py-0.5 bg-muted/50 rounded text-center border border-border/50 cursor-pointer hover:bg-muted transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
                         +{dayEvents.length - 2} autres
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent 
-                      className="w-80 p-0" 
+                    <PopoverContent
+                      className="w-80 p-0"
                       align="start"
                       onClick={(e) => e.stopPropagation()}
                     >

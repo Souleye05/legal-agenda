@@ -42,128 +42,128 @@ export function EventDetailsDialog({ event, open, onOpenChange }: EventDetailsDi
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl">
-                <div className="flex flex-col h-full max-h-[95vh]">
-                    {/* Header avec gradient et effet glassmorphism */}
-                    <div className="relative overflow-hidden border-b bg-gradient-to-r from-primary/10 via-primary/5 to-background backdrop-blur-xl">
-                        <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(white,transparent_85%)]"></div>
+            <DialogContent className="max-w-3xl p-0 overflow-hidden border-none shadow-2xl rounded-3xl">
+                <div className="flex flex-col h-full max-h-[90vh]">
+                    {/* Header with refined gradient and glassmorphism */}
+                    <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-primary/5">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
+                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[100px] rounded-full"></div>
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary/5 blur-[100px] rounded-full"></div>
 
-                        <div className="relative p-8 space-y-4">
-                            {/* Bouton fermer */}
-                            <button
-                                onClick={() => onOpenChange(false)}
-                                className="absolute top-4 right-4 p-2 rounded-xl bg-background/80 hover:bg-background border border-border/50 transition-all hover:shadow-lg group"
-                            >
-                                <X className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                            </button>
-
-                            {/* Titre et référence */}
-                            <div className="pr-12 space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                        <CalendarIcon className="h-5 w-5 text-primary" />
+                        <div className="relative p-8 pb-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-primary/15 rounded-xl ring-1 ring-primary/20 backdrop-blur-sm">
+                                        <CalendarIcon className="h-4 w-4 text-primary" />
                                     </div>
-                                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                                    <span className="text-[11px] font-bold text-primary/80 uppercase tracking-[0.2em]">
                                         Détails de l'audience
                                     </span>
                                 </div>
 
-                                <h2 className="text-3xl font-bold text-foreground leading-tight">
-                                    {event.title}
-                                </h2>
+                                <div className="space-y-4 pr-10">
+                                    <h2 className="text-3xl font-serif font-bold text-foreground tracking-tight leading-[1.1]">
+                                        {event.title}
+                                    </h2>
 
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <Badge variant="outline" className="text-sm px-3 py-1.5 font-mono bg-muted/50 border-border/50">
-                                        {event.caseReference}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-sm px-3 py-1.5 bg-background/50">
-                                        {HEARING_TYPE_LABELS[event.type]}
-                                    </Badge>
-                                    <HearingStatusBadge status={event.status} />
+                                    <div className="flex items-center gap-2.5 flex-wrap">
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm">
+                                            <span className="text-[10px] font-bold text-muted-foreground/70 uppercase">Réf.</span>
+                                            <span className="text-xs font-mono font-bold text-foreground">{event.caseReference}</span>
+                                        </div>
+                                        <Badge variant="secondary" className="px-3 py-1 bg-primary/5 text-primary border-primary/10 hover:bg-primary/10 transition-colors">
+                                            {HEARING_TYPE_LABELS[event.type]}
+                                        </Badge>
+                                        <HearingStatusBadge status={event.status} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Content scrollable */}
-                    <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                        {/* Informations principales en cartes */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Date et heure */}
-                            <div className="group p-6 rounded-2xl bg-muted/50 border border-border hover:border-primary/50 transition-all hover:shadow-lg">
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-8 scrollbar-hide">
+                        {/* Information Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            {/* Date & Time Card */}
+                            <div className="group relative p-6 rounded-2xl bg-gradient-to-br from-muted/30 to-background border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                                        <CalendarIcon className="h-6 w-6 text-primary" />
+                                    <div className="mt-1 p-2.5 bg-primary/5 rounded-xl group-hover:bg-primary/10 transition-colors ring-1 ring-primary/5">
+                                        <CalendarIcon className="h-5 w-5 text-primary" />
                                     </div>
-                                    <div className="flex-1 space-y-2">
-                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                                            Date & Heure
+                                    <div className="space-y-1.5">
+                                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                                            Date et Heure
                                         </span>
-                                        <p className="text-xl font-bold text-foreground capitalize">
+                                        <p className="text-lg font-bold text-foreground capitalize tracking-tight leading-tight">
                                             {format(new Date(event.date), 'EEEE dd MMMM yyyy', { locale: fr })}
                                         </p>
                                         {event.time && (
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <Clock className="h-4 w-4" />
-                                                <span className="font-semibold text-lg">{event.time}</span>
+                                            <div className="flex items-center gap-2 py-1 px-2.5 rounded-lg bg-primary/5 w-fit border border-primary/10">
+                                                <Clock className="h-3.5 w-3.5 text-primary" />
+                                                <span className="font-bold text-primary text-sm">{event.time}</span>
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Juridiction */}
-                            <div className="group p-6 rounded-2xl bg-muted/50 border border-border hover:border-primary/50 transition-all hover:shadow-lg">
+                            {/* Jurisdiction Card */}
+                            <div className="group relative p-6 rounded-2xl bg-gradient-to-br from-muted/30 to-background border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                                        <Building2 className="h-6 w-6 text-primary" />
+                                    <div className="mt-1 p-2.5 bg-primary/5 rounded-xl group-hover:bg-primary/10 transition-colors ring-1 ring-primary/5">
+                                        <Building2 className="h-5 w-5 text-primary" />
                                     </div>
-                                    <div className="flex-1 space-y-2">
-                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                    <div className="space-y-1.5">
+                                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
                                             Juridiction
                                         </span>
-                                        <p className="text-lg font-bold text-foreground">
+                                        <p className="text-lg font-bold text-foreground tracking-tight leading-tight">
                                             {event.jurisdiction}
                                         </p>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                            <MapPin className="h-4 w-4" />
-                                            <span className="font-medium">{event.chamber}</span>
+                                        <div className="flex items-center gap-2 text-muted-foreground/80">
+                                            <MapPin className="h-3.5 w-3.5" />
+                                            <span className="text-sm font-medium">{event.chamber}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Parties */}
-                        <div className="p-6 rounded-2xl bg-muted/50 border border-border">
-                            <div className="flex items-start gap-4">
-                                <div className="p-3 bg-primary/10 rounded-xl">
-                                    <Users className="h-6 w-6 text-primary" />
+                        {/* Parties Section */}
+                        <div className="relative p-6 rounded-2xl bg-muted/20 border border-border/40 overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-8 text-primary/5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                                <Users className="h-24 w-24" />
+                            </div>
+                            <div className="relative flex items-start gap-4">
+                                <div className="mt-1 p-2.5 bg-primary/5 rounded-xl ring-1 ring-primary/5">
+                                    <Users className="h-5 w-5 text-primary" />
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                <div className="space-y-1.5 flex-1">
+                                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
                                         Parties au litige
                                     </span>
-                                    <p className="text-lg font-semibold text-foreground leading-relaxed">
+                                    <p className="text-lg font-medium text-foreground leading-relaxed pr-12">
                                         {event.parties || 'Non renseigné'}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Alerte si non renseigné */}
+                        {/* Urgent Alert */}
                         {event.status === 'NON_RENSEIGNEE' && (
-                            <div className="p-5 rounded-2xl bg-gradient-to-r from-destructive/10 to-destructive/5 border-2 border-destructive/30 border-dashed">
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-destructive/20 rounded-lg">
-                                        <FileEdit className="h-5 w-5 text-destructive" />
+                            <div className="relative p-6 rounded-2xl bg-gradient-to-r from-urgent/10 via-urgent/5 to-transparent border border-urgent/20 overflow-hidden group">
+                                <div className="absolute inset-0 bg-urgent/5 animate-pulse"></div>
+                                <div className="relative flex items-start gap-4">
+                                    <div className="p-2.5 bg-urgent/15 rounded-xl ring-1 ring-urgent/20 shadow-sm group-hover:rotate-12 transition-transform">
+                                        <FileEdit className="h-5 w-5 text-urgent" />
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold text-destructive mb-1">
-                                            ⚠️ Audience non renseignée
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-black text-urgent uppercase tracking-wide">
+                                            Audience en attente de résultat
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Cette audience nécessite que vous renseigniez son résultat.
+                                        <p className="text-sm text-foreground/70 leading-relaxed font-normal">
+                                            Le délai pour renseigner cette audience est dépassé. Veuillez enregistrer le résultat pour mettre à jour le dossier.
                                         </p>
                                     </div>
                                 </div>
@@ -171,29 +171,31 @@ export function EventDetailsDialog({ event, open, onOpenChange }: EventDetailsDi
                         )}
                     </div>
 
-                    {/* Footer avec actions */}
-                    <div className="border-t bg-muted/30 backdrop-blur-xl p-6">
-                        <div className="flex gap-3">
+                    {/* Footer/Actions */}
+                    <div className="p-6 border-t bg-muted/10 backdrop-blur-md">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <Button
                                 variant="outline"
-                                size="lg"
-                                className="flex-1 h-12 rounded-xl font-semibold hover:bg-background hover:shadow-lg transition-all group"
+                                className="flex-1 h-12 rounded-2xl font-bold bg-background/50 hover:bg-background border-border/60 hover:border-primary/40 hover:shadow-lg transition-all group overflow-hidden"
                                 onClick={handleViewDetails}
                             >
-                                <Eye className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                                Voir les détails complets
-                                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    <Eye className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                    Voir le dossier
+                                    <ArrowRight className="h-3.5 w-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                </span>
                             </Button>
 
                             {event.status === 'NON_RENSEIGNEE' && (
                                 <Button
-                                    size="lg"
-                                    className="flex-1 h-12 rounded-xl font-semibold bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/90 hover:to-destructive hover:shadow-xl transition-all group"
+                                    className="flex-1 h-12 rounded-2xl font-bold bg-urgent hover:bg-urgent/90 text-white shadow-lg shadow-urgent/20 hover:shadow-xl hover:shadow-urgent/30 transition-all group overflow-hidden"
                                     onClick={handleRecordResult}
                                 >
-                                    <FileEdit className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-                                    Renseigner le résultat
-                                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    <span className="relative z-10 flex items-center justify-center gap-2">
+                                        <FileEdit className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                                        Renseigner le résultat
+                                        <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                    </span>
                                 </Button>
                             )}
                         </div>

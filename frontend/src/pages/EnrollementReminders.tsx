@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, isToday, isBefore, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ClipboardList, Calendar, ArrowLeft, CheckCircle2, Clock, AlertCircle, Plus } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, CheckCircle2, Clock, AlertCircle, Plus, RotateCcw } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -59,8 +59,8 @@ export default function EnrollmentReminders() {
       const allHearings = Array.isArray(allHearingsData) ? allHearingsData : (allHearingsData as any).data || [];
       const today = new Date();
       // Filter: upcoming hearings without enrollment reminder
-      return allHearings.filter((h: Hearing) => 
-        new Date(h.date) > today && 
+      return allHearings.filter((h: Hearing) =>
+        new Date(h.date) > today &&
         !h.rappelEnrolement &&
         h.statut !== 'TENUE'
       );
@@ -78,6 +78,19 @@ export default function EnrollmentReminders() {
     },
     onError: (error: any) => {
       toast.error(error.message || 'Erreur lors de la mise à jour');
+    },
+  });
+
+  // Mutation pour annuler le marquage "effectué"
+  const unmarkCompleteMutation = useMutation({
+    mutationFn: (hearingId: string) => api.unmarkEnrollmentComplete(hearingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['enrollment-reminders'] });
+      queryClient.invalidateQueries({ queryKey: ['completed-enrollments'] });
+      toast.success('Enrôlement rétabli dans la liste à faire');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erreur lors de l\'annulation');
     },
   });
 
@@ -101,6 +114,10 @@ export default function EnrollmentReminders() {
 
   const handleMarkComplete = (reminderId: string) => {
     markCompleteMutation.mutate(reminderId);
+  };
+
+  const handleUnmarkComplete = (reminderId: string) => {
+    unmarkCompleteMutation.mutate(reminderId);
   };
 
   const handleEnableReminder = () => {
@@ -375,10 +392,22 @@ export default function EnrollmentReminders() {
                           Audience le {format(new Date(reminder.date), 'dd/MM/yyyy', { locale: fr })}
                         </p>
                       </div>
-                      <Badge variant="secondary" className="bg-success/10 text-success">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Effectué
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUnmarkComplete(reminder.id)}
+                          disabled={unmarkCompleteMutation.isPending}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-primary transition-colors"
+                          title="Annuler le marquage effectué"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                        <Badge variant="secondary" className="bg-success/10 text-success">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Effectué
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 ))}

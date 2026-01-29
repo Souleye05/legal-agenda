@@ -11,7 +11,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 @Controller('hearings')
 @UseGuards(JwtAuthGuard)
 export class HearingsController {
-  constructor(private hearingsService: HearingsService) {}
+  constructor(private hearingsService: HearingsService) { }
 
   @Get()
   @ApiOperation({ summary: 'Liste toutes les audiences avec pagination optionnelle' })
@@ -19,8 +19,8 @@ export class HearingsController {
   @ApiQuery({ name: 'caseId', required: false, description: 'ID de l\'affaire' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Numéro de page (défaut: 1)' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Éléments par page (défaut: 10, max: 100)' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Liste des audiences (paginée si page/limit fournis)',
   })
   findAll(
@@ -85,6 +85,15 @@ export class HearingsController {
   @ApiResponse({ status: 404, description: 'Audience non trouvée' })
   markEnrollmentComplete(@Param('id') id: string, @CurrentUser() user: any) {
     return this.hearingsService.markEnrollmentComplete(id, user.userId);
+  }
+
+  @Patch(':id/enrollment-uncomplete')
+  @ApiOperation({ summary: 'Annuler le marquage de l\'enrôlement comme effectué' })
+  @ApiResponse({ status: 200, description: 'Marquage annulé' })
+  @ApiResponse({ status: 400, description: 'Pas de rappel d\'enrôlement activé' })
+  @ApiResponse({ status: 404, description: 'Audience non trouvée' })
+  unmarkEnrollmentComplete(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.hearingsService.unmarkEnrollmentComplete(id, user.userId);
   }
 
   @Patch(':id/enable-enrollment-reminder')
