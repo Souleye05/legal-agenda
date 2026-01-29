@@ -18,14 +18,25 @@ export default function DailyReports() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tomorrowDate, setTomorrowDate] = useState<Date>(addDays(new Date(), 1));
 
-  // Fetch all hearings
+  // Fetch all hearings WITHOUT pagination for daily reports
   const { data: allHearingsData = [] } = useQuery({
-    queryKey: ['hearings'],
-    queryFn: () => api.getHearings(),
+    queryKey: ['hearings-all'],
+    queryFn: async () => {
+      // Fetch without pagination by requesting a very high limit
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/hearings?limit=1000`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+      const data = await response.json();
+      return data;
+    },
   });
 
   // Gérer le cas où l'API retourne un objet paginé ou un tableau
-  const allHearings = Array.isArray(allHearingsData) ? allHearingsData : (allHearingsData as any).data || [];
+  const allHearings = Array.isArray(allHearingsData) 
+    ? allHearingsData 
+    : (allHearingsData as any).data || [];
 
   // Fetch all cases
   const { data: allCasesData = [] } = useQuery({
