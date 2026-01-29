@@ -47,7 +47,7 @@ export default function DailyReports() {
     return allHearings.filter(h => {
       const matchesDate = format(new Date(h.date), 'yyyy-MM-dd') === dateStr;
       const isCompleted = h.statut === 'TENUE';
-      const hasResult = h.resultatType !== null && h.resultatType !== undefined;
+      const hasResult = h.resultat !== null && h.resultat !== undefined;
       
       return matchesDate && isCompleted && hasResult;
     });
@@ -69,7 +69,7 @@ export default function DailyReports() {
   // Count hearings without results for warning
   const selectedDateAllHearings = getHearingsForDate(selectedDate);
   const hearingsWithoutResult = selectedDateAllHearings.filter(h => 
-    h.statut === 'TENUE' && (!h.resultatType)
+    h.statut === 'TENUE' && (!h.resultat)
   );
 
   const handleGenerateDailyReport = () => {

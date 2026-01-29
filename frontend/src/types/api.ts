@@ -92,6 +92,17 @@ export interface Hearing {
   motifRenvoi?: string;
   motifRadiation?: string;
   texteDelibere?: string;
+  resultat?: {
+    id: string;
+    type: HearingResultType;
+    nouvelleDate?: string;
+    motifRenvoi?: string;
+    motifRadiation?: string;
+    texteDelibere?: string;
+    audienceId: string;
+    createdAt: string;
+    createurId: string;
+  };
   estPreparee: boolean;
   rappelEnrolement?: boolean;
   dateRappelEnrolement?: string;
