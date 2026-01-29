@@ -14,9 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { MapPin, Clock, FileEdit, Calendar as CalendarIcon, Users, Building2, ArrowRight, X } from 'lucide-react';
+import { Clock, FileEdit, Calendar as CalendarIcon, Users, Building2, X } from 'lucide-react';
+import { HighlightText } from '@/components/ui/highlight-text';
 import { HEARING_TYPE_LABELS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 import { EventSearchBar } from '@/components/agenda/EventSearchBar';
 import { StatusFilterButton } from '@/components/agenda/StatusFilterButton';
 import { EventDetailsDialog } from '@/components/agenda/EventDetailsDialog';
@@ -246,7 +246,7 @@ export default function Agenda() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                {event.caseReference}
+                                <HighlightText text={event.caseReference} highlight={searchQuery} />
                               </span>
                               <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight bg-background/50 border-border/50">
                                 {HEARING_TYPE_LABELS[event.type]}
@@ -255,13 +255,13 @@ export default function Agenda() {
                             </div>
 
                             <h4 className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                              {event.title}
+                              <HighlightText text={event.title} highlight={searchQuery} />
                             </h4>
 
                             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1.5 font-medium">
                                 <Building2 className="h-3.5 w-3.5" />
-                                {event.jurisdiction}
+                                <HighlightText text={event.jurisdiction} highlight={searchQuery} />
                               </span>
                               {event.time && (
                                 <span className="flex items-center gap-1.5 font-medium py-1 px-2 bg-muted/50 rounded-lg">
@@ -271,7 +271,7 @@ export default function Agenda() {
                               )}
                               <span className="flex items-center gap-1.5 font-medium">
                                 <Users className="h-3.5 w-3.5" />
-                                {event.parties.split(' / ')[0]}...
+                                <HighlightText text={event.parties.split(' / ')[0] + '...'} highlight={searchQuery} />
                               </span>
                             </div>
                           </div>

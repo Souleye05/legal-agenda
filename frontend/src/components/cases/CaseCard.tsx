@@ -5,14 +5,16 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Case } from '@/types/legal';
 import { CaseStatusBadge } from './CaseStatusBadge';
+import { HighlightText } from '@/components/ui/highlight-text';
 import { api } from '@/lib/api';
 import type { Hearing } from '@/types/api';
 
 interface CaseCardProps {
   caseData: Case;
+  searchQuery?: string;
 }
 
-export function CaseCard({ caseData }: CaseCardProps) {
+export function CaseCard({ caseData, searchQuery = '' }: CaseCardProps) {
   const navigate = useNavigate();
   
   // Fetch hearings for this case
@@ -46,14 +48,17 @@ export function CaseCard({ caseData }: CaseCardProps) {
 
           {/* Title */}
           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-            {caseData.title}
+            <HighlightText text={caseData.title} highlight={searchQuery} />
           </h3>
 
           {/* Parties */}
           <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
             <Users className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="truncate">
-              {demandeurs.map(p => p.nom || p.name).join(', ')} c/ {defendeurs.map(p => p.nom || p.name).join(', ')}
+              <HighlightText 
+                text={`${demandeurs.map(p => p.nom || p.name).join(', ')} c/ ${defendeurs.map(p => p.nom || p.name).join(', ')}`}
+                highlight={searchQuery}
+              />
             </span>
           </div>
 

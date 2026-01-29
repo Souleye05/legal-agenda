@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -23,10 +23,19 @@ const ITEMS_PER_PAGE = 10;
 
 export default function Cases() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, DEBOUNCE_DELAYS.SEARCH);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Read search parameter from URL
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
 
   // Fetch cases from API
   const { data: casesData = [], isLoading } = useQuery({
@@ -129,7 +138,7 @@ export default function Cases() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {paginatedCases.map((c) => (
-                <CaseCard key={c.id} caseData={c} />
+                <CaseCard key={c.id} caseData={c} searchQuery={debouncedSearch} />
               ))}
             </div>
             {totalPages > 1 && (
