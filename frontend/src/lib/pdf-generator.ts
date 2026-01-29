@@ -301,6 +301,170 @@ export function generateTrackingSheetPDF(hearings: HearingWithCase[], date: Date
   doc.save(`fiche-suivi-${format(date, 'yyyy-MM-dd')}.pdf`);
 }
 
+// Generate unreported hearings PDF - Black & White theme
+// Each jurisdiction starts on a new page
+export function generateUnreportedHearingsPDF(hearings: HearingWithCase[]): void {
+  const doc = new jsPDF();
+  
+  if (hearings.length === 0) {
+    let y = addCabinetHeader(doc, 20);
+    
+    // Title
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('times', 'bold');
+    doc.text("AUDIENCES A RENSEIGNER", 105, y, { align: 'center' });
+    y += 8;
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
+    const dateStr = format(new Date(), 'EEEE d MMMM yyyy', { locale: fr });
+    doc.text(`Édité le ${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}`, 105, y, { align: 'center' });
+    y += 10;
+    
+    doc.setFont('times', 'normal');
+    doc.text("Aucune audience à renseigner.", 20, y);
+    
+    addFooter(doc);
+    doc.save(`audiences-a-renseigner-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    return;
+  }
+  
+  // Group by jurisdiction
+  const byJurisdiction = hearings.reduce((acc, hearing) => {
+    const key = hearing.affaire.juridiction;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(hearing);
+    return acc;
+  }, {} as Record<string, HearingWithCase[]>);
+  
+  const jurisdictions = Object.entries(byJurisdiction);
+  
+  // Generate one page per jurisdiction
+  jurisdictions.forEach(([jurisdiction, jurisdictionHearings], jurisdictionIndex) => {
+    // Add new page for each jurisdiction (except first)
+    if (jurisdictionIndex > 0) {
+      doc.addPage();
+    }
+    
+    let y = addCabinetHeader(doc, 20);
+    
+    // Title
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('times', 'bold');
+    doc.text("AUDIENCES A RENSEIGNER", 105, y, { align: 'center' });
+    y += 8;
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
+    const dateStr = format(new Date(), 'EEEE d MMMM yyyy', { locale: fr });
+    doc.text(`Édité le ${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)}`, 105, y, { align: 'center' });
+    y += 10;
+    
+    // Instructions
+    doc.setFontSize(9);
+    doc.setFont('times', 'italic');
+    doc.text("Audiences passées nécessitant un résultat. Renseigner et transmettre à la secrétaire pour saisie.", 105, y, { align: 'center' });
+    y += 10;
+    
+    // Jurisdiction header - Simple border with bold text (économie d'encre)
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.rect(20, y - 5, 170, 8, 'S');
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.setFont('times', 'bold');
+    doc.text(jurisdiction.toUpperCase(), 25, y);
+    y += 10;
+    
+    jurisdictionHearings.forEach((hearing, index) => {
+      // Check if we need a new page within this jurisdiction
+      if (y > 240) {
+        doc.addPage();
+        y = 20;
+        
+        // Repeat jurisdiction header on new page
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(20, y - 5, 170, 8, 'S');
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.setFont('times', 'bold');
+        doc.text(`${jurisdiction.toUpperCase()} (suite)`, 25, y);
+        y += 10;
+      }
+      
+      const caseData = hearing.affaire;
+      const parties = caseData.parties || [];
+      const demandeurs = parties.filter(p => p.role === 'DEMANDEUR').map(p => p.nom).join(', ');
+      const defendeurs = parties.filter(p => p.role === 'DEFENDEUR').map(p => p.nom).join(', ');
+      const hearingDate = format(new Date(hearing.date), 'd MMMM yyyy', { locale: fr });
+      
+      doc.setFontSize(10);
+      doc.setFont('times', 'bold');
+      doc.text(`${index + 1}. ${caseData.reference} - ${caseData.titre}`, 25, y);
+      y += 5;
+      
+      doc.setFont('times', 'normal');
+      doc.setFontSize(9);
+      const hearingTypeLabel = hearing.type === 'PLAIDOIRIE' ? 'Plaidoirie' : 
+                               hearing.type === 'MISE_EN_ETAT' ? 'Mise en état' :
+                               hearing.type === 'RENVOI' ? 'Renvoi' : hearing.type;
+      doc.text(`Date: ${hearingDate} | Chambre: ${caseData.chambre || '-'} | Heure: ${hearing.heure || '-'} | Type: ${hearingTypeLabel}`, 30, y);
+      y += 4;
+      doc.text(`Dem.: ${demandeurs}  |  Déf.: ${defendeurs}`, 30, y);
+      y += 8;
+      
+      // Result boxes - Clean black border
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.3);
+      doc.setFontSize(8);
+      doc.rect(30, y, 150, 25);
+      
+      // Draw checkbox squares manually instead of using special characters
+      const checkboxSize = 3;
+      const checkboxY1 = y + 4;
+      const checkboxY2 = y + 11;
+      const checkboxY3 = y + 18;
+      
+      // First checkbox
+      doc.rect(35, checkboxY1, checkboxSize, checkboxSize);
+      doc.text('RENVOI - Date: ___/___/_____ Motif: _________________________________', 40, y + 6);
+      
+      // Second checkbox
+      doc.rect(35, checkboxY2, checkboxSize, checkboxSize);
+      doc.text('RADIATION - Motif: ________________________________________________', 40, y + 13);
+      
+      // Third checkbox
+      doc.rect(35, checkboxY3, checkboxSize, checkboxSize);
+      doc.text('DELIBERE - Decision: ______________________________________________', 40, y + 20);
+      
+      y += 35;
+    });
+    
+    // Signature section at the end of each jurisdiction
+    if (y > 240) {
+      doc.addPage();
+      y = 20;
+    }
+    y += 10;
+    doc.setFontSize(10);
+    doc.setFont('times', 'normal');
+    doc.text('Collaborateur: _________________________', 25, y);
+    doc.text('Date: ___/___/_____', 130, y);
+    y += 10;
+    doc.text('Signature: _________________________', 25, y);
+  });
+  
+  // Add footers to all pages
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    addFooter(doc);
+  }
+  
+  doc.save(`audiences-a-renseigner-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+}
+
 // Generate tomorrow hearings PDF - Black & White theme
 export function generateTomorrowHearingsPDF(hearings: HearingWithCase[], date: Date): void {
   const doc = new jsPDF();

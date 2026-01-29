@@ -4,7 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { HearingCard } from '@/components/hearings/HearingCard';
 import { api } from '@/lib/api';
-import { AlertTriangle, Gavel } from 'lucide-react';
+import { AlertTriangle, Gavel, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,8 @@ import { HearingResultType, Hearing, Case } from '@/types/legal';
 import { useToast } from '@/hooks/use-toast';
 import type { Hearing as ApiHearing } from '@/types/api';
 import { transformHearingWithCase } from '@/lib/transformers';
+import { generateUnreportedHearingsPDF } from '@/lib/pdf-generator';
+import { toast as sonnerToast } from 'sonner';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -110,6 +112,22 @@ export default function UnreportedHearings() {
     }
   };
 
+  const handleGeneratePDF = () => {
+    try {
+      // Transform hearings to include case data
+      const hearingsWithCases = apiHearings.map(h => ({
+        ...h,
+        affaire: h.affaire!
+      })).filter(h => h.affaire);
+      
+      generateUnreportedHearingsPDF(hearingsWithCases as any);
+      sonnerToast.success('PDF téléchargé avec succès');
+    } catch (error) {
+      sonnerToast.error('Erreur lors de la génération du PDF');
+      console.error(error);
+    }
+  };
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -131,10 +149,18 @@ export default function UnreportedHearings() {
   return (
     <MainLayout>
       <div className="space-y-6 animate-fade-in">
-        <PageHeader
-          title="Audiences à renseigner"
-          description="Ces audiences sont passées et nécessitent un résultat"
-        />
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif">Audiences à renseigner</h1>
+            <p className="mt-1 text-muted-foreground">Ces audiences sont passées et nécessitent un résultat</p>
+          </div>
+          {unreportedHearings.length > 0 && (
+            <Button onClick={handleGeneratePDF} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Télécharger PDF
+            </Button>
+          )}
+        </div>
 
         {unreportedHearings.length === 0 ? (
           <div className="card-elevated p-12 text-center">

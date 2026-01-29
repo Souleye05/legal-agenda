@@ -41,6 +41,18 @@ export default function DailyReports() {
     return allHearings.filter(h => format(new Date(h.date), 'yyyy-MM-dd') === dateStr);
   };
 
+  // Get only completed hearings with results for compte rendu
+  const getCompletedHearingsForDate = (date: Date): Hearing[] => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return allHearings.filter(h => {
+      const matchesDate = format(new Date(h.date), 'yyyy-MM-dd') === dateStr;
+      const isCompleted = h.statut === 'TENUE';
+      const hasResult = h.resultatType !== null && h.resultatType !== undefined;
+      
+      return matchesDate && isCompleted && hasResult;
+    });
+  };
+
   // Enrich hearings with case data
   const enrichHearingsWithCases = (hearings: Hearing[]) => {
     return hearings.map(hearing => ({
@@ -49,8 +61,16 @@ export default function DailyReports() {
     })).filter(h => h.affaire); // Only include hearings with valid cases
   };
 
-  const selectedDateHearings = enrichHearingsWithCases(getHearingsForDate(selectedDate));
+  // For compte rendu: only hearings with results
+  const selectedDateHearings = enrichHearingsWithCases(getCompletedHearingsForDate(selectedDate));
+  // For fiche de suivi: all hearings (no result needed)
   const tomorrowHearings = enrichHearingsWithCases(getHearingsForDate(tomorrowDate));
+  
+  // Count hearings without results for warning
+  const selectedDateAllHearings = getHearingsForDate(selectedDate);
+  const hearingsWithoutResult = selectedDateAllHearings.filter(h => 
+    h.statut === 'TENUE' && (!h.resultatType)
+  );
 
   const handleGenerateDailyReport = () => {
     try {
@@ -109,7 +129,7 @@ export default function DailyReports() {
             <div>
               <h3 className="font-semibold text-foreground">Comptes rendus d'audience du jour</h3>
               <p className="text-sm text-muted-foreground">
-                Générer les comptes rendus PDF avec motifs de renvoi, radiation ou délibéré
+                Générer les comptes rendus PDF pour les audiences avec résultat enregistré (renvoi, radiation ou délibéré)
               </p>
             </div>
           </div>
@@ -156,16 +176,31 @@ export default function DailyReports() {
             </div>
           </div>
 
-          <div className="p-4 bg-muted/50 rounded-lg">
+          <div className="p-4 bg-muted/50 rounded-lg space-y-2">
             <p className="text-sm text-muted-foreground">
               {selectedDateHearings.length === 0 ? (
-                "Aucune audience pour cette date"
+                <>
+                  Aucune audience avec résultat enregistré pour cette date
+                  {selectedDateAllHearings.length > 0 && (
+                    <span className="block mt-1 text-warning">
+                      ⚠️ {selectedDateAllHearings.length} audience{selectedDateAllHearings.length > 1 ? 's' : ''} trouvée {selectedDateAllHearings.length > 1 ? 's' : ''} 
+                      mais sans résultat enregistré
+                    </span>
+                  )}
+                </>
               ) : (
                 <>
-                  <strong>{selectedDateHearings.length}</strong> audience{selectedDateHearings.length > 1 ? 's' : ''} trouvée{selectedDateHearings.length > 1 ? 's' : ''} pour le {format(selectedDate, 'd MMMM yyyy', { locale: fr })}
+                  <strong>{selectedDateHearings.length}</strong> audience{selectedDateHearings.length > 1 ? 's' : ''} 
+                  avec résultat pour le {format(selectedDate, 'd MMMM yyyy', { locale: fr })}
                 </>
               )}
             </p>
+            {hearingsWithoutResult.length > 0 && selectedDateHearings.length > 0 && (
+              <p className="text-sm text-warning">
+                ⚠️ {hearingsWithoutResult.length} autre{hearingsWithoutResult.length > 1 ? 's' : ''} audience{hearingsWithoutResult.length > 1 ? 's' : ''} 
+                sans résultat. <a href="/a-renseigner" className="underline hover:text-warning/80">Renseigner maintenant</a>
+              </p>
+            )}
           </div>
         </div>
 
